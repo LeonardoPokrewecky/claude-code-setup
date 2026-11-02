@@ -20,8 +20,9 @@ Skill e pluggin\
 │   └── skills\                   ← env-guide, project-bootstrap, lgpd-audit, session-handoff
 ├── project-templates\            ← modelos para cada projeto
 │   ├── CLAUDE.project.md         ← modelo de CLAUDE.md de projeto
-│   ├── dotnet-angular\.claude\settings.json
-│   ├── dotnet\.claude\settings.json
+│   ├── dotnet\.claude\settings.json          ← repos backend .NET
+│   ├── angular\.claude\settings.json         ← repos frontend Angular
+│   ├── dotnet-angular\.claude\settings.json  ← repo com .NET e Angular juntos
 │   ├── supabase\.claude\settings.json
 │   └── marketing\.claude\settings.json
 └── scripts\
@@ -141,7 +142,7 @@ Se um plugin não baixar sozinho, instale manualmente:
 
 ## 5. Ativar em um projeto
 
-### Projeto existente (ex.: ZapVendedor backend)
+### Projeto existente (ex.: ZapVendedor backend — modelo `dotnet`)
 Abra uma sessão no projeto e peça: **"use a skill project-bootstrap no modo adopt-existing"**.
 O Claude faz o inventário, mostra a proposta e só grava após sua aprovação.
 
@@ -150,15 +151,16 @@ Manual, se preferir:
 $proj = "C:\Workspace\ZapVendedor\02.zapvendedor.backend"
 New-Item -ItemType Directory -Force "$proj\.claude" | Out-Null
 if (-not (Test-Path "$proj\.claude\settings.json")) {
-  Copy-Item "$repo\project-templates\dotnet-angular\.claude\settings.json" "$proj\.claude\settings.json"
+  Copy-Item "$repo\project-templates\dotnet\.claude\settings.json" "$proj\.claude\settings.json"
 }
 if (-not (Test-Path "$proj\CLAUDE.md")) { Copy-Item "$repo\project-templates\CLAUDE.project.md" "$proj\CLAUDE.md" }
 ```
 
 | Stack | Modelo de settings |
 |---|---|
-| .NET + Angular | `dotnet-angular` |
-| Só .NET | `dotnet` |
+| Backend .NET | `dotnet` |
+| Frontend Angular | `angular` |
+| .NET e Angular no mesmo repo | `dotnet-angular` |
 | Usa Supabase | `supabase` (mesclar com o da stack) |
 | Landing page / marketing | `marketing` (mesclar com o da stack) |
 
@@ -168,8 +170,10 @@ Crie em `C:\Workspace\<Nome>`, rode `git init` e peça: **"use a skill project-b
 ### Projetos atuais
 | Projeto | Git | Modelo | Observação |
 |---|---|---|---|
-| ZapVendedor | sim | dotnet-angular | já tem CLAUDE.md → mesclar |
-| Buscador Contabil | sim | dotnet-angular | piloto recomendado (limpo, sem CLAUDE.md) |
+| Buscador Contabil backend | sim | dotnet | **piloto adotado em 2026-11-02**; remoto (WallysonDuarte) não encontrado |
+| Buscador Contabil frontend | sim | angular | pendente |
+| ZapVendedor backend | sim | dotnet | já tem CLAUDE.md → mesclar |
+| ZapVendedor frontend / admin | sim | angular | frontend já tem CLAUDE.md → mesclar |
 | DiscordTorLauncher | **não** | dotnet | continua usando `.memory` até ter Git |
 | WAHA | **não** | nenhum | continua usando `.memory` até ter Git |
 

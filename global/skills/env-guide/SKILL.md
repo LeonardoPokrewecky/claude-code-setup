@@ -25,12 +25,16 @@ Regras:
 - **Descartados**: Claude-Mem (conflita com Auto Memory e envia dados a terceiros), Headroom (proxy incompatível com Desktop/advisor), OmniRoute (troca o endpoint e quebra o advisor), anthropics/skills (duplica skills já sincronizadas). **Pendente**: Task Observer.
 
 ## Projetos atuais
-| Projeto | Stack | Plugins de projeto |
-|---|---|---|
-| ZapVendedor (backend, frontend, admin) | .NET + Angular | `csharp-lsp`, `typescript-lsp` |
-| Buscador Contabil (backend, frontend) | .NET + Angular | `csharp-lsp`, `typescript-lsp` |
-| DiscordTorLauncher | .NET (sem Git) | `csharp-lsp` |
-| WAHA | docker-compose (sem Git) | nenhum |
+Cada repo é só backend ou só frontend: backend usa o modelo `dotnet`, frontend usa `angular`.
+
+| Projeto | Stack | Modelo | Status |
+|---|---|---|---|
+| Buscador Contabil backend | .NET 8 | `dotnet` | **adotado** (CLAUDE.md + settings) |
+| Buscador Contabil frontend | Angular | `angular` | pendente |
+| ZapVendedor backend | .NET | `dotnet` | pendente (já tem CLAUDE.md → mesclar) |
+| ZapVendedor frontend / admin | Angular | `angular` | pendente (frontend já tem CLAUDE.md → mesclar) |
+| DiscordTorLauncher | .NET (sem Git) | `dotnet` | pendente; usa `.memory` |
+| WAHA | docker-compose (sem Git) | nenhum | usa `.memory` |
 
 ## Skills globais
 | Skill | Quando usar |
