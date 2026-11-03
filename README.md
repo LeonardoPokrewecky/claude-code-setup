@@ -22,11 +22,11 @@ Skill e pluggin\
 │   ├── CLAUDE.project.md         ← modelo de CLAUDE.md de projeto
 │   ├── dotnet\.claude\settings.json          ← repos backend .NET
 │   ├── angular\.claude\settings.json         ← repos frontend Angular
-│   ├── dotnet-angular\.claude\settings.json  ← repo com .NET e Angular juntos
+│   ├── _base, node-ts, python, infra, playwright, serena\.claude\settings.json  ← camadas (ver scripts\merge-settings.ps1 -Layers)
 │   ├── supabase\.claude\settings.json
 │   └── marketing\.claude\settings.json
 └── scripts\
-    └── merge-settings.ps1        ← mescla settings.merge.json sem apagar o que existe
+    └── merge-settings.ps1        ← mescla settings (global ou -Layers por projeto) sem apagar; -DryRun; backup
 ```
 
 ## 2. Decisões de arquitetura
@@ -142,40 +142,42 @@ Se um plugin não baixar sozinho, instale manualmente:
 
 ## 5. Ativar em um projeto
 
-### Projeto existente (ex.: ZapVendedor backend — modelo `dotnet`)
+### Projeto existente (ex.: PlanoCarreiraDev — camadas `_base,dotnet`)
 Abra uma sessão no projeto e peça: **"use a skill project-bootstrap no modo adopt-existing"**.
-O Claude faz o inventário, mostra a proposta e só grava após sua aprovação.
+O Claude faz o inventário, mostra a proposta (com `-DryRun`) e só grava após sua aprovação.
 
 Manual, se preferir:
 ```powershell
-$proj = "C:\Workspace\ZapVendedor\02.zapvendedor.backend"
-New-Item -ItemType Directory -Force "$proj\.claude" | Out-Null
-if (-not (Test-Path "$proj\.claude\settings.json")) {
-  Copy-Item "$repo\project-templates\dotnet\.claude\settings.json" "$proj\.claude\settings.json"
-}
+$proj = "C:\Workspace\PlanoCarreiraDev"
+# ver antes:
+powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -Target "$proj\.claude\settings.json" -Layers _base,dotnet -DryRun
+# aplicar (faz backup do settings existente):
+powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -Target "$proj\.claude\settings.json" -Layers _base,dotnet
 if (-not (Test-Path "$proj\CLAUDE.md")) { Copy-Item "$repo\project-templates\CLAUDE.project.md" "$proj\CLAUDE.md" }
 ```
 
-| Stack | Modelo de settings |
+Camadas: sempre `_base` + a(s) da stack. Tabela completa em `global\skills\env-guide\SKILL.md`.
+
+| Stack | Camadas |
 |---|---|
-| Backend .NET | `dotnet` |
-| Frontend Angular | `angular` |
-| .NET e Angular no mesmo repo | `dotnet-angular` |
-| Usa Supabase | `supabase` (mesclar com o da stack) |
-| Landing page / marketing | `marketing` (mesclar com o da stack) |
+| Backend .NET | `_base,dotnet` |
+| Frontend Angular | `_base,angular` |
+| Node/TS (não Angular) | `_base,node-ts` |
+| Python | `_base,python` |
+| Só docker/terraform | `_base,infra` |
+| Usa Supabase / marketing | somar `supabase` / `marketing` |
+| Testar UI / navegação por símbolo (opt-in) | somar `playwright` / `serena` |
 
 ### Projeto novo
 Crie em `C:\Workspace\<Nome>`, rode `git init` e peça: **"use a skill project-bootstrap no modo new-project"**.
 
 ### Projetos atuais
-| Projeto | Git | Modelo | Observação |
+| Projeto | Git | Camadas | Observação |
 |---|---|---|---|
-| Buscador Contabil backend | sim | dotnet | **piloto adotado em 2026-11-02**; remoto (WallysonDuarte) não encontrado |
-| Buscador Contabil frontend | sim | angular | pendente |
-| ZapVendedor backend | sim | dotnet | já tem CLAUDE.md → mesclar |
-| ZapVendedor frontend / admin | sim | angular | frontend já tem CLAUDE.md → mesclar |
-| DiscordTorLauncher | **não** | dotnet | continua usando `.memory` até ter Git |
-| WAHA | **não** | nenhum | continua usando `.memory` até ter Git |
+| PlanoCarreiraDev | **não** | `_base,dotnet` | tem `CLAUDE.md` e `.claude\settings.json`; falta `_base`; usa `.memory` |
+| PlanoCarreiraDev.Frontend | **não** | `_base,angular` | sem `CLAUDE.md` nem `.claude\` |
+
+Projetos antigos (ZapVendedor, BuscadorContabil, DiscordTorLauncher, WAHA) foram removidos do uso em 2026-11-02.
 
 ---
 
@@ -211,11 +213,10 @@ Plugins: `/plugin` → desinstalar, ou remover a entrada de `enabledPlugins`.
 
 ## 8. Pendências
 
-- [ ] Limpar as permissões antigas do `settings.json` global (≈30 regras avulsas e `additionalDirectories` do ZapVendedor).
+- [x] Limpar as permissões antigas do `settings.json` global (F1, 2026-11-02; backup em `~\.claudeackups\F1-*`).
 - [ ] Fixar versão (commit/tag) dos marketplaces de terceiros.
 - [ ] Confirmar que `"caveman@caveman": false` deixa o plugin instalado e inativo.
-- [ ] Migrar contexto útil dos `.memory` (ZapVendedor, BuscadorContabil) para os `CLAUDE.md` dos projetos.
-- [ ] Revisar e remover o worktree antigo `.claude\worktrees\agent-a7d6759d…` do ZapVendedor backend.
+- [ ] Migrar contexto útil de `Memory\PlanoCarreiraDev.memory` para o `CLAUDE.md` do projeto, se ainda não estiver lá.
 - [ ] Avaliar Task Observer (origem, licença, hooks).
 - [ ] Medir tokens/custo antes e depois do caveman e do advisor (`/usage`).
 

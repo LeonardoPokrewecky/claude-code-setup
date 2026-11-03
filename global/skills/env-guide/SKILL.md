@@ -15,7 +15,7 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 | `caveman` | Global, **desligado** | Só a pedido do usuário, em sessões longas de logs/testes |
 | `csharp-lsp` | Projeto | Repo com `*.csproj` / `*.sln` |
 | `typescript-lsp` | Projeto | Repo com `angular.json` / `tsconfig.json` |
-| `frontend-design` | Projeto | Repo Angular (modelos `angular` e `dotnet-angular`): criar/refinar UI; respeitar o design system do projeto |
+| `frontend-design` | Projeto | Repo Angular (camada `angular`): criar/refinar UI; respeitar o design system do projeto |
 | `marketing-skills` | Projeto | Landing page, copy, SEO, preço, CRO |
 | `supabase` | Projeto | Só se o projeto usar Supabase; começar somente leitura em dev |
 
@@ -25,17 +25,30 @@ Regras:
 - Plugin fora desta lista: revisar origem, licença, hooks e dados coletados e pedir aprovação.
 - **Descartados**: Claude-Mem (conflita com Auto Memory e envia dados a terceiros), Headroom (proxy incompatível com Desktop/advisor), OmniRoute (troca o endpoint e quebra o advisor), anthropics/skills (duplica skills já sincronizadas). **Pendente**: Task Observer.
 
-## Projetos atuais
-Cada repo é só backend ou só frontend: backend usa o modelo `dotnet`, frontend usa `angular`.
+## Camadas de projeto (`project-templates\`)
+Aplicadas por `scripts\merge-settings.ps1 -Target <repo>\.claude\settings.json -Layers a,b` (união sem apagar; `-DryRun` mostra antes; faz backup). Cada repo = `_base` + stack + opcionais.
 
-| Projeto | Stack | Modelo | Status |
+| Camada | Plugins / efeito | Detecção |
+|---|---|---|
+| `_base` | `deny` de `node_modules`, `dist`, `.angular`, `bin`, `obj`, `.vs`, lockfile, `*.min.js` | todo projeto |
+| `dotnet` | `csharp-lsp` | `*.sln` / `*.csproj` |
+| `angular` | `typescript-lsp`, `frontend-design` | `angular.json` |
+| `node-ts` | `typescript-lsp` | `package.json` sem `angular.json` |
+| `python` | `pyright-lsp`, `deny` de `.venv`/`__pycache__` | `pyproject.toml` / `requirements.txt` |
+| `infra` | `deny` de `.tfstate`/`.tfvars`/`.terraform` | só `docker-compose*.yml` / `*.tf` |
+| `supabase` | `supabase` | usa Supabase |
+| `marketing` | `marketing-skills` | landing page, copy, SEO |
+| `playwright` (opt-in) | `playwright`: testar UI no navegador | só a pedido; medir tokens |
+| `serena` (opt-in) | `serena`: navegação por símbolo; exige `uvx` | só a pedido; medir tokens |
+
+Repo sem Git: a defesa é o `deny` da `_base` + `C:\Workspace\Memory\<Projeto>.memory`.
+
+## Projetos atuais (em `C:\Workspace`)
+| Projeto | Stack | Camadas | Situação |
 |---|---|---|---|
-| Buscador Contabil backend | .NET 8 | `dotnet` | **adotado** (CLAUDE.md + settings) |
-| Buscador Contabil frontend | Angular | `angular` | pendente |
-| ZapVendedor backend | .NET | `dotnet` | pendente (já tem CLAUDE.md → mesclar) |
-| ZapVendedor frontend / admin | Angular | `angular` | pendente (frontend já tem CLAUDE.md → mesclar) |
-| DiscordTorLauncher | .NET (sem Git) | `dotnet` | pendente; usa `.memory` |
-| WAHA | docker-compose (sem Git) | nenhum | usa `.memory` |
+| PlanoCarreiraDev | .NET 8 + MongoDB (sem Git) | `_base`, `dotnet` | tem `CLAUDE.md` e `.claude\settings.json` (só `csharp-lsp`) → falta `_base`; usa `.memory` |
+| PlanoCarreiraDev.Frontend | Angular (sem Git) | `_base`, `angular` | sem `CLAUDE.md` nem `.claude\` |
+| LeonardoPokrewecky | README de perfil (Git) | nenhuma | — |
 
 ## Skills globais
 | Skill | Quando usar |
