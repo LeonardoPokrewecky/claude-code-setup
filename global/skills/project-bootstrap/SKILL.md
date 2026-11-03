@@ -16,7 +16,8 @@ Nunca sobrescrever, apagar ou renomear nada. Nada é criado sem aprovação expl
 6. Opcional: o plugin `claude-code-setup` fica desligado no global; ligar na sessão (`/plugin`) só para pedir sugestões de automação e desligar depois.
 
 ## 2. Proposta (mostrar antes de criar)
-- `CLAUDE.md` do projeto a partir de `project-templates\CLAUDE.project.md` (repositório de configuração em `C:\Users\Leonardo\Desktop\Skill e pluggin`).
+- `CLAUDE.md` do projeto a partir de `project-templates\CLAUDE.project.md` (repositório `claude-code-setup`; caminho por máquina no `env-guide`).
+- Skill específica do projeto nunca guarda segredo (webhook, senha de teste, token): referenciar `secrets/<projeto>/` ou variável de ambiente.
 - `.claude\settings.json` por **camadas**: sempre `_base` + a(s) da stack detectada + opcionais só se pedidos. Gerar com `scripts\merge-settings.ps1 -Target <repo>\.claude\settings.json -Layers ... -DryRun` e mostrar o resultado antes de gravar. Repo sem Git: avisar que o `deny` da `_base` é a defesa e sugerir `git init` (sem executar).
 - Skills/agentes específicos só se forem exclusivos deste projeto.
 - Projeto existente: mostrar o que será preservado e o que será adicionado, arquivo por arquivo.

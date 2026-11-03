@@ -17,7 +17,8 @@ Skill e pluggin\
 │   ├── CLAUDE.md                 ← instruções globais (curto, carregado em toda sessão)
 │   ├── settings.merge.json       ← modelos, advisor, plugins, bloqueio de .env
 │   ├── agents\                   ← 6 agentes (Explore, researcher, reviewer, test-validator, documentation, implementer)
-│   └── skills\                   ← env-guide, project-bootstrap, lgpd-audit, session-handoff
+│   ├── hooks\                    ← bloquear-segredos.ps1 (PreToolUse: segredo via Bash/PowerShell)
+│   └── skills\                   ← env-guide, project-bootstrap, lgpd-audit, session-handoff + sob demanda (/revisar, /blueprint, /alterar-dados, /deploy-checklist, /medir-antes-depois…)
 ├── project-templates\            ← modelos para cada projeto
 │   ├── CLAUDE.project.md         ← modelo de CLAUDE.md de projeto
 │   ├── dotnet\.claude\settings.json          ← repos backend .NET
@@ -101,10 +102,10 @@ Write-Host "Backup em $bk"
 Copy-Item "$repo\global\CLAUDE.md" "$cl\CLAUDE.md" -Force
 ```
 
-### Passo 3 — Agentes e skills
-Copia sem sobrescrever arquivos que já existam:
+### Passo 3 — Agentes, skills e hooks
+Copia sem sobrescrever arquivos que já existam (o hook precisa estar em `~\.claude\hooks\` antes do Passo 4):
 ```powershell
-foreach ($d in 'agents', 'skills') {
+foreach ($d in 'agents', 'skills', 'hooks') {
   Get-ChildItem "$repo\global\$d" -Recurse -File | ForEach-Object {
     $dest = $_.FullName.Replace("$repo\global", $cl)
     New-Item -ItemType Directory -Force (Split-Path $dest) | Out-Null
@@ -205,8 +206,10 @@ Copy-Item "$bk\CLAUDE.md", "$bk\settings.json" $cl -Force
 # Remover agentes e skills instalados por este setup:
 'Explore','researcher-haiku','reviewer-haiku','test-validator-haiku','documentation-haiku','implementer-sonnet' |
   ForEach-Object { Remove-Item "$cl\agents\$_.md" -ErrorAction SilentlyContinue }
-'env-guide','project-bootstrap','lgpd-audit','session-handoff' |
+'env-guide','project-bootstrap','lgpd-audit','session-handoff','revisar','criar-testes','explicar','limpar-codigo',
+'preparar-pr','adr','plano-migracao','postmortem','blueprint','alterar-dados','deploy-checklist','medir-antes-depois' |
   ForEach-Object { Remove-Item "$cl\skills\$_" -Recurse -ErrorAction SilentlyContinue }
+Remove-Item "$cl\hooks\bloquear-segredos.ps1" -ErrorAction SilentlyContinue   # e tirar o bloco "hooks" do settings.json
 ```
 Plugins: `/plugin` → desinstalar, ou remover a entrada de `enabledPlugins`.
 
@@ -215,7 +218,13 @@ Plugins: `/plugin` → desinstalar, ou remover a entrada de `enabledPlugins`.
 ## 8. Pendências
 
 - [x] Limpar as permissões antigas do `settings.json` global (F1, 2026-11-02; backup em `~\.claudeackups\F1-*`).
-- [ ] Fixar versão (commit/tag) dos marketplaces de terceiros.
+- [x] Fixar versão (tag) dos marketplaces de terceiros (2026-11-03: ponytail v5.3.3, caveman v4.0.1, marketingskills v2.14.0).
+- [ ] Aplicar este setup no perfil **DEV** (hoje: `settings.json` sem `deny`/`ask` e com `Read(//c//**)`); a F1 foi feita só no perfil Leonardo.
+- [ ] Validar o hook `bloquear-segredos` numa sessão nova (testado fora do harness: 11 casos + entrada vazia/inválida).
+
+## 8b. Auditoria de vazamento (2026-11-03)
+Repo privado no GitHub. Sem caractere invisível/bidi, comentário HTML, URL estranha ou comando de rede/execução nos `.md`/`.json`/`.ps1`; histórico Git limpo; `Auditoria LGPD.pdf` sem JavaScript, ações ou anexos.
+Plugins de terceiros (código baixado e lido, não executado): `ponytail` — hooks `node` em SessionStart/SubagentStart/UserPromptSubmit, lê transcrição, grava métricas locais, webhook só se configurado; `caveman` (desligado) — hooks `node`, sem rede; `marketing-skills` — só skills (recomenda ferramentas de parceiros), sem hooks/MCP. Nenhum trecho malicioso; o risco é de cadeia de suprimento (resolvido com `ref`).
 - [ ] Confirmar que `"caveman@caveman": false` deixa o plugin instalado e inativo.
 - [ ] Migrar contexto útil de `Memory\PlanoCarreiraDev.memory` para o `CLAUDE.md` do projeto, se ainda não estiver lá.
 - [ ] Avaliar Task Observer (origem, licença, hooks).

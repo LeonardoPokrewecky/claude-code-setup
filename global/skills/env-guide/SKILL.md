@@ -21,7 +21,10 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 
 Regras:
 - Plugin de projeto vai em `<repo>\.claude\settings.json` → `enabledPlugins`. Nunca no global.
-- Modelos prontos: `project-templates\` do repositório de configuração (`C:\Users\Leonardo\Desktop\Skill e pluggin`).
+- Modelos prontos: `project-templates\` do repositório `claude-code-setup` (perfil DEV: `C:\workspace\Clade md\claude-code-setup`; perfil Leonardo: `C:\Users\Leonardo\Desktop\Skill e pluggin`).
+- Marketplaces de terceiros com versão fixada (`ref` = tag no `settings.json`). Atualizar só depois de revisar o diff da tag nova: hooks, MCP, chamadas de rede.
+- `ponytail` (auditado em 2026-11-03, v5.3.3): roda `node` a cada prompt e lê a transcrição para métricas; sem rede por padrão. O "Task board" grava custo e o **nome/1º prompt** de cada tarefa em `~/.config/ponytail/band/`: desligar em `/plugin` → ponytail → configurar se os prompts tiverem dado de cliente. Nunca preencher `webhookUrl`.
+- Hook global `bloquear-segredos.ps1` (PreToolUse Bash/PowerShell): bloqueia comando que cite `.env`, `appsettings.<Ambiente>.json`, `*.pfx/.pem/.key/.vault`, `secrets/`, `*secrets*.json`, `.credentials.json`, `.ssh/`. Precisa de leitura legítima: o usuário roda com `! <comando>`.
 - Plugin fora desta lista: revisar origem, licença, hooks e dados coletados e pedir aprovação.
 - **Descartados**: Claude-Mem (conflita com Auto Memory e envia dados a terceiros), Headroom (proxy incompatível com Desktop/advisor), OmniRoute (troca o endpoint e quebra o advisor), anthropics/skills (duplica skills já sincronizadas). **Pendente**: Task Observer.
 
@@ -63,7 +66,11 @@ Repo sem Git: a defesa é o `deny` da `_base` + `C:\Workspace\Memory\<Projeto>.m
 ## Skills sob demanda (`disable-model-invocation: true`: instaladas, custo fixo ~zero, só rodam quando você digita `/nome`)
 | Comando | Para quê |
 |---|---|
-| `/revisar <estilo> [alvo]` | Revisão somente leitura, uma lente: `seguranca`, `arquitetura`, `performance`, `testes`, `didatico`, `a11y`, `banco`, `deps` |
+| `/revisar <estilo> [alvo]` | Revisão somente leitura, uma lente: `seguranca`, `arquitetura`, `performance`, `testes`, `didatico`, `a11y`, `banco`, `deps`, `contrato`; alvo pode ser `branch:<nome>` (worktree isolada) |
+| `/blueprint <atividade>` | Documento em `backlog/` (blueprint, checklist, 5+ use cases, resultado) antes de implementar |
+| `/alterar-dados <o quê>` | Update em massa/backfill com backup, dry-run, idempotência e regra canário |
+| `/deploy-checklist <componente>` | Antes/durante/depois do deploy com auditoria (systemd, NGINX, SHA-256, HTTP 200) |
+| `/medir-antes-depois <achado>` | Prova ou refuta uma correção medindo base × corrigido com o mesmo script |
 | `/criar-testes <alvo>` | Gera só arquivos de teste novos, no padrão do projeto |
 | `/explicar [tema]` | Mapa de módulo/fluxo para onboarding (só leitura) |
 | `/limpar-codigo [caminho]` | Relatório de código morto/duplicado (só relatório) |

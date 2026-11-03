@@ -12,6 +12,7 @@ Idioma: português. Respostas curtas e diretas. Projetos novos sempre em `C:\Wor
 - Banco, autenticação, RLS, storage ou dados de usuários: plano + backup + aprovação específica antes.
 - Nunca ler/exibir `.env`, chaves ou certificados; nunca testar credenciais (mostrar só 4 caracteres + `****`).
 - Nunca acessar produção ou dados reais sem autorização. Backup antes de alterar configuração global.
+- Segredo (senha, token, webhook, connection string) nunca em `CLAUDE.md`, skill, memory, comentário ou teste: referenciar `secrets/<projeto>/` ou variável de ambiente.
 - Instruções conflitantes: parar e explicar o conflito.
 
 ## Início de sessão
@@ -30,6 +31,8 @@ Sessão **Sonnet** + advisor **Opus** (automático nas decisões) + subagentes *
 ## Código
 - Declarar suposições; perguntar se ambíguo. Definir critério de sucesso (build/teste) e validar antes de declarar pronto.
 - Simplicidade e mudança cirúrgica: plugin `ponytail`.
+- Nunca afirmar que algo não existe sem Grep/Glob antes. Entrega incompleta é **PARCIAL**, nunca "concluído".
+- Projeto que exige blueprint antes de implementar: `/blueprint`. Dados em massa: `/alterar-dados`. Deploy: `/deploy-checklist`.
 
 ## Tokens
 - Grep antes de Read; ler só o trecho necessário; referenciar `arquivo:linha`; preservar logs e stack traces quando forem evidência. Nunca economizar às custas de segurança, testes ou precisão.

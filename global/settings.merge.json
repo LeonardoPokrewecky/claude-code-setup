@@ -6,9 +6,9 @@
     "CLAUDE_CODE_SUBAGENT_MODEL": "haiku"
   },
   "extraKnownMarketplaces": {
-    "ponytail": { "source": { "source": "github", "repo": "DietrichGebert/ponytail" } },
-    "caveman": { "source": { "source": "github", "repo": "JuliusBrussee/caveman" } },
-    "marketingskills": { "source": { "source": "github", "repo": "coreyhaines31/marketingskills" } }
+    "ponytail": { "source": { "source": "github", "repo": "DietrichGebert/ponytail", "ref": "v5.3.3" } },
+    "caveman": { "source": { "source": "github", "repo": "JuliusBrussee/caveman", "ref": "v4.0.1" } },
+    "marketingskills": { "source": { "source": "github", "repo": "coreyhaines31/marketingskills", "ref": "v2.14.0" } }
   },
   "enabledPlugins": {
     "claude-code-setup@claude-plugins-official": false,
@@ -16,6 +16,20 @@
     "security-guidance@claude-plugins-official": true,
     "ponytail@ponytail": true,
     "caveman@caveman": false
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"$HOME/.claude/hooks/bloquear-segredos.ps1\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   },
   "permissions": {
     "deny": [
@@ -25,8 +39,19 @@
       "Read(**/*.pem)",
       "Read(**/*.key)",
       "Read(**/*.p12)",
+      "Read(**/*.kdbx)",
+      "Read(**/*.vault)",
       "Read(**/secrets.json)",
-      "Read(**/appsettings.Production.json)"
+      "Read(**/*secrets*.json)",
+      "Read(**/secrets/**)",
+      "Read(**/appsettings.Production.json)",
+      "Read(**/appsettings.Development.json)",
+      "Read(**/.credentials.json)",
+      "Read(**/.git-credentials)",
+      "Read(**/.npmrc)",
+      "Read(**/.ssh/**)",
+      "Read(**/id_rsa*)",
+      "Read(**/id_ed25519*)"
     ],
     "ask": [
       "Bash(git commit:*)",
@@ -38,7 +63,14 @@
       "Bash(dotnet add package:*)",
       "Bash(winget:*)",
       "Bash(rm:*)",
-      "Bash(Remove-Item:*)"
+      "Bash(Remove-Item:*)",
+      "Bash(node -e:*)",
+      "Bash(powershell:*)",
+      "Bash(cmd:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "PowerShell(Invoke-WebRequest:*)",
+      "PowerShell(Invoke-RestMethod:*)"
     ]
   }
 }
