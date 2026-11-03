@@ -44,7 +44,7 @@ Skill e pluggin\
 
 | Plugin | Origem | Escopo | Status |
 |---|---|---|---|
-| claude-code-setup | oficial Anthropic | global | ativo |
+| claude-code-setup | oficial Anthropic | global | **desligado** (ligar só no bootstrap) |
 | context7 | oficial Anthropic | global | ativo |
 | security-guidance | oficial Anthropic | global | ativo |
 | ponytail | DietrichGebert/ponytail (MIT) | global | ativo |
@@ -128,7 +128,7 @@ powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1"
 |---|---|
 | `/status` | `Setting sources` inclui User settings; modelo Sonnet |
 | `/advisor` | Advisor = Opus |
-| `/plugin` | claude-code-setup, context7, security-guidance, ponytail instalados; caveman desativado |
+| `/plugin` | context7, security-guidance, ponytail ativos; claude-code-setup e caveman desativados |
 | `/agents` | Explore, researcher-haiku, reviewer-haiku, test-validator-haiku, documentation-haiku, implementer-sonnet |
 | "quais skills globais você tem?" | env-guide, project-bootstrap, lgpd-audit, session-handoff |
 

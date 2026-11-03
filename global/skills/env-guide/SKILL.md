@@ -8,7 +8,7 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 ## Plugins (download automático via `settings.json`)
 | Plugin | Escopo | Quando usar |
 |---|---|---|
-| `claude-code-setup` | Global | Projeto novo/adotado: recomendar hooks, skills, MCPs e agentes |
+| `claude-code-setup` | Global, **desligado** | Só no bootstrap: ligar com `/plugin` para recomendar hooks, skills, MCPs e agentes; desligar depois |
 | `ponytail` | Global | Sempre ativo. `/ponytail-review` no diff, `/ponytail-audit` no repo, `/ponytail-debt` para atalhos adiados |
 | `context7` | Global | Antes de usar API de biblioteca/framework em que a versão importa |
 | `security-guidance` | Global | Sempre ativo: avisos ao editar e revisão do diff no fim |

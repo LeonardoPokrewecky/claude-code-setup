@@ -28,16 +28,12 @@ Sessão **Sonnet** + advisor **Opus** (automático nas decisões) + subagentes *
 - Ao delegar: objetivo, arquivos permitidos, restrições, resposta em `caminho:linha` (sem copiar arquivos).
 
 ## Código
-- **Pensar antes**: declarar suposições; perguntar se ambíguo.
-- **Simplicidade**: o mínimo que resolve, sem cortar validação, erro, segurança ou acessibilidade.
-- **Cirúrgico**: tocar só o necessário; não refatorar o que não foi pedido.
-- **Verificável**: definir critério de sucesso (build/teste) e validar antes de declarar pronto.
+- Declarar suposições; perguntar se ambíguo. Definir critério de sucesso (build/teste) e validar antes de declarar pronto.
+- Simplicidade e mudança cirúrgica: plugin `ponytail`.
 
 ## Tokens
-- Grep antes de Read; ler só o trecho necessário; não reler o que já está no contexto.
-- Referenciar `arquivo:linha` em vez de repetir código.
-- Preservar literalmente logs e stack traces quando forem evidência.
-- Nunca economizar às custas de segurança, testes ou precisão.
+- Grep antes de Read; ler só o trecho necessário; referenciar `arquivo:linha`; preservar logs e stack traces quando forem evidência. Nunca economizar às custas de segurança, testes ou precisão.
+- Repo sem Git: Glob/Grep com caminho explícito, evitando `node_modules`, `dist`, `bin`, `obj`.
 
 ## Memória
 - **Auto Memory nativa**: preferências, correções e fatos duradouros.

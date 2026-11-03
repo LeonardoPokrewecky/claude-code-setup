@@ -13,7 +13,7 @@ Nunca sobrescrever, apagar ou renomear nada. Nada é criado sem aprovação expl
 3. Comandos reais de build/teste (ex.: `dotnet build`, `dotnet test`, `npm run build`, `npm test`).
 4. Inventário do que já existe: `CLAUDE.md`, `.claude\`, `.mcp.json`, `AGENTS.md`, hooks, worktrees.
 5. Não abrir `.env`, chaves ou certificados.
-6. Opcional: rodar o plugin `claude-code-setup` para sugestões de automação.
+6. Opcional: o plugin `claude-code-setup` fica desligado no global; ligar na sessão (`/plugin`) só para pedir sugestões de automação e desligar depois.
 
 ## 2. Proposta (mostrar antes de criar)
 - `CLAUDE.md` do projeto a partir de `project-templates\CLAUDE.project.md` (repositório de configuração em `C:\Users\Leonardo\Desktop\Skill e pluggin`).
