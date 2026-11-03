@@ -1,6 +1,6 @@
 # Proposta — ambiente Claude Code (global + por tipo de projeto)
 
-Data: 2026-11-02 · Status: **proposta, nada aplicado** · Itens de permissões/segurança: **rodar com sessão Opus** (regra do CLAUDE.md global).
+Data: 2026-11-02 · Status: **F2–F5b aplicadas; F1 (permissões) e F6 (medição) pendentes** · Itens de permissões/segurança: **rodar com sessão Opus** (regra do CLAUDE.md global).
 
 ## 1. Diagnóstico (evidências)
 
@@ -150,15 +150,15 @@ Regras: cada skill sob demanda é somente leitura por padrão; quem escreve (`/c
 
 ## 5. Plano em fases (cada fase = 1 commit; nenhuma aplicada sem OK)
 
-| Fase | Conteúdo | Risco | Exige |
-|---|---|---|---|
-| F1 | G1 permissões | **alto** (segurança) | Opus + backup do `settings.json` + aprovação |
-| F2 | G2 CLAUDE.md + sync da cópia instalada | baixo | backup `~\.claude\CLAUDE.md` |
-| F3 | Reestruturar `project-templates` em camadas + `merge-settings.ps1` | médio | teste em pasta temporária (nunca em projeto real) |
-| F4 | Atualizar `project-bootstrap`, `env-guide`, README (D1) | baixo | Q1 respondida |
-| F5 | Aplicar nos projetos reais (PlanoCarreiraDev, PlanoCarreiraDev.Frontend: CLAUDE.md + `_base`) | baixo | adopt-existing, um por vez |
-| F5b | Criar `/revisar <estilo>` (3b) + marcar `lgpd-audit`/`session-handoff` como sob demanda | baixo | quais estilos/lentes (Q5); testar em pasta temporária |
-| F6 | Medir com `/context` e decidir G3 + opcionais (`serena`, `playwright`) | — | autorização para instalar |
+| Fase | Conteúdo | Risco | Exige | Status |
+|---|---|---|---|---|
+| F1 | G1 permissões | **alto** (segurança) | Opus + backup do `settings.json` + aprovação | pendente |
+| F2 | G2 CLAUDE.md + sync da cópia instalada | baixo | backup `~\.claude\CLAUDE.md` | feito (`c28663a`) |
+| F3 | Reestruturar `project-templates` em camadas + `merge-settings.ps1` | médio | teste em pasta temporária (nunca em projeto real) | feito (`716d693`) |
+| F4 | Atualizar `project-bootstrap`, `env-guide`, README (D1) | baixo | Q1 respondida | feito (`7b8bed9`) |
+| F5 | Aplicar nos projetos reais (PlanoCarreiraDev, PlanoCarreiraDev.Frontend: CLAUDE.md + `_base`) | baixo | adopt-existing, um por vez | feito (settings com `_base` + `.bak-20261102`; Frontend já tem `CLAUDE.md`) |
+| F5b | Criar `/revisar <estilo>` (3b) + marcar `lgpd-audit`/`session-handoff` como sob demanda | baixo | quais estilos/lentes (Q5); testar em pasta temporária | feito (`c33ff34`) |
+| F6 | Medir com `/context` e decidir G3 + opcionais (`serena`, `playwright`) | — | autorização para instalar | pendente |
 
 Critério de sucesso: JSON válido em todos os settings; `merge-settings.ps1` idempotente (rodar 2× = mesmo resultado); `/context` mostra menos tokens fixos que o baseline; busca no front sem `.git` rápida.
 
@@ -174,3 +174,8 @@ Critério de sucesso: JSON válido em todos os settings; `merge-settings.ps1` id
 - Consumo real de tokens (sem `/context` ainda).
 - Se `anthropic-skills:*` e conectores podem ser desligados por settings.
 - Compatibilidade/qualidade de `playwright`, `serena`, `claude-md-management` (só li a lista do marketplace local).
+
+## 8. Resultado (2026-11-02)
+- **Feito**: G2 (`CLAUDE.md` global enxuto; cópia instalada idêntica ao repo), G3 parcial (`claude-code-setup` desligado no global, ligar no bootstrap), G4 (docs com a realidade do disco), camadas + `merge-settings.ps1 -Layers/-DryRun`, skills sob demanda, `_base` aplicada nos dois projetos.
+- **Pendente**: **F1** — o `settings.json` global ainda tem `npm install:*` e `winget:*` em `allow` e nenhum `ask` (D2/D4 seguem abertos; fazer em sessão Opus com backup). **F6** — medir com `/context`; `playwright`/`serena` seguem opt-in.
+- **Ainda não verificado**: itens da seção 7.

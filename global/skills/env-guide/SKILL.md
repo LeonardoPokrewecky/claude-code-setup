@@ -19,6 +19,8 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 | `marketing-skills` | Projeto | Landing page, copy, SEO, preço, CRO |
 | `supabase` | Projeto | Só se o projeto usar Supabase; começar somente leitura em dev |
 
+Pendente no global: permissões do `settings.json` (`npm install`/`winget` em `allow`, sem `ask`) — ver `PROPOSTA.md` F1.
+
 Regras:
 - Plugin de projeto vai em `<repo>\.claude\settings.json` → `enabledPlugins`. Nunca no global.
 - Modelos prontos: `project-templates\` do repositório de configuração (`C:\Users\Leonardo\Desktop\Skill e pluggin`).
@@ -46,8 +48,8 @@ Repo sem Git: a defesa é o `deny` da `_base` + `C:\Workspace\Memory\<Projeto>.m
 ## Projetos atuais (em `C:\Workspace`)
 | Projeto | Stack | Camadas | Situação |
 |---|---|---|---|
-| PlanoCarreiraDev | .NET 8 + MongoDB (sem Git) | `_base`, `dotnet` | tem `CLAUDE.md` e `.claude\settings.json` (só `csharp-lsp`) → falta `_base`; usa `.memory` |
-| PlanoCarreiraDev.Frontend | Angular (sem Git) | `_base`, `angular` | sem `CLAUDE.md` nem `.claude\` |
+| PlanoCarreiraDev | .NET 8 + MongoDB (sem Git) | `_base`, `dotnet` | `CLAUDE.md` + `.claude\settings.json` com `_base`+`dotnet` aplicados; usa `.memory` |
+| PlanoCarreiraDev.Frontend | Angular (sem Git) | `_base`, `angular` | `CLAUDE.md` + `.claude\settings.json` com `_base`+`angular` aplicados; sem `.memory` |
 | LeonardoPokrewecky | README de perfil (Git) | nenhuma | — |
 
 ## Skills globais
