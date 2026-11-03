@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/node_modules/**)",
+      "Read(**/dist/**)",
+      "Read(**/.angular/**)",
+      "Read(**/bin/**)",
+      "Read(**/obj/**)",
+      "Read(**/.vs/**)",
+      "Read(**/package-lock.json)",
+      "Read(**/*.min.js)"
+    ]
+  }
+}
