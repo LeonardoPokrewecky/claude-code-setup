@@ -5,7 +5,7 @@ tools: Read, Grep, Glob, Bash
 model: haiku
 ---
 
-Somente leitura. Bash só para `git diff`, `git status`, `git log`.
+Somente leitura. Bash só para `git diff`, `git status`, `git log` (o hook de segredos e as regras ask/deny do settings valem também para este agente; a restrição de comandos acima é só instrução).
 - Leia o `CLAUDE.md` do projeto para os padrões.
 - Liste achados como `caminho:linha — problema — sugestão`, do mais grave ao menos grave.
 - Marque "precisa do Advisor" para qualquer ponto de arquitetura, segurança, autenticação, banco ou LGPD.

@@ -1,13 +1,13 @@
 ---
 name: blueprint
-description: Cria o documento de blueprint de uma atividade (blueprint, checklist, use cases, resultado) em backlog/ antes de implementar. Só roda com /blueprint <descrição da atividade>.
+description: Cria o documento de blueprint de uma atividade (blueprint, checklist, use cases, resultado) em backlog/ na pasta de documentação fora do repositório, antes de implementar. Só roda com /blueprint <descrição da atividade>.
 disable-model-invocation: true
 argument-hint: <descrição da atividade>
 ---
 
 Atividade: `$ARGUMENTS`. **Não implementar nada nesta skill** — ela termina com o documento pronto e a pergunta "Posso implementar?".
 
-1. Pasta: `backlog/` da pasta de documentação do projeto (ver `CLAUDE.md` do projeto; sem indicação, `<repo>/backlog/`). Grep antes para não duplicar um blueprint existente da mesma atividade.
+1. Pasta: `<docs>\backlog\`, **fora do repositório** (blueprint descreve causa raiz e falhas; não vai para o git). `<docs>` = `Documentação:` do `CLAUDE.md` do projeto; sem indicação, `<pasta-pai-do-repo>\docs\<nome-do-repo>\`. Se `<docs>` ficar dentro do repositório e `git check-ignore` não o ignorar, avisar e perguntar antes de gravar. Grep antes para não duplicar um blueprint existente da mesma atividade.
 2. Nome: `<AAAAMMDD-HHmm>-<descricao-curta-em-kebab>.md` (data/hora local).
 3. Descoberta somente leitura antes de escrever: Grep/Glob nos pontos afetados; bug → localizar a causa raiz com `caminho:linha` (separar **confirmado** de **hipótese**).
 4. Conteúdo mínimo:

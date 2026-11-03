@@ -2,26 +2,50 @@
 # Global (padrao):  merge-settings.ps1 [-Target <settings.json>]            -> global\settings.merge.json
 # Camadas:          merge-settings.ps1 -Target <repo>\.claude\settings.json -Layers _base,dotnet,angular
 #                   (cada camada = project-templates\<nome>\.claude\settings.json; -Target e obrigatorio)
-# -DryRun mostra o resultado sem gravar. Grava backup <Target>.bak-AAAAMMDD antes de alterar.
+# Fluxo obrigatorio em 2 passos (nada e gravado sem o usuario ver o resultado):
+#   1. -DryRun mostra o JSON final (valores com nome de segredo mascarados), os ALERTAS (toda entrada nova que nao
+#      seja deny/ask/plugin desligado) e um codigo de confirmacao.
+#   2. -Confirmar <codigo> grava. O codigo e o hash do alvo + resultado: se o pacote ou o alvo mudar depois
+#      do dry-run, o codigo deixa de valer. Grava backup <Target>.bak-AAAAMMDD-HHmmss (nunca sobrescreve) antes.
+# O codigo nao distingue usuario de agente: a aprovacao real e o "ask" que o hook bloquear-segredos pede ao ver
+# -Confirmar. Sem mudanca no resultado, nada e gravado (nem backup).
 param(
     [string]$Target,
     [string[]]$Layers,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [string]$Confirmar
 )
 $ErrorActionPreference = 'Stop'
 $root = Join-Path $PSScriptRoot '..'
+$utf8 = New-Object Text.UTF8Encoding $false
 
 $Layers = @($Layers | ForEach-Object { $_ -split ',' } | Where-Object { $_ })   # -File entrega "a,b" como 1 string
 if ($Layers) {
     if (-not $Target) { throw '-Layers exige -Target explicito (nunca grava no settings global por engano).' }
     $sources = $Layers | ForEach-Object {
         $f = Join-Path $root "project-templates\$_\.claude\settings.json"
-        if (-not (Test-Path $f)) { throw "Camada inexistente: $_" }
+        if (-not (Test-Path -LiteralPath $f)) { throw "Camada inexistente: $_" }
         $f
     }
 } else {
     if (-not $Target) { $Target = "$env:USERPROFILE\.claude\settings.json" }
     $sources = @(Join-Path $root 'global\settings.merge.json')
+}
+# Caminho absoluto pelo PowerShell: [IO.File] resolve relativo pelo diretorio do processo, que difere de $PWD apos cd.
+$Target = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Target)
+
+# UTF-8 explicito: no PowerShell 5.1 o Get-Content le UTF-8 sem BOM como ANSI e corrompe acentos.
+function Read-Json([string]$caminho) { [IO.File]::ReadAllText($caminho, $utf8) | ConvertFrom-Json }
+
+function New-ConjuntoTexto { New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal) }
+
+# Uniao de arrays pela forma JSON de cada item, diferenciando maiusculas: Select-Object -Unique comparava objetos
+# pelo texto "@{...}" e @{} ignora caixa (Read(**/A) e Read(**/a) viravam 1).
+function Join-Unique($x, $y) {
+    $vistos = New-ConjuntoTexto
+    ,@(@($x) + @($y) | Where-Object {   # "," impede o PowerShell de desenrolar array de 1 item em escalar
+        $vistos.Add($(if ($_ -is [string]) { "s:$_" } else { 'j:' + ($_ | ConvertTo-Json -Compress -Depth 30) }))
+    })
 }
 
 function Merge-Json($a, $b) {
@@ -29,19 +53,139 @@ function Merge-Json($a, $b) {
         $cur = $a.PSObject.Properties[$p.Name]
         if (-not $cur) { $a | Add-Member -NotePropertyName $p.Name -NotePropertyValue $p.Value; continue }
         if ($p.Value -is [pscustomobject] -and $cur.Value -is [pscustomobject]) { Merge-Json $cur.Value $p.Value }
-        elseif ($p.Value -is [array] -and $cur.Value -is [array]) { $cur.Value = @(@($cur.Value) + @($p.Value) | Select-Object -Unique) }
+        elseif ($p.Value -is [array] -and $cur.Value -is [array]) { $cur.Value = Join-Unique $cur.Value $p.Value }
         else { $cur.Value = $p.Value }
     }
 }
 
-$a = if (Test-Path $Target) { Get-Content $Target -Raw | ConvertFrom-Json } else { New-Object psobject }
-foreach ($s in $sources) { Merge-Json $a (Get-Content $s -Raw | ConvertFrom-Json) }
+# Achata o settings em linhas "caminho=valor"; item de array objeto vira uma linha so (ex.: um hook inteiro).
+function Get-Entradas($o, [string]$caminho) {
+    if ($o -is [pscustomobject]) {
+        foreach ($p in $o.PSObject.Properties) { Get-Entradas $p.Value ($(if ($caminho) { "$caminho.$($p.Name)" } else { $p.Name })) }
+    } elseif ($o -is [array]) {
+        foreach ($i in $o) {
+            if ($i -is [pscustomobject] -or $i -is [array]) { "$caminho[]=" + ($i | ConvertTo-Json -Compress -Depth 30) }
+            else { "$caminho[]=$i" }
+        }
+    } else { "$caminho=$o" }
+}
+
+# Lista do que e seguro (so restringe ou desliga), nao do que e perigoso: chave nova desconhecida tambem gera alerta.
+$entradasSeguras = '^(\$schema=|permissions\.(deny|ask)\[\]=|enabledPlugins\.[^=]+=False$)'
+
+# Devolve o indice de cada entrada nova fora da lista segura (o indice localiza a mesma entrada na versao mascarada).
+function Get-Alertas($antes, $depois) {
+    $conhecidas = New-ConjuntoTexto
+    foreach ($e in $antes) { [void]$conhecidas.Add($e) }
+    for ($i = 0; $i -lt $depois.Count; $i++) {
+        if (-not $conhecidas.Contains($depois[$i]) -and $depois[$i] -notmatch $entradasSeguras) { $i }
+    }
+}
+
+# Mascara valor de propriedade com nome de segredo e valor com cara de credencial (o dry-run vai para a transcricao).
+$nomeSegredo = '(?i)(token|secret|passw|pwd|apikey|api_key|auth|credential|cookie|bearer|private|connectionstring|key$)'
+$valorSegredo = '(?i)^bearer\s|^basic\s|://[^/\s:@]+:[^/\s@]+@|^sk-[\w-]{16,}|^gh[pousr]_\w{20,}|^xox[abp]-'
+function Hide-Segredos($o) {
+    if ($o -is [pscustomobject]) {
+        foreach ($p in $o.PSObject.Properties) {
+            if ($p.Value -is [pscustomobject] -or $p.Value -is [array]) { Hide-Segredos $p.Value }
+            elseif ($null -ne $p.Value -and ($p.Name -match $nomeSegredo -or "$($p.Value)" -match $valorSegredo)) { $p.Value = '***' }
+        }
+    } elseif ($o -is [array]) {
+        foreach ($i in $o) { if ($i -is [pscustomobject] -or $i -is [array]) { Hide-Segredos $i } }
+    }
+}
+
+# Recusa estrutura que o Claude Code nao entende antes de gravar (tipo errado vira configuracao ignorada em silencio).
+function Test-Estrutura($o) {
+    foreach ($k in 'allow', 'deny', 'ask', 'additionalDirectories') {
+        $v = $o.permissions.$k
+        if ($null -ne $v -and -not ($v -is [array] -and -not @($v | Where-Object { $_ -isnot [string] }))) { "permissions.$k deve ser lista de textos" }
+    }
+    if ($null -ne $o.permissions.defaultMode -and $o.permissions.defaultMode -isnot [string]) { 'permissions.defaultMode deve ser texto' }
+    if ($o.env) { foreach ($p in $o.env.PSObject.Properties) { if ($p.Value -isnot [string]) { "env.$($p.Name) deve ser texto" } } }
+    if ($o.enabledPlugins) { foreach ($p in $o.enabledPlugins.PSObject.Properties) { if ($p.Value -isnot [bool]) { "enabledPlugins.$($p.Name) deve ser true/false" } } }
+    if ($o.hooks) {
+        foreach ($ev in $o.hooks.PSObject.Properties) {
+            if ($ev.Value -isnot [array]) { "hooks.$($ev.Name) deve ser lista"; continue }
+            foreach ($g in $ev.Value) {
+                if ($g.hooks -isnot [array]) { "hooks.$($ev.Name)[].hooks deve ser lista"; continue }
+                foreach ($h in $g.hooks) { if (-not $h.type -or ($h.type -eq 'command' -and -not $h.command)) { "hooks.$($ev.Name): hook sem type/command" } }
+            }
+        }
+    }
+}
+
+# Hook apontando para arquivo inexistente falha sem bloquear nada: avisar antes de gravar.
+function Get-HooksAusentes($o) {
+    if (-not $o.hooks) { return }
+    foreach ($ev in $o.hooks.PSObject.Properties) {
+        foreach ($h in @($ev.Value | ForEach-Object { $_.hooks })) {
+            if ("$($h.command)" -match '-File\s+"?([^"]+?\.ps1)') {
+                $arq = $Matches[1] -replace '^(\$HOME|~|\$env:USERPROFILE|%USERPROFILE%)', $env:USERPROFILE
+                if (-not (Test-Path -LiteralPath $arq)) { $arq }
+            }
+        }
+    }
+}
+
+$existe = Test-Path -LiteralPath $Target
+$textoAtual = if ($existe) { [IO.File]::ReadAllText($Target, $utf8) } else { $null }
+$a = if ($existe -and $textoAtual.Trim()) { $textoAtual | ConvertFrom-Json } else { New-Object psobject }
+$antes = @(Get-Entradas $a '')
+foreach ($s in $sources) { Merge-Json $a (Read-Json $s) }
 
 $json = $a | ConvertTo-Json -Depth 30
-$null = $json | ConvertFrom-Json   # valida
-if ($DryRun) { $json; return }
+$resultado = $json | ConvertFrom-Json   # alertas e validacao sobre o que sera gravado, nao sobre o objeto em memoria
+$depois = @(Get-Entradas $resultado '')
+$erros = @(Test-Estrutura $resultado)
+if ($erros.Count) { throw "Resultado invalido, nada foi gravado:`n  " + ($erros -join "`n  ") }
+$ausentes = @(Get-HooksAusentes $a)
+$alertas = @(Get-Alertas $antes $depois)
 
-if (Test-Path $Target) { Copy-Item $Target "$Target.bak-$(Get-Date -Format yyyyMMdd)" -Force }
-else { New-Item -ItemType Directory -Force (Split-Path $Target) | Out-Null }
-[IO.File]::WriteAllText($Target, $json, (New-Object Text.UTF8Encoding $false))
+$mascarado = $json | ConvertFrom-Json
+Hide-Segredos $mascarado
+$depoisMascarado = @(Get-Entradas $mascarado '')
+
+$sha = [Security.Cryptography.SHA256]::Create()
+$bytes = $utf8.GetBytes($Target + "`n" + $json)
+$codigo = (-join ($sha.ComputeHash($bytes) | ForEach-Object { $_.ToString('x2') })).Substring(0, 12)
+
+function Show-Alertas {
+    if ($alertas.Count) {
+        Write-Host "ALERTA: $($alertas.Count) entrada(s) nova(s) fora da lista segura (executa codigo, desvia API, libera acesso ou liga terceiro). Confira cada uma:" -ForegroundColor Yellow
+        $alertas | ForEach-Object { Write-Host "  + $($depoisMascarado[$_])" -ForegroundColor Yellow }
+    } else { Write-Host 'Sem alertas: nenhuma entrada nova fora da lista segura.' }
+    $ausentes | ForEach-Object { Write-Host "AVISO: hook aponta para arquivo inexistente (falharia sem bloquear): $_" -ForegroundColor Yellow }
+}
+
+if ($existe -and $textoAtual -ceq $json) {
+    Write-Host "Sem alteracoes: $Target ja contem o resultado. Nada a gravar."
+    return
+}
+
+if ($DryRun) {
+    $mascarado | ConvertTo-Json -Depth 30
+    Write-Host "Alvo: $Target ($(if ($existe) { 'sera alterado; backup antes' } else { 'sera criado' }))"
+    Show-Alertas
+    Write-Host "Para gravar, revise o JSON e os alertas acima e rode de novo com: -Confirmar $codigo"
+    return
+}
+
+if (-not $Confirmar) { throw 'Gravacao exige revisao: rode antes com -DryRun e depois com -Confirmar <codigo> mostrado no dry-run.' }
+if ($Confirmar -ne $codigo) { throw 'Codigo de confirmacao nao confere: o pacote ou o alvo mudou depois do dry-run. Rode -DryRun de novo e revise.' }
+
+Show-Alertas
+if ($existe) {
+    $carimbo = Get-Date -Format yyyyMMdd-HHmmss
+    $backup = "$Target.bak-$carimbo"
+    for ($n = 1; Test-Path -LiteralPath $backup; $n++) { $backup = "$Target.bak-$carimbo-$n" }
+    [IO.File]::Copy($Target, $backup, $false)
+    Write-Host "Backup: $backup"
+} else { New-Item -ItemType Directory -Force -Path (Split-Path $Target) | Out-Null }
+[IO.File]::WriteAllText($Target, $json, $utf8)
+if ([IO.File]::ReadAllText($Target, $utf8) -cne $json) {
+    if ($existe) { [IO.File]::Copy($backup, $Target, $true) }
+    throw "Falha ao conferir a gravacao de $Target; conteudo anterior restaurado."
+}
 Write-Host "OK: $Target atualizado."

@@ -1,0 +1,47 @@
+# Segredos e configuração com valores reais: nunca entram neste repositório.
+.env
+.env.*
+.envrc
+*.env
+secrets/
+*secrets*.json
+*secrets*.yaml
+*secrets*.yml
+appsettings.*.json
+local.settings.json
+*.pfx
+*.p12
+*.p8
+*.pem
+*.key
+*.ppk
+*.jks
+*.keystore
+*.kdbx
+*.vault
+id_rsa*
+id_ed25519*
+id_ecdsa*
+.npmrc
+.netrc
+.pgpass
+.pypirc
+.git-credentials
+.credentials.json
+.claude.json
+
+# Gerados por scripts e skills (podem conter dado de cliente ou config local).
+*.bak-*
+HANDOFF.md
+RELATORIO-LGPD.md
+DIVIDA.md
+backlog/
+.claude/settings.local.json
+
+# Sistema operacional e editores.
+Thumbs.db
+Desktop.ini
+.DS_Store
+.vs/
+.vscode/
+.idea/

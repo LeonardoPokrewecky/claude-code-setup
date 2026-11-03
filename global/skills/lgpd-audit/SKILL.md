@@ -1,6 +1,6 @@
 ---
 name: lgpd-audit
-description: Auditoria LGPD completa e somente leitura de um app (web/mobile/API) — pesquisa a legislação vigente, mapeia dados pessoais, avalia 11 áreas, prioriza P0–P3 e gera RELATORIO-LGPD.md em linguagem simples. Use quando pedirem auditoria/avaliação LGPD, privacidade ou adequação à lei de proteção de dados.
+description: Auditoria LGPD completa e somente leitura de um app (web/mobile/API) — pesquisa a legislação vigente, mapeia dados pessoais, avalia 11 áreas, prioriza P0–P3 e gera RELATORIO-LGPD.md (fora do repositório) em linguagem simples. Use quando pedirem auditoria/avaliação LGPD, privacidade ou adequação à lei de proteção de dados.
 disable-model-invocation: true
 ---
 
@@ -11,7 +11,7 @@ Papel: auditor sênior de privacidade e segurança. Entregar relatório em portu
 ## Regra de ouro
 1. **Somente leitura.** Permitido: ler, buscar, comandos de consulta, testes existentes, `npm audit`/`dotnet list package --vulnerable`, pesquisa web.
 2. **Nada é alterado** até autorização explícita por item ("pode implementar o item 1"). "ok"/"faz sentido" não é autorização.
-3. Segredos: não usar nem testar; mostrar só 4 caracteres + `****` e arquivo:linha.
+3. Segredos: não usar nem testar; mostrar só arquivo:linha e o tipo (ex.: "chave de API"), nunca parte do valor.
 4. Sem dados reais, sem produção, sem explorar falhas.
 
 ## Etapa 0 — Legislação vigente (pesquisar antes do código)
@@ -48,7 +48,8 @@ Ordem: Gravidade × Probabilidade; empate → menor esforço e menor risco.
 - **P2** processo/documentação (retenção, contratos, plano de incidentes)
 - **P3** boas práticas
 
-## Etapa 5 — Relatório `RELATORIO-LGPD.md` na raiz (única escrita permitida)
+## Etapa 5 — Relatório `RELATORIO-LGPD.md` na pasta de documentação (única escrita permitida)
+Fora do repositório do app: o relatório tem mapa de dados pessoais e falhas abertas, não vai para o git. Pasta = `Documentação:` do `CLAUDE.md` do projeto; sem indicação, `<pasta-pai-do-repo>\docs\<nome-do-repo>\`. Se ficar dentro do repositório e `git check-ignore` não a ignorar, avisar e perguntar antes de gravar.
 1. Resumo em 5 linhas · 2. Nota 🟢/🟡/🔴 com justificativa · 3. Os 3 problemas mais urgentes ·
 4. Tabela ranqueada: `# | Prioridade | Problema | Onde | Por que importa | Ganho | Risco ao implementar | Esforço | Como corrigir | Base legal` ·
 5. Detalhe por item (evidência, passo a passo, como testar, cuidados) · 6. O que já está bom · 7. O que não deu para verificar ·

@@ -10,7 +10,7 @@ Idioma: português. Respostas curtas e diretas. Projetos novos sempre em `C:\Wor
 ## Segurança e autorização
 - Commit, push, deploy, migration, exclusão, instalar/atualizar pacotes ou plugins: **só com pedido explícito**.
 - Banco, autenticação, RLS, storage ou dados de usuários: plano + backup + aprovação específica antes.
-- Nunca ler/exibir `.env`, chaves ou certificados; nunca testar credenciais (mostrar só 4 caracteres + `****`).
+- Nunca ler/exibir `.env`, chaves ou certificados; nunca testar credenciais; ao citar um segredo, só arquivo:linha e o tipo, nunca parte do valor.
 - Nunca acessar produção ou dados reais sem autorização. Backup antes de alterar configuração global.
 - Segredo (senha, token, webhook, connection string) nunca em `CLAUDE.md`, skill, memory, comentário ou teste: referenciar `secrets/<projeto>/` ou variável de ambiente.
 - Instruções conflitantes: parar e explicar o conflito.
@@ -30,7 +30,7 @@ Sessão **Sonnet** + advisor **Opus** (automático nas decisões) + subagentes *
 
 ## Código
 - Declarar suposições; perguntar se ambíguo. Definir critério de sucesso (build/teste) e validar antes de declarar pronto.
-- Simplicidade e mudança cirúrgica: plugin `ponytail`.
+- Simplicidade e mudança cirúrgica: o mínimo que resolve, sem refatorar o que não foi pedido.
 - Nunca afirmar que algo não existe sem Grep/Glob antes. Entrega incompleta é **PARCIAL**, nunca "concluído".
 - Projeto que exige blueprint antes de implementar: `/blueprint`. Dados em massa: `/alterar-dados`. Deploy: `/deploy-checklist`.
 

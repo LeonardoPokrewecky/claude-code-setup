@@ -9,27 +9,50 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 | Plugin | Escopo | Quando usar |
 |---|---|---|
 | `claude-code-setup` | Global, **desligado** | Só no bootstrap: ligar com `/plugin` para recomendar hooks, skills, MCPs e agentes; desligar depois |
-| `ponytail` | Global | Sempre ativo. `/ponytail-review` no diff, `/ponytail-audit` no repo, `/ponytail-debt` para atalhos adiados |
 | `context7` | Global | Antes de usar API de biblioteca/framework em que a versão importa |
 | `security-guidance` | Global | Sempre ativo: avisos ao editar e revisão do diff no fim |
-| `caveman` | Global, **desligado** | Só a pedido do usuário, em sessões longas de logs/testes |
 | `csharp-lsp` | Projeto | Repo com `*.csproj` / `*.sln` |
 | `typescript-lsp` | Projeto | Repo com `angular.json` / `tsconfig.json` |
 | `frontend-design` | Projeto | Repo Angular (camada `angular`): criar/refinar UI; respeitar o design system do projeto |
-| `marketing-skills` | Projeto | Landing page, copy, SEO, preço, CRO |
+| `marketing-skills` | Projeto (terceiro; marketplace só na camada `marketing`) | Landing page, copy, SEO, preço, CRO |
 | `supabase` | Projeto | Só se o projeto usar Supabase; começar somente leitura em dev |
 
 Regras:
 - Plugin de projeto vai em `<repo>\.claude\settings.json` → `enabledPlugins`. Nunca no global.
-- Modelos prontos: `project-templates\` do repositório `claude-code-setup` (perfil DEV: `C:\workspace\Clade md\claude-code-setup`; perfil Leonardo: `C:\Users\Leonardo\Desktop\Skill e pluggin`).
-- Marketplaces de terceiros com versão fixada (`ref` = tag no `settings.json`). Atualizar só depois de revisar o diff da tag nova: hooks, MCP, chamadas de rede.
-- `ponytail` (auditado em 2026-11-03, v5.3.3): roda `node` a cada prompt e lê a transcrição para métricas; sem rede por padrão. O "Task board" grava custo e o **nome/1º prompt** de cada tarefa em `~/.config/ponytail/band/`: desligar em `/plugin` → ponytail → configurar se os prompts tiverem dado de cliente. Nunca preencher `webhookUrl`.
-- Hook global `bloquear-segredos.ps1` (PreToolUse Bash/PowerShell): bloqueia comando que cite `.env`, `appsettings.<Ambiente>.json`, `*.pfx/.pem/.key/.vault`, `secrets/`, `*secrets*.json`, `.credentials.json`, `.ssh/`. Precisa de leitura legítima: o usuário roda com `! <comando>`.
+- Modelos prontos: `project-templates\` do repositório `claude-code-setup` (caminho do clone local em cada máquina; ex.: `C:\workspace\Clade md\claude-code-setup`).
+- Marketplaces de terceiros com versão fixada (`ref` = tag no `settings.json`). Tag pode ser movida pelo autor: antes de atualizar (ou ao reinstalar), conferir que o commit da tag é o mesmo auditado (`git ls-remote <repo> refs/tags/<tag>`) e revisar o diff da tag nova: hooks, MCP, chamadas de rede.
+- Plugins oficiais (`claude-plugins-official`) seguem a versão mais recente: risco aceito. `context7` envia a consulta a um serviço externo (Upstash): nunca colocar código, dado ou segredo de cliente na consulta, só nome/versão da biblioteca e a dúvida. `supabase` acessa o banco (começar somente leitura em dev); `serena` baixa e roda código via `uvx`.
+- Commit de referência da tag (obtido na API do GitHub em 2026-11-03): `marketingskills` `v2.14.0` = `5ffe077d2e59486d91c5ccaecbd74b6973c32308`. Antes de instalar: `git ls-remote https://github.com/coreyhaines31/marketingskills refs/tags/v2.14.0` deve devolver o mesmo SHA; diferente = tag movida, não instalar sem auditar de novo.
+- **Global sem código de terceiro.** Único marketplace de terceiro: `marketingskills`, só na camada `marketing`. Removidos em 2026-11-03: `caveman` (sem uso) e `ponytail` (hooks `node` a cada prompt lendo a transcrição; substituído por `/simplify`, `/code-review`, `/limpar-codigo`, `/revisar arquitetura` e `/divida`). Instalação antiga com ponytail: o merge grava `ponytail@ponytail: false`; para remover de vez, desinstalar em `/plugin` e apagar `~/.config/ponytail/`.
+- Hook global `bloquear-segredos.ps1` (PreToolUse Bash/PowerShell). Ignora aspas e escapes no meio do nome (`.e""nv`) e reconhece o nome colado a `:`, `>`, `&` e `,`.
+  - **Bloqueia** comando que cite: `.env`, `.env.*`, `.envrc` e `*.env`; `appsettings.<Ambiente>.json`; `local.settings.json`; `*.pfx/.p12/.p8/.pem/.key/.jks/.keystore/.vault/.kdbx/.ppk`; `secrets/`, `*secrets*.json/.yaml`, `UserSecrets`; `.credentials.json`, `.git-credentials`, `.claude.json`; `id_rsa` e similares; `.ssh`, `.aws`, `.azure`, `.kube`, `.docker/config.json` e `.config/gh`; `.npmrc/.netrc/.pgpass/.pypirc`.
+  - **Pede confirmação** para:
+    - comando que cite `.claude/settings*`, `hooks`, `agents`, `skills`, `commands` ou `CLAUDE.md`, inclusive a escrita por redirecionamento, `Set-Content`, `Copy-Item` etc.;
+    - `cd` para `.claude`;
+    - `merge-settings`/`instalar-arquivos` com `-Confirmar`;
+    - `-EncodedCommand` (e `/enc`), `FromBase64String`, `base64 -d` e `certutil -decode`;
+    - `Net.WebClient`, `HttpClient` e `Send-MailMessage`;
+    - despejo de variáveis de ambiente e `user-secrets list`;
+    - `web.config`;
+    - curinga que alcance um nome de segredo.
+  - Precisa de leitura legítima: o usuário roda com `! <comando>`. Limitações em README, "Limitações das proteções".
+- Autoproteção: o `settings.json` global e `~/.claude/hooks/` têm `deny` de Edit/Write. O settings de projeto e `~/.claude/CLAUDE.md`, `skills/` e `agents/` têm `ask`. Pelo shell, o hook pede confirmação. Não é garantia absoluta: nome montado em variável escapa do hook. Mudar só pelo `scripts\merge-settings.ps1` e pelo `scripts\instalar-arquivos.ps1`, rodados pelo usuário ou aprovados na confirmação do hook.
 - Plugin fora desta lista: revisar origem, licença, hooks e dados coletados e pedir aprovação.
 - **Descartados**: Claude-Mem (conflita com Auto Memory e envia dados a terceiros), Headroom (proxy incompatível com Desktop/advisor), OmniRoute (troca o endpoint e quebra o advisor), anthropics/skills (duplica skills já sincronizadas). **Pendente**: Task Observer.
 
+## Documentos gerados pelas skills
+Pasta de documentação = `Documentação:` do `CLAUDE.md` do projeto; sem indicação, `<pasta-pai-do-repo>\docs\<nome-do-repo>\` (**fora do repositório**).
+| Arquivo | Skill | Onde | Por quê |
+|---|---|---|---|
+| `backlog\*.md` | `/blueprint` | pasta de documentação | causa raiz e falhas antes da correção |
+| `RELATORIO-LGPD.md` | `/lgpd-audit` | pasta de documentação | mapa de dados pessoais e falhas abertas |
+| `HANDOFF.md` | `/session-handoff` | pasta de documentação | estado de trabalho (projeto sem Git: `.memory`) |
+| `DIVIDA.md` | `/divida` | raiz do projeto, versionado | sem segredo; útil para a equipe |
+
+Defesa extra: `project-templates\gitignore.claude` (segredos + gerados) somado ao `.gitignore` do projeto pelo `/project-bootstrap`.
+
 ## Camadas de projeto (`project-templates\`)
-Aplicadas por `scripts\merge-settings.ps1 -Target <repo>\.claude\settings.json -Layers a,b` (união sem apagar; `-DryRun` mostra antes; faz backup). Cada repo = `_base` + stack + opcionais.
+Aplicadas por `scripts\merge-settings.ps1 -Target <repo>\.claude\settings.json -Layers a,b` (união sem apagar; `-DryRun` mostra o resultado, os alertas e um código; gravar só com `-Confirmar <código>`; faz backup). Cada repo = `_base` + stack + opcionais.
 
 | Camada | Plugins / efeito | Detecção |
 |---|---|---|
@@ -62,14 +85,16 @@ Repo sem Git: a defesa é o `deny` da `_base` + `C:\Workspace\Memory\<Projeto>.m
 | `env-guide` | Este guia |
 | `security-review` (embutida) | Revisão de segurança das mudanças pendentes |
 | `code-review` (embutida) | Revisão de bugs no diff |
+| `simplify` (embutida) | Reuso, simplificação e eficiência do código alterado (aplica as correções: rodar só com diff revisável) |
 
 ## Skills sob demanda (`disable-model-invocation: true`: instaladas, custo fixo ~zero, só rodam quando você digita `/nome`)
 | Comando | Para quê |
 |---|---|
 | `/revisar <estilo> [alvo]` | Revisão somente leitura, uma lente: `seguranca`, `arquitetura`, `performance`, `testes`, `didatico`, `a11y`, `banco`, `deps`, `contrato`; alvo pode ser `branch:<nome>` (worktree isolada) |
-| `/blueprint <atividade>` | Documento em `backlog/` (blueprint, checklist, 5+ use cases, resultado) antes de implementar |
+| `/blueprint <atividade>` | Documento em `<docs>\backlog\`, fora do repositório (blueprint, checklist, 5+ use cases, resultado) antes de implementar |
 | `/alterar-dados <o quê>` | Update em massa/backfill com backup, dry-run, idempotência e regra canário |
 | `/deploy-checklist <componente>` | Antes/durante/depois do deploy com auditoria (systemd, NGINX, SHA-256, HTTP 200) |
+| `/divida registrar <atalho>` / `/divida listar` | Dívida técnica adiada de propósito em `DIVIDA.md` (arquivo:linha, motivo, risco, gatilho) |
 | `/medir-antes-depois <achado>` | Prova ou refuta uma correção medindo base × corrigido com o mesmo script |
 | `/criar-testes <alvo>` | Gera só arquivos de teste novos, no padrão do projeto |
 | `/explicar [tema]` | Mapa de módulo/fluxo para onboarding (só leitura) |

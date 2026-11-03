@@ -24,7 +24,7 @@ Data: 2026-11-02 · Status: **F2–F5b aplicadas; todas as fases concluídas (F6
 - **Manter** (leitura/baixo risco): `ls`, `where`, `git --version`, `npm --version`, `dotnet build`.
 - **Adicionar `ask`**: `git commit`, `git push`, `git reset --hard`, `git clean`, `npm install`/`npm i`, `dotnet add package`, `winget`, `Remove-Item`/`rm`.
 - **Adicionar `deny`** (além de `.env`, `.pfx`, `.pem`): `*.key`, `*.p12`, `**/secrets.json`, `**/appsettings.Production.json`.
-- **`additionalDirectories`**: remover as 4 entradas do ZapVendedor (pastas inexistentes) e `C:\Users\Leonardo`; o diretório de trabalho já é concedido por sessão.
+- **`additionalDirectories`**: remover as 4 entradas do ZapVendedor (pastas inexistentes) e a pasta de perfil do usuário (`C:\Users\<usuário>`); o diretório de trabalho já é concedido por sessão.
 
 ### G2 — `CLAUDE.md` global
 - Cortar a seção "Código" a **uma linha** apontando para o `ponytail` (D7), e "Tokens" a 2 linhas. Ganho estimado pequeno (~200 tokens/turno) — **medir**.

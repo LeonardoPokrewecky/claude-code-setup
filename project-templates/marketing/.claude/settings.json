@@ -1,4 +1,7 @@
 {
+  "extraKnownMarketplaces": {
+    "marketingskills": { "source": { "source": "github", "repo": "coreyhaines31/marketingskills", "ref": "v2.14.0" } }
+  },
   "enabledPlugins": {
     "marketing-skills@marketingskills": true
   }
