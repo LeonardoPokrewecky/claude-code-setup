@@ -1,6 +1,6 @@
 # Proposta — ambiente Claude Code (global + por tipo de projeto)
 
-Data: 2026-11-02 · Status: **F2–F5b aplicadas; só F6 (medição) pendente** · Itens de permissões/segurança: **rodar com sessão Opus** (regra do CLAUDE.md global).
+Data: 2026-11-02 · Status: **F2–F5b aplicadas; todas as fases concluídas (F6 medida)** · Itens de permissões/segurança: **rodar com sessão Opus** (regra do CLAUDE.md global).
 
 ## 1. Diagnóstico (evidências)
 
@@ -170,13 +170,13 @@ Critério de sucesso: JSON válido em todos os settings; `merge-settings.ps1` id
 - **Q5**: incluir **tudo que for útil para outros projetos**, em dois grupos (ver 3c).
 
 ## 7. Não verificado
-- Se `disable-model-invocation: true` remove a descrição do contexto nesta versão (confirmar com `/context` antes de generalizar).
-- Consumo real de tokens (sem `/context` ainda).
 - Se `anthropic-skills:*` e conectores podem ser desligados por settings.
 - Compatibilidade/qualidade de `playwright`, `serena`, `claude-md-management` (só li a lista do marketplace local).
 
 ## 8. Resultado (2026-11-02)
 - **Feito**: G2 (`CLAUDE.md` global enxuto; cópia instalada idêntica ao repo), G3 parcial (`claude-code-setup` desligado no global, ligar no bootstrap), G4 (docs com a realidade do disco), camadas + `merge-settings.ps1 -Layers/-DryRun`, skills sob demanda, `_base` aplicada nos dois projetos.
 - **F1 verificada**: o `settings.json` global tem `allow` só de leitura, `ask` (commit, push, reset --hard, clean, npm install/i, dotnet add package, winget, rm, Remove-Item), `deny` de segredos e nenhum `additionalDirectories`. (Registro anterior de F1 pendente estava errado.)
-- **Pendente**: **F6** — medir com `/context`; `playwright`/`serena` seguem opt-in.
+- **F6 medida** (`/context`, sessão Sonnet 5.5): fixo antes das mensagens ≈ 34k tokens (3,4% de 1M) — system prompt 2,8k, system tools 22,5k, MCP 0,7k, agentes 0,5k, `CLAUDE.md` global 1,4k, skills 6,7k. Ferramentas MCP carregam sob demanda (0 token).
+- **Confirmado**: as 8 skills novas + `lgpd-audit` + `session-handoff` (`disable-model-invocation`) não aparecem na lista de skills → custo fixo zero. Resolve a dúvida da seção 7.
+- **Decisão G3**: manter como está. As skills de maior custo (`dataviz` ~480, `code-review` ~400, `claude-api` ~360, `docs`/conectores sync ~300 cada) são embutidas ou do claude.ai; somam ~5k (0,5%) e não dá para desligar por settings (não verificado). Não vale o esforço. `playwright`/`serena` seguem opt-in, sem instalar.
 - **Ainda não verificado**: itens da seção 7.
