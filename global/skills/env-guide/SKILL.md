@@ -15,6 +15,7 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 | `caveman` | Global, **desligado** | Só a pedido do usuário, em sessões longas de logs/testes |
 | `csharp-lsp` | Projeto | Repo com `*.csproj` / `*.sln` |
 | `typescript-lsp` | Projeto | Repo com `angular.json` / `tsconfig.json` |
+| `frontend-design` | Projeto | Repo Angular (modelos `angular` e `dotnet-angular`): criar/refinar UI; respeitar o design system do projeto |
 | `marketing-skills` | Projeto | Landing page, copy, SEO, preço, CRO |
 | `supabase` | Projeto | Só se o projeto usar Supabase; começar somente leitura em dev |
 
