@@ -60,6 +60,19 @@ Repo sem Git: a defesa é o `deny` da `_base` + `C:\Workspace\Memory\<Projeto>.m
 | `security-review` (embutida) | Revisão de segurança das mudanças pendentes |
 | `code-review` (embutida) | Revisão de bugs no diff |
 
+## Skills sob demanda (`disable-model-invocation: true`: instaladas, custo fixo ~zero, só rodam quando você digita `/nome`)
+| Comando | Para quê |
+|---|---|
+| `/revisar <estilo> [alvo]` | Revisão somente leitura, uma lente: `seguranca`, `arquitetura`, `performance`, `testes`, `didatico`, `a11y`, `banco`, `deps` |
+| `/criar-testes <alvo>` | Gera só arquivos de teste novos, no padrão do projeto |
+| `/explicar [tema]` | Mapa de módulo/fluxo para onboarding (só leitura) |
+| `/limpar-codigo [caminho]` | Relatório de código morto/duplicado (só relatório) |
+| `/preparar-pr [base]` | Texto do PR a partir do diff; não faz commit/push |
+| `/adr <decisão>` | Registra decisão na seção Decisões do `CLAUDE.md` |
+| `/plano-migracao <tec> [versão]` | Plano de upgrade com riscos e rollback (só leitura) |
+| `/postmortem <incidente>` | Linha do tempo, causa raiz e ações |
+| `/lgpd-audit`, `/session-handoff` | Auditoria LGPD; handoff para outra sessão |
+
 ## Agentes globais
 | Agente | Modelo | Uso |
 |---|---|---|

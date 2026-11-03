@@ -1,6 +1,7 @@
 ---
 name: session-handoff
 description: Gera um resumo de passagem de bastão quando uma tarefa vai continuar em outra sessão — objetivo, estado, decisões, arquivos, testes e próximos passos. Use quando o usuário pedir handoff/resumo para continuar depois, ou antes de encerrar uma tarefa longa inacabada.
+disable-model-invocation: true
 ---
 
 # Session Handoff

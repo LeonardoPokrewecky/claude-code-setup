@@ -188,9 +188,10 @@ Projetos antigos (ZapVendedor, BuscadorContabil, DiscordTorLauncher, WAHA) foram
 | Tarefa comum | Sessão Sonnet; o advisor Opus entra sozinho nas decisões |
 | Tarefa crítica (arquitetura, banco, segurança, LGPD) | Trocar a sessão para Opus no seletor |
 | Planejar algo grande | Iniciar em **Plan mode** |
-| Revisar código | `/ponytail-review`, `/code-review`, `/security-review` |
-| Auditoria LGPD | "faça uma auditoria LGPD deste app" (skill `lgpd-audit`) |
-| Continuar amanhã | "faça um handoff da sessão" (skill `session-handoff`) |
+| Revisar código | `/revisar <estilo>` (seguranca, arquitetura, performance, testes, didatico, a11y, banco, deps); `/ponytail-review`, `/code-review`, `/security-review` |
+| Outras sob demanda | `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem` |
+| Auditoria LGPD | `/lgpd-audit` |
+| Continuar amanhã | `/session-handoff` |
 | Muitos logs/testes longos | `/caveman` para respostas curtas; `/caveman off` para voltar |
 | Desligar advisor | `/advisor off` |
 
