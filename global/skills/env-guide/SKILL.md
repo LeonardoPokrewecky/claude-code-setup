@@ -19,8 +19,6 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 | `marketing-skills` | Projeto | Landing page, copy, SEO, preço, CRO |
 | `supabase` | Projeto | Só se o projeto usar Supabase; começar somente leitura em dev |
 
-Pendente no global: permissões do `settings.json` (`npm install`/`winget` em `allow`, sem `ask`) — ver `PROPOSTA.md` F1.
-
 Regras:
 - Plugin de projeto vai em `<repo>\.claude\settings.json` → `enabledPlugins`. Nunca no global.
 - Modelos prontos: `project-templates\` do repositório de configuração (`C:\Users\Leonardo\Desktop\Skill e pluggin`).

@@ -1,6 +1,6 @@
 # Proposta — ambiente Claude Code (global + por tipo de projeto)
 
-Data: 2026-11-02 · Status: **F2–F5b aplicadas; F1 (permissões) e F6 (medição) pendentes** · Itens de permissões/segurança: **rodar com sessão Opus** (regra do CLAUDE.md global).
+Data: 2026-11-02 · Status: **F2–F5b aplicadas; só F6 (medição) pendente** · Itens de permissões/segurança: **rodar com sessão Opus** (regra do CLAUDE.md global).
 
 ## 1. Diagnóstico (evidências)
 
@@ -152,7 +152,7 @@ Regras: cada skill sob demanda é somente leitura por padrão; quem escreve (`/c
 
 | Fase | Conteúdo | Risco | Exige | Status |
 |---|---|---|---|---|
-| F1 | G1 permissões | **alto** (segurança) | Opus + backup do `settings.json` + aprovação | pendente |
+| F1 | G1 permissões | **alto** (segurança) | Opus + backup do `settings.json` + aprovação | feito (`settings.json` global já com `ask`/`deny` e sem `additionalDirectories`) |
 | F2 | G2 CLAUDE.md + sync da cópia instalada | baixo | backup `~\.claude\CLAUDE.md` | feito (`c28663a`) |
 | F3 | Reestruturar `project-templates` em camadas + `merge-settings.ps1` | médio | teste em pasta temporária (nunca em projeto real) | feito (`716d693`) |
 | F4 | Atualizar `project-bootstrap`, `env-guide`, README (D1) | baixo | Q1 respondida | feito (`7b8bed9`) |
@@ -177,5 +177,6 @@ Critério de sucesso: JSON válido em todos os settings; `merge-settings.ps1` id
 
 ## 8. Resultado (2026-11-02)
 - **Feito**: G2 (`CLAUDE.md` global enxuto; cópia instalada idêntica ao repo), G3 parcial (`claude-code-setup` desligado no global, ligar no bootstrap), G4 (docs com a realidade do disco), camadas + `merge-settings.ps1 -Layers/-DryRun`, skills sob demanda, `_base` aplicada nos dois projetos.
-- **Pendente**: **F1** — o `settings.json` global ainda tem `npm install:*` e `winget:*` em `allow` e nenhum `ask` (D2/D4 seguem abertos; fazer em sessão Opus com backup). **F6** — medir com `/context`; `playwright`/`serena` seguem opt-in.
+- **F1 verificada**: o `settings.json` global tem `allow` só de leitura, `ask` (commit, push, reset --hard, clean, npm install/i, dotnet add package, winget, rm, Remove-Item), `deny` de segredos e nenhum `additionalDirectories`. (Registro anterior de F1 pendente estava errado.)
+- **Pendente**: **F6** — medir com `/context`; `playwright`/`serena` seguem opt-in.
 - **Ainda não verificado**: itens da seção 7.
