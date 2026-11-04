@@ -26,7 +26,8 @@ trap { Write-Confirmar "falha interna do hook: $($_.Exception.Message)" }
 try { [Console]::InputEncoding = [Text.UTF8Encoding]::new($false) } catch { }
 
 try {
-    $entrada = [Console]::In.ReadToEnd() | ConvertFrom-Json
+    # PowerShell 5.1 pode entregar o stdin com BOM (U+FEFF); sem o Trim o parse falha e o hook libera tudo.
+    $entrada = [Console]::In.ReadToEnd().TrimStart([char]0xFEFF) | ConvertFrom-Json
     $comando = [string]$entrada.tool_input.command
 } catch { exit 0 }
 if ([string]::IsNullOrWhiteSpace($comando)) { exit 0 }
