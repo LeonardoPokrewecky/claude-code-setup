@@ -1,6 +1,6 @@
 ---
 name: lgpd-audit
-description: Auditoria LGPD completa e somente leitura de um app (web/mobile/API) — pesquisa a legislação vigente, mapeia dados pessoais, avalia 11 áreas, prioriza P0–P3 e gera RELATORIO-LGPD.md (fora do repositório) em linguagem simples. Use quando pedirem auditoria/avaliação LGPD, privacidade ou adequação à lei de proteção de dados.
+description: Auditoria LGPD completa e somente leitura de um app (web/mobile/API) — pesquisa a legislação vigente, mapeia dados pessoais, avalia 11 áreas, prioriza P0–P3 e gera RELATORIO-LGPD.md (fora do repositório) em linguagem simples. Só roda com /lgpd-audit.
 disable-model-invocation: true
 ---
 

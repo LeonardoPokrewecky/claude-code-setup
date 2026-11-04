@@ -13,7 +13,10 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 | `security-guidance` | Global | Sempre ativo: avisos ao editar e revisão do diff no fim |
 | `csharp-lsp` | Projeto | Repo com `*.csproj` / `*.sln` |
 | `typescript-lsp` | Projeto | Repo com `angular.json` / `tsconfig.json` |
+| `pyright-lsp` | Projeto | Repo Python (camada `python`) |
 | `frontend-design` | Projeto | Repo Angular (camada `angular`): criar/refinar UI; respeitar o design system do projeto |
+| `playwright` | Projeto (opt-in) | Testar UI no navegador; só a pedido |
+| `serena` | Projeto (opt-in) | Navegação por símbolo; exige `uvx`; só a pedido |
 | `marketing-skills` | Projeto (terceiro; marketplace só na camada `marketing`) | Landing page, copy, SEO, preço, CRO |
 | `supabase` | Projeto | Só se o projeto usar Supabase; começar somente leitura em dev |
 

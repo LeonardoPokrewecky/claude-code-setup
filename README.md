@@ -46,18 +46,12 @@ claude-code-setup\
 
 ### Plugins
 
+Plugins em uso (globais e por projeto, com escopo e quando ativar): tabela "Plugins" em `global\skills\env-guide\SKILL.md` — fonte única. Aqui fica só o registro do que foi removido ou descartado:
+
 | Plugin | Origem | Escopo | Status |
 |---|---|---|---|
-| claude-code-setup | oficial Anthropic | global | **desligado** (ligar só no bootstrap) |
-| context7 | oficial Anthropic | global | ativo |
-| security-guidance | oficial Anthropic | global | ativo |
 | ponytail | DietrichGebert/ponytail | — | **removido** (2026-11-03): substituído por `/simplify`, `/code-review`, `/limpar-codigo`, `/revisar arquitetura` e `/divida` |
-| csharp-lsp / typescript-lsp / pyright-lsp | oficial Anthropic | projeto | por stack (camadas `dotnet`, `angular`/`node-ts`, `python`) |
-| frontend-design | oficial Anthropic | projeto (camada `angular`) | repos Angular |
-| playwright / serena | oficial Anthropic | projeto (camadas opt-in) | só a pedido; `serena` exige `uvx` |
-| marketing-skills | coreyhaines31/marketingskills (MIT) | projeto (camada `marketing`, que registra o marketplace) | quando houver marketing |
 | caveman | JuliusBrussee/caveman | — | **removido** (2026-11-03, sem uso) |
-| supabase | oficial Anthropic | projeto | só se usar Supabase |
 | Karpathy skills | multica-ai | — | **não instalado**: 4 princípios já estão no CLAUDE.md |
 | anthropics/skills | Anthropic | — | **não instalado**: duplica skills já sincronizadas (docx, pdf, pptx, xlsx) |
 | Claude-Mem | thedotmack | — | **descartado**: conflita com Auto Memory e envia conversas a terceiros |

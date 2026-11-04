@@ -34,7 +34,7 @@ Sessão **Sonnet** + advisor **Opus** (automático nas decisões) + agentes **Ha
 - Declarar suposições; perguntar se ambíguo. Definir critério de sucesso (build/teste) e validar antes de declarar pronto.
 - Simplicidade e mudança cirúrgica: o mínimo que resolve, sem refatorar o que não foi pedido.
 - Nunca afirmar que algo não existe sem Grep/Glob antes. Entrega incompleta é **PARCIAL**, nunca "concluído".
-- Projeto que exige blueprint antes de implementar: `/blueprint`. Dados em massa: `/alterar-dados`. Deploy: `/deploy-checklist`.
+- Skills sob demanda só rodam quando o usuário digita o comando: sugerir `/blueprint` (projeto que exige blueprint antes de implementar), `/alterar-dados` (dados em massa) e `/deploy-checklist` (deploy).
 
 ## Tokens
 - Grep antes de Read; ler só o trecho necessário; referenciar `arquivo:linha`; preservar logs e stack traces quando forem evidência. Nunca economizar às custas de segurança, testes ou precisão.
@@ -43,7 +43,7 @@ Sessão **Sonnet** + advisor **Opus** (automático nas decisões) + agentes **Ha
 ## Memória
 - **Auto Memory nativa**: preferências, correções e fatos duradouros.
 - Contexto fixo do projeto (stack, arquitetura, armadilhas): `CLAUDE.md` do projeto.
-- Repo com Git: sem log de atividades (o Git registra). Continuar em outra sessão: skill `session-handoff`.
+- Repo com Git: sem log de atividades (o Git registra). Continuar em outra sessão: sugerir `/session-handoff` ao usuário.
 - **Projeto sem Git**: manter `C:\Workspace\Memory\<Projeto>.memory`, registrando ao fim de cada tarefa (data, o que foi feito, arquivos). Acima de 800 linhas, compactar mantendo só decisões e armadilhas. Sugerir `git init`.
 
 ## Fluxo de tarefa
