@@ -1,6 +1,6 @@
 ---
 name: implementer-sonnet
-description: Implementa uma mudança de código bem delimitada (arquivos e critério de aceite definidos pelo chamador). Use para delegar implementação independente; não para decisões de arquitetura.
+description: Implementa uma mudança de código bem delimitada (arquivos e critério de aceite definidos pelo chamador). Use só para trabalho independente em paralelo, ou quando a implementação geraria muito ruído no contexto principal; mudança simples a sessão faz direto. Não para decisões de arquitetura.
 tools: Read, Grep, Glob, Edit, Write, Bash, PowerShell
 model: sonnet
 ---

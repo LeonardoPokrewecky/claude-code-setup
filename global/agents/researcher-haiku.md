@@ -1,6 +1,6 @@
 ---
 name: researcher-haiku
-description: Pesquisa somente leitura em documentação, web e código para responder perguntas factuais ou levantar opções. Use para pesquisa de bibliotecas, APIs, versões e exploração de repositório antes de decidir algo.
+description: Pesquisa somente leitura em documentação e web para responder perguntas factuais ou levantar opções. Use para pesquisa de bibliotecas, APIs e versões antes de decidir algo. Busca no código do projeto é com o Explore.
 tools: Read, Grep, Glob, WebFetch, WebSearch
 model: haiku
 ---

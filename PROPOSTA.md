@@ -1,5 +1,7 @@
 # Proposta — ambiente Claude Code (global + por tipo de projeto)
 
+> **Arquivado (2026-11-04).** Registro histórico das decisões de 2026-11-02; não descreve o estado atual. Desde então: `ponytail` e `caveman` foram removidos, as camadas opcionais ficaram `supabase`/`marketing`/`playwright`/`serena` (sem `_opt-*`/`_overlay-sem-git`) e o `merge-settings.ps1` une todos os arrays. Estado atual: `README.md` e skill `env-guide`.
+
 Data: 2026-11-02 · Status: **F2–F5b aplicadas; todas as fases concluídas (F6 medida)** · Itens de permissões/segurança: **rodar com sessão Opus** (regra do CLAUDE.md global).
 
 ## 1. Diagnóstico (evidências)
@@ -158,7 +160,7 @@ Regras: cada skill sob demanda é somente leitura por padrão; quem escreve (`/c
 | F4 | Atualizar `project-bootstrap`, `env-guide`, README (D1) | baixo | Q1 respondida | feito (`7b8bed9`) |
 | F5 | Aplicar nos projetos reais (PlanoCarreiraDev, PlanoCarreiraDev.Frontend: CLAUDE.md + `_base`) | baixo | adopt-existing, um por vez | feito (settings com `_base` + `.bak-20261102`; Frontend já tem `CLAUDE.md`) |
 | F5b | Criar `/revisar <estilo>` (3b) + marcar `lgpd-audit`/`session-handoff` como sob demanda | baixo | quais estilos/lentes (Q5); testar em pasta temporária | feito (`c33ff34`) |
-| F6 | Medir com `/context` e decidir G3 + opcionais (`serena`, `playwright`) | — | autorização para instalar | pendente |
+| F6 | Medir com `/context` e decidir G3 + opcionais (`serena`, `playwright`) | — | autorização para instalar | feito (`45a6834`; ver §8) |
 
 Critério de sucesso: JSON válido em todos os settings; `merge-settings.ps1` idempotente (rodar 2× = mesmo resultado); `/context` mostra menos tokens fixos que o baseline; busca no front sem `.git` rápida.
 

@@ -10,15 +10,16 @@ Repositório versionado com toda a configuração do Claude Code (Desktop → ab
 ## 1. O que tem aqui
 
 ```text
-Skill e pluggin\
+claude-code-setup\
 ├── README.md                     ← este guia
+├── PROPOSTA.md                   ← registro histórico da revisão de 2026-11-02 (arquivado)
 ├── Auditoria LGPD.pdf            ← documento-base da skill lgpd-audit
 ├── global\                       ← vai para %USERPROFILE%\.claude\
 │   ├── CLAUDE.md                 ← instruções globais (curto, carregado em toda sessão)
 │   ├── settings.merge.json       ← modelos, advisor, plugins, bloqueio de .env
 │   ├── agents\                   ← 6 agentes (Explore, researcher, reviewer, test-validator, documentation, implementer)
 │   ├── hooks\                    ← bloquear-segredos.ps1 (PreToolUse: segredo via Bash/PowerShell)
-│   └── skills\                   ← env-guide, project-bootstrap, lgpd-audit, session-handoff + sob demanda (/revisar, /blueprint, /alterar-dados, /deploy-checklist, /medir-antes-depois, /divida…)
+│   └── skills\                   ← env-guide, project-bootstrap + sob demanda (/lgpd-audit, /session-handoff, /revisar, /blueprint, /alterar-dados, /deploy-checklist, /medir-antes-depois, /divida…)
 ├── project-templates\            ← modelos para cada projeto
 │   ├── CLAUDE.project.md         ← modelo de CLAUDE.md de projeto (com a linha "Documentação:")
 │   ├── gitignore.claude          ← linhas de .gitignore para projetos: segredos + arquivos gerados pelas skills
@@ -36,7 +37,7 @@ Skill e pluggin\
 
 | Tema | Decisão |
 |---|---|
-| Modelos | Sessão **Sonnet** + advisor **Opus** (consultado nas decisões) + subagentes **Haiku**. Equivale a `claude --advisor opus` com subagentes Haiku, só que permanente |
+| Modelos | Sessão **Sonnet** + advisor **Opus** (consultado nas decisões) + agentes **Haiku** com `model:` próprio. `Plan` e `general-purpose` embutidos herdam o Sonnet (sem `CLAUDE_CODE_SUBAGENT_MODEL`) |
 | Tarefa crítica | Trocar a sessão para Opus no seletor de modelo do Desktop |
 | Memória | Auto Memory nativa + `CLAUDE.md` do projeto. `.memory` só para projetos **sem Git** |
 | Git ao abrir projeto | `git fetch` + aviso (sem `pull` automático) |
@@ -51,7 +52,9 @@ Skill e pluggin\
 | context7 | oficial Anthropic | global | ativo |
 | security-guidance | oficial Anthropic | global | ativo |
 | ponytail | DietrichGebert/ponytail | — | **removido** (2026-11-03): substituído por `/simplify`, `/code-review`, `/limpar-codigo`, `/revisar arquitetura` e `/divida` |
-| csharp-lsp / typescript-lsp | oficial Anthropic | projeto | por stack |
+| csharp-lsp / typescript-lsp / pyright-lsp | oficial Anthropic | projeto | por stack (camadas `dotnet`, `angular`/`node-ts`, `python`) |
+| frontend-design | oficial Anthropic | projeto (camada `angular`) | repos Angular |
+| playwright / serena | oficial Anthropic | projeto (camadas opt-in) | só a pedido; `serena` exige `uvx` |
 | marketing-skills | coreyhaines31/marketingskills (MIT) | projeto (camada `marketing`, que registra o marketplace) | quando houver marketing |
 | caveman | JuliusBrussee/caveman | — | **removido** (2026-11-03, sem uso) |
 | supabase | oficial Anthropic | projeto | só se usar Supabase |
@@ -126,6 +129,7 @@ Dois passos obrigatórios:
 - O `-DryRun` mostra o JSON final, os **alertas** e um código. Valores com nome de segredo (token, key, password, auth…) aparecem como `***`. Toda entrada nova gera alerta, exceto `deny`, `ask`, plugin desligado e `$schema`. Também avisa se o hook aponta para um arquivo que não existe.
 - Só grava com o código. Leia cada alerta antes de confirmar: um alerta inesperado é sinal de alteração indevida no pacote.
 - Estrutura inválida (tipo errado em `permissions`, `env`, `hooks` ou `enabledPlugins`) é recusada antes de gravar.
+- O merge só **adiciona**: chave removida do pacote continua no `settings.json` instalado. Se o seu tiver `env.CLAUDE_CODE_SUBAGENT_MODEL` (versões anteriores), remova manualmente — ela colocava `Plan` e `general-purpose` em Haiku.
 ```powershell
 powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -DryRun
 powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -Confirmar <código>
@@ -142,7 +146,7 @@ powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -Con
 | `/advisor` | Advisor = Opus |
 | `/plugin` | context7, security-guidance ativos; claude-code-setup desativado; nenhum plugin de terceiro |
 | `/agents` | Explore, researcher-haiku, reviewer-haiku, test-validator-haiku, documentation-haiku, implementer-sonnet |
-| "quais skills globais você tem?" | env-guide, project-bootstrap, lgpd-audit, session-handoff |
+| "quais skills globais você tem?" | env-guide, project-bootstrap (as sob demanda, como `/lgpd-audit` e `/session-handoff`, não aparecem na lista: só rodam quando você digita `/nome`) |
 
 Se um plugin oficial não baixar sozinho, instale manualmente (ex.: `/plugin install context7@claude-plugins-official`).
 Instalação antiga com `ponytail`: o merge grava `"ponytail@ponytail": false` (desliga o plugin). Para remover de vez: `/plugin` → desinstalar, apagar `~/.config/ponytail/` e tirar `ponytail` de `extraKnownMarketplaces` do `settings.json` (o merge só soma, não remove chaves).
@@ -200,10 +204,7 @@ Camadas: sempre `_base` + a(s) da stack. Tabela completa em `global\skills\env-g
 Crie em `C:\Workspace\<Nome>`, rode `git init` e peça: **"use a skill project-bootstrap no modo new-project"**.
 
 ### Projetos atuais
-| Projeto | Git | Camadas | Observação |
-|---|---|---|---|
-| PlanoCarreiraDev | **não** | `_base,dotnet` | tem `CLAUDE.md` e `.claude\settings.json`; falta `_base`; usa `.memory` |
-| PlanoCarreiraDev.Frontend | **não** | `_base,angular` | sem `CLAUDE.md` nem `.claude\` |
+Estado de cada projeto (stack, camadas aplicadas, Git, `.memory`): tabela "Projetos atuais" em `global\skills\env-guide\SKILL.md` — fonte única, para não divergir.
 
 Projetos antigos (ZapVendedor, BuscadorContabil, DiscordTorLauncher, WAHA) foram removidos do uso em 2026-11-02.
 
@@ -248,6 +249,7 @@ Backups automáticos dos scripts: `~\.claude\settings.json.bak-AAAAMMDD-HHmmss` 
 - [x] Limpar as permissões antigas do `settings.json` global (F1, 2026-11-02; backup em `~\.claude\backups\F1-*`).
 - [x] Fixar versão (tag) dos marketplaces de terceiros (2026-11-03: ponytail v5.3.3, caveman v4.0.1, marketingskills v2.14.0).
 - [ ] Aplicar este setup no perfil **DEV** (hoje: `settings.json` sem `deny`/`ask` e com `Read(//c//**)`); a F1 foi feita só no perfil Leonardo.
+  **Antes do Passo 2 no DEV:** o `~\.claude\CLAUDE.md` instalado ali é o padrão MonitorContabil (~250 linhas: blueprint, `.memory`/history, deploy, Mongo/EF, firewall, operação remota). O Passo 2 o substitui inteiro. Parte já virou skill (`/blueprint`, `/deploy-checklist`, `/alterar-dados`); o restante (frontend, EF Core, túnel/operação remota, comunicação) precisa ir para o `CLAUDE.md` dos repos do MonitorContabil antes. Backup do Passo 1 obrigatório.
 - [ ] Validar numa sessão real, depois de instalar (2026-11-03: testado só fora do harness, PowerShell 5.1, 88 casos do hook):
   1. o hook roda (`echo .env` pela ferramenta Bash e pela PowerShell → bloqueado; prova que `$HOME` expande);
   2. `Read` de `~/.ssh/config` e de `~/.claude/.credentials.json` com a sessão aberta num projeto → negado;

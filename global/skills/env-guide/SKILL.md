@@ -76,12 +76,10 @@ Repo sem Git: a defesa é o `deny` da `_base` + `C:\Workspace\Memory\<Projeto>.m
 | PlanoCarreiraDev.Frontend | Angular (sem Git) | `_base`, `angular` | `CLAUDE.md` + `.claude\settings.json` com `_base`+`angular` aplicados; sem `.memory` |
 | LeonardoPokrewecky | README de perfil (Git) | nenhuma | — |
 
-## Skills globais
+## Skills globais (invocadas automaticamente pelo modelo)
 | Skill | Quando usar |
 |---|---|
 | `project-bootstrap` | Projeto novo ou adoção de projeto existente |
-| `lgpd-audit` | Auditoria LGPD somente leitura de um app |
-| `session-handoff` | Tarefa que vai continuar em outra sessão |
 | `env-guide` | Este guia |
 | `security-review` (embutida) | Revisão de segurança das mudanças pendentes |
 | `code-review` (embutida) | Revisão de bugs no diff |
@@ -109,8 +107,8 @@ Repo sem Git: a defesa é o `deny` da `_base` + `C:\Workspace\Memory\<Projeto>.m
 | Agente | Modelo | Uso |
 |---|---|---|
 | `Explore` | haiku | Busca ampla no código (substitui o Explore embutido) |
-| `researcher-haiku` | haiku | Pesquisa em docs/web e no código, somente leitura |
+| `researcher-haiku` | haiku | Pesquisa em docs/web, somente leitura (código: `Explore`) |
 | `reviewer-haiku` | haiku | Checagem de diff contra padrões e riscos óbvios |
 | `test-validator-haiku` | haiku | Rodar build/testes autorizados e resumir falhas |
-| `documentation-haiku` | haiku | README, docs, resumos |
-| `implementer-sonnet` | sonnet | Implementação delegada, escopo fechado |
+| `documentation-haiku` | haiku | README, docs, resumos — só `.md`, nunca código |
+| `implementer-sonnet` | sonnet | Implementação delegada, escopo fechado, só em paralelo ou com muito ruído |

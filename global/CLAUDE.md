@@ -21,9 +21,11 @@ Idioma: português. Respostas curtas e diretas. Projetos novos sempre em `C:\Wor
 - Plugins, skills, agentes e o que ativar em cada projeto: skill `env-guide`.
 
 ## Modelos
-Sessão **Sonnet** + advisor **Opus** (automático nas decisões) + subagentes **Haiku** — configurado no `settings.json`.
+Sessão **Sonnet** + advisor **Opus** (automático nas decisões) + agentes **Haiku** com `model:` próprio. Agentes embutidos sem modelo (`Plan`, `general-purpose`) herdam o Sonnet.
 - Tarefa crítica (arquitetura, segurança, banco, LGPD): avisar o usuário para trocar a sessão para Opus.
-- Haiku: pesquisa, leitura, docs, testes, checagens simples. Nunca decide arquitetura, segurança, banco ou LGPD.
+- Mesmo problema sem solução após 2 tentativas: parar e sugerir troca da sessão para Opus (o advisor não substitui o contexto acumulado).
+- Haiku: pesquisa, leitura, docs, testes, checagens simples. Nunca decide arquitetura, segurança, banco ou LGPD. Nunca edita código.
+- Delegar ao Haiku quando o volume a ler (logs, saída de build, muitos arquivos, HTML) for muito maior que o resultado. Busca pontual (um símbolo, um método): o próprio Sonnet com Grep.
 - Implementação delegada: `implementer-sonnet`. Resultado Haiku insuficiente → refazer com Sonnet.
 - Não delegar tarefa trivial; nunca dois agentes editando os mesmos arquivos.
 - Ao delegar: objetivo, arquivos permitidos, restrições, resposta em `caminho:linha` (sem copiar arquivos).
