@@ -80,20 +80,14 @@
       "Read(~/.config/gh/**)",
       "Read(~/AppData/Roaming/Microsoft/UserSecrets/**)",
       "Edit(~/.claude/settings*.json)",
-      "Write(~/.claude/settings*.json)",
-      "Edit(~/.claude/hooks/**)",
-      "Write(~/.claude/hooks/**)"
+      "Edit(~/.claude/hooks/**)"
     ],
     "ask": [
       "Read(**/web.config)",
       "Edit(**/.claude/settings*.json)",
-      "Write(**/.claude/settings*.json)",
       "Edit(~/.claude/CLAUDE.md)",
-      "Write(~/.claude/CLAUDE.md)",
       "Edit(~/.claude/skills/**)",
-      "Write(~/.claude/skills/**)",
       "Edit(~/.claude/agents/**)",
-      "Write(~/.claude/agents/**)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git reset --hard:*)",
