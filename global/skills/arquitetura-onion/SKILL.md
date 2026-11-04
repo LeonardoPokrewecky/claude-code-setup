@@ -42,7 +42,31 @@ As referências apontam sempre para dentro.
 - `Workers` chama casos de uso da `Application` e não tem regra de negócio própria.
 - A regra vale por **teste**: `<Produto>.Architecture.Tests` (ex.: NetArchTest) falha se aparecer uma referência proibida.
 
-## 4. Pastas: o mesmo caminho em todos os projetos
+## 4. Pastas
+
+### Solução: pastas numeradas por camada
+
+```
+<repo>/
+├── <Produto>.slnx
+├── src/
+│   ├── 01-api/            <Produto>.Api/
+│   ├── 02-application/    <Produto>.Application/
+│   ├── 03-core/           <Produto>.Core/, <Produto>.Contracts/
+│   ├── 04-infra/          <Produto>.Infra/ (e Infra.Data.<Banco>/, Integrations.<Sistema>/ quando separar)
+│   ├── 05-workers/        <Produto>.Workers/ (só quando separar)
+│   └── 06-clients/        desktop e outros clientes dos contratos
+├── tests/                 <Produto>.Core.Tests/, ..., <Produto>.Architecture.Tests/
+└── tools/                 scripts e utilitários de desenvolvimento
+```
+
+- A numeração mantém a ordem fixa no Explorer e no IDE: do host para o centro, depois os consumidores.
+- Nome da pasta: `NN-camada`, minúsculo, sem espaço (espaço exige aspas em CLI, Docker, CI e scripts de deploy).
+- `src/` só tem código que vai para produção; testes em `tests/` e utilitários em `tools/`, na raiz.
+- **Pasta física = pasta da solution** (mesma árvore no Explorer e no `.slnx`). Cada projeto fica na sua própria pasta, com o nome do projeto.
+- A pasta numerada só existe quando tem projeto: buraco na numeração é normal (sem `05-workers` enquanto os jobs rodam na Api). Os números não mudam quando uma pasta nasce.
+
+### Dentro de cada projeto: o mesmo caminho em todos
 
 Toda funcionalidade fica em `<Modulo>/<X>/` em **todos** os projetos, com o mesmo nome de módulo. Assim, uma busca pela pasta ou pelo namespace encontra as peças de uma vez.
 
@@ -121,7 +145,7 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 ## 8. Projeto existente fora deste padrão
 
 - Seguir o padrão que o projeto já usa no módulo em questão; registrar as divergências na seção Arquitetura do `CLAUDE.md` do projeto.
-- Melhorias deste padrão entram **só em código novo** e só com OK do usuário (ex.: filtro tipado num módulo novo, teste de DI). Nunca mover projetos, pastas, namespaces ou renomear sufixos em massa sem pedido.
+- Melhorias deste padrão entram **só em código novo** e só com OK do usuário (ex.: filtro tipado num módulo novo, teste de DI). Nunca mover projetos, pastas, namespaces ou renomear sufixos em massa sem pedido. Adotar as pastas numeradas num projeto existente quebra caminhos de deploy, CI, Dockerfile e scripts: só com plano que liste e atualize cada um.
 - Migração estrutural: propor com `/plano-migracao`, módulo a módulo.
 
 ## 9. Fatia vertical de uma funcionalidade nova (checklist)
@@ -151,4 +175,5 @@ Apontar `arquivo:linha` e a camada correta quando aparecer:
 - base abstrata acumulando dependências;
 - app service acima do limite da seção 6;
 - projeto separado sem motivo da seção 2;
+- projeto na pasta numerada errada, pasta com espaço ou teste dentro de `src/`;
 - worker com regra de negócio própria.
