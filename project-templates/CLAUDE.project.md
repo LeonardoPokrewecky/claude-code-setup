@@ -15,6 +15,7 @@ Documentação: `<pasta-pai-do-repo>\docs\<nome-do-repo>\` (fora do repositório
 ## Arquitetura
 - Camadas/pastas e responsabilidade de cada uma.
 - Regras de dependência entre camadas.
+- Backend .NET novo: seguir a skill `arquitetura-onion`; registrar aqui só o que divergir dela.
 
 ## Padrões
 - Nomenclatura, tratamento de erros, validação, logs.

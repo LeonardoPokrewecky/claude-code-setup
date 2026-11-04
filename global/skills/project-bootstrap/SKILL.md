@@ -22,6 +22,7 @@ Nunca sobrescrever, apagar ou renomear nada. Nada é criado sem aprovação expl
 - **Pasta de documentação** (blueprints, relatório LGPD, handoff): propor `<pasta-pai-do-repo>\docs\<nome-do-repo>\` na linha `Documentação:` do `CLAUDE.md`; criar a pasta só após OK.
 - **`.gitignore`**: somar as linhas de `project-templates\gitignore.claude` que faltam no `.gitignore` do projeto (comparar linha a linha lendo os dois em UTF-8 — `Get-Content -Encoding UTF8`; no PowerShell 5.1 o padrão é ANSI e linha acentuada duplica a cada rodada —, sem duplicar, sem reordenar o existente); mostrar só as linhas novas. Sem Git: não criar.
 - Skills/agentes específicos só se forem exclusivos deste projeto.
+- Backend .NET: comparar os projetos/pastas com a skill `arquitetura-onion`; projeto novo nasce nesse padrão, projeto existente só registra as divergências na seção Arquitetura (sem mover nada).
 - Projeto existente: mostrar o que será preservado e o que será adicionado, arquivo por arquivo.
 - Se existir `<pasta de memória>\<Projeto>.memory` (pasta em `~/.claude/maquina.md`): propor levar stack, decisões e armadilhas para o `CLAUDE.md` do projeto.
 
