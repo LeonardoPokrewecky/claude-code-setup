@@ -218,6 +218,9 @@ $faltam   # revisar antes de seguir
 # ...e, conferidas, somar ao final sem grudar na última linha:
 if ((Test-Path $gi) -and (Get-Content $gi -Raw) -notmatch '\n$') { Add-Content $gi -Value '' -Encoding utf8 }
 Add-Content $gi -Value $faltam -Encoding utf8
+# 5. só em repositório de cliente (Claude fora do Git sem tocar no .gitignore versionado):
+$ex = "$proj\.git\info\exclude"; $atual = if (Test-Path $ex) { Get-Content $ex -Encoding UTF8 } else { @() }
+'CLAUDE.md', 'CLAUDE.local.md', '.claude/' | Where-Object { $_ -notin $atual } | ForEach-Object { Add-Content $ex -Value $_ -Encoding utf8 }
 ```
 Troque `_base,dotnet` pelas camadas da stack (tabela da seção 2.1). Depois, registre o projeto na tabela do `maquina.md`.
 

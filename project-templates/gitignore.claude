@@ -41,3 +41,6 @@ HANDOFF.md
 RELATORIO-LGPD.md
 *.bak-*
 .claude/settings.local.json
+
+# --- claude-code-setup: arquivos pessoais do Claude (nunca versionar) ---
+CLAUDE.local.md
