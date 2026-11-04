@@ -182,3 +182,28 @@ Critério de sucesso: JSON válido em todos os settings; `merge-settings.ps1` id
 - **Confirmado**: as 8 skills novas + `lgpd-audit` + `session-handoff` (`disable-model-invocation`) não aparecem na lista de skills → custo fixo zero. Resolve a dúvida da seção 7.
 - **Decisão G3**: manter como está. As skills de maior custo (`dataviz` ~480, `code-review` ~400, `claude-api` ~360, `docs`/conectores sync ~300 cada) são embutidas ou do claude.ai; somam ~5k (0,5%) e não dá para desligar por settings (não verificado). Não vale o esforço. `playwright`/`serena` seguem opt-in, sem instalar.
 - **Ainda não verificado**: itens da seção 7.
+
+## Anexo — histórico retirado do README (2026-11-04)
+
+### Plugins removidos, descartados ou pendentes
+| Plugin | Origem | Status |
+|---|---|---|
+| ponytail | DietrichGebert/ponytail | **removido** (2026-11-03): substituído por `/simplify`, `/code-review`, `/limpar-codigo`, `/revisar arquitetura` e `/divida` |
+| caveman | JuliusBrussee/caveman | **removido** (2026-11-03, sem uso) |
+| Karpathy skills | multica-ai | **não instalado**: os 4 princípios já estão no CLAUDE.md |
+| anthropics/skills | Anthropic | **não instalado**: duplica skills já sincronizadas (docx, pdf, pptx, xlsx) |
+| Claude-Mem | thedotmack | **descartado**: conflita com Auto Memory e envia conversas a terceiros |
+| Headroom | headroom | **descartado**: proxy incompatível com Desktop e com o advisor |
+| OmniRoute | diegosouzapw | **descartado**: troca o endpoint e quebra o advisor |
+| Task Observer | rebelytics | **pendente**: origem não confirmada |
+
+Projetos antigos (ZapVendedor, BuscadorContabil, DiscordTorLauncher, WAHA) saíram de uso em 2026-11-02 (Q1).
+
+### Pendências concluídas
+- [x] Limpar as permissões antigas do `settings.json` global (F1, 2026-11-02; backup em `~\.claude\backups\F1-*`).
+- [x] Fixar versão (tag) dos marketplaces de terceiros (2026-11-03: ponytail v5.3.3, caveman v4.0.1, marketingskills v2.14.0).
+- [x] `caveman` e `ponytail` removidos; global sem código de terceiro; `marketingskills` só na camada `marketing` (2026-11-03).
+
+### Auditoria de vazamento (2026-11-03)
+Repo privado no GitHub. Sem caractere invisível/bidi, comentário HTML, URL estranha ou comando de rede/execução nos `.md`/`.json`/`.ps1`; histórico Git limpo; `Auditoria LGPD.pdf` sem JavaScript, ações ou anexos.
+Plugins de terceiros (código baixado e lido, não executado): `ponytail` — hooks `node` em SessionStart/SubagentStart/UserPromptSubmit, lê transcrição, grava métricas locais, webhook só se configurado; `caveman` (desligado) — hooks `node`, sem rede; `marketing-skills` — só skills (recomenda ferramentas de parceiros), sem hooks/MCP. Nenhum trecho malicioso; o risco é de cadeia de suprimento (resolvido com `ref`).
