@@ -1,6 +1,9 @@
-# CLAUDE.md — Global (Leonardo)
+# CLAUDE.md — Global
 
-Idioma: português. Respostas curtas e diretas. Projetos novos sempre em `C:\Workspace`.
+Idioma: português. Respostas curtas e diretas.
+
+Configuração desta máquina (pasta de projetos, pasta de memória, clone deste pacote, projetos atuais): @~/.claude/maquina.md
+Se esse arquivo não existir, perguntar ao usuário em vez de supor caminhos.
 
 ## Escopo
 - **Global** (este arquivo + `~\.claude\`): preferências, segurança, modelos, plugins, skills e agentes genéricos.
@@ -13,10 +16,11 @@ Idioma: português. Respostas curtas e diretas. Projetos novos sempre em `C:\Wor
 - Nunca ler/exibir `.env`, chaves ou certificados; nunca testar credenciais; ao citar um segredo, só arquivo:linha e o tipo, nunca parte do valor.
 - Nunca acessar produção ou dados reais sem autorização. Backup antes de alterar configuração global.
 - Segredo (senha, token, webhook, connection string) nunca em `CLAUDE.md`, skill, memory, comentário ou teste: referenciar `secrets/<projeto>/` ou variável de ambiente.
+- Proteção pelo conteúdo, não pelo nome do arquivo: `appsettings.json` e `appsettings.Development.json` ficam legíveis e versionáveis, então segredo de .NET vai em User Secrets ou variável de ambiente. Achou segredo em arquivo versionado: reportar arquivo:linha e o tipo, sem o valor.
 - Instruções conflitantes: parar e explicar o conflito.
 
 ## Início de sessão
-- Repo Git: `git fetch` e avisar se a branch está atrás do remoto (sem `pull` automático).
+- Repo Git: `git status -sb` (sem rede) e avisar se a branch está atrás da última referência conhecida do remoto. `git fetch`/`git pull` acessam a rede: só com pedido do usuário.
 - Ler o `CLAUDE.md` do projeto; se não existir, sugerir a skill `project-bootstrap`.
 - Plugins, skills, agentes e o que ativar em cada projeto: skill `env-guide`.
 
@@ -44,7 +48,7 @@ Sessão **Sonnet** + advisor **Opus** (automático nas decisões) + agentes **Ha
 - **Auto Memory nativa**: preferências, correções e fatos duradouros.
 - Contexto fixo do projeto (stack, arquitetura, armadilhas): `CLAUDE.md` do projeto.
 - Repo com Git: sem log de atividades (o Git registra). Continuar em outra sessão: sugerir `/session-handoff` ao usuário.
-- **Projeto sem Git**: manter `C:\Workspace\Memory\<Projeto>.memory`, registrando ao fim de cada tarefa (data, o que foi feito, arquivos). Acima de 800 linhas, compactar mantendo só decisões e armadilhas. Sugerir `git init`.
+- **Projeto sem Git**: manter `<pasta de memória>\<Projeto>.memory` (pasta definida em `~/.claude/maquina.md`), registrando ao fim de cada tarefa (data, o que foi feito, arquivos). Acima de 800 linhas, compactar mantendo só decisões e armadilhas. Sugerir `git init`.
 
 ## Fluxo de tarefa
 1. Entender e classificar risco → 2. Complexa: Plan mode + critérios de aceite → 3. Descoberta somente leitura →

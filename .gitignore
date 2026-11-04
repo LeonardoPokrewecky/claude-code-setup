@@ -7,7 +7,12 @@ secrets/
 *secrets*.json
 *secrets*.yaml
 *secrets*.yml
-appsettings.*.json
+appsettings.Production*.json
+appsettings.Prod.json
+appsettings.Staging*.json
+appsettings.Homolog*.json
+appsettings*.Local.json
+appsettings*.local.json
 local.settings.json
 *.pfx
 *.p12

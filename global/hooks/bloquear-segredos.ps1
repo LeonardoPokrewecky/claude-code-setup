@@ -4,10 +4,24 @@
 # essa brecha.
 # Entrada: JSON do Claude Code no stdin. Saída: exit 2 + motivo no stderr bloqueia; JSON "ask" no stdout pede
 # confirmação ao usuário; exit 0 sem saída libera.
-# JSON inválido ou sem comando libera (o hook nunca pode travar a sessão).
+# JSON inválido ou sem comando libera (o hook nunca pode travar a sessão). Qualquer outra falha interna pede
+# confirmação (trap abaixo): sem ele, a exceção sairia com código 1, que o Claude Code trata como não bloqueante.
 # Defesa por texto do comando: não pega nome montado em variável/concatenação, "cd" seguido de caminho relativo nem
 # curinga "*" sozinho; é camada extra sobre o deny/ask do settings.json (limitações no README).
 $ErrorActionPreference = 'Stop'
+
+# Definida antes de tudo: o trap depende dela.
+function Write-Confirmar([string]$motivo) {
+    $saida = @{ hookSpecificOutput = @{
+        hookEventName            = 'PreToolUse'
+        permissionDecision       = 'ask'
+        permissionDecisionReason = "Hook bloquear-segredos: $motivo. Confira o que o comando faz antes de aprovar."
+    } }
+    [Console]::Out.Write(($saida | ConvertTo-Json -Compress -Depth 5))
+    exit 0
+}
+trap { Write-Confirmar "falha interna do hook: $($_.Exception.Message)" }
+
 [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 try { [Console]::InputEncoding = [Text.UTF8Encoding]::new($false) } catch { }
 
@@ -26,7 +40,8 @@ $fim = '(?=$|[^\w.-])'
 $padroes = @(
     "(?<![\w.-])\.env(rc)?(\.[\w-]+)*$fim",
     "(^|[\s/\\:=<>|&;,])(?!(process|this|self|ctx|context|Deno|Bun)\.env)[\w-]+\.env$fim",
-    'appsettings\.[\w-]+(\.[\w-]+)*\.json',
+    # Só os de ambiente real: appsettings.json e appsettings.Development.json costumam ser versionados sem segredo.
+    'appsettings\.([\w-]+\.)*(Production|Prod|Staging|Homolog\w*|Local)(\.[\w-]+)*\.json',
     # Sensível a caixa e fora de variável: "$_.Key" e "$obj.key" não são arquivo.
     ('(?-i:(?<!\$[\w:]*)(?<=[\w-])\.(pfx|p12|pem|key|vault|kdbx|ppk|jks|keystore|p8)' + $fim + ')'),
     '(?<![\w.-])secrets[/\\]',
@@ -53,7 +68,11 @@ $padroesConfirmar = @(
     @{ Padrao = 'FromBase64String|(^|[\s|;&])base64\s+(-\w*d|--decode)|certutil(\.exe)?\s.*[-/]decode'; Motivo = 'decodifica base64 (pode esconder o comando ou o alvo)' },
     @{ Padrao = 'Net\.WebClient|Net\.Http\.HttpClient|Net\.Sockets|Net\.Mail|Send-MailMessage|Download(String|File|Data)|Upload(String|File|Data|Values)'; Motivo = 'acesso à rede ou envio de dados pelo .NET' },
     @{ Padrao = '(^|[\s;&|(])(printenv|(Get-ChildItem|gci|ls|dir)\s+env:)|(^|[;&|]\s*)(env|set)\s*($|[|;&>])|user-secrets\s+list'; Motivo = 'despeja variáveis de ambiente ou user-secrets' },
-    @{ Padrao = '(?<![\w.-])web\.[\w.]*config(?=$|[^\w.-])'; Motivo = 'web.config pode conter connection string' }
+    @{ Padrao = '(?<![\w.-])web\.[\w.]*config(?=$|[^\w.-])'; Motivo = 'web.config pode conter connection string' },
+    # As regras "ask" do settings comparam só o início do comando: não pegam "git -C pasta push" nem "x && git push".
+    @{ Padrao = '(^|[\s;&|(])git(\.exe)?(\s+(-C|-c|--git-dir|--work-tree)(\s+|=)\S+)*\s+(push|commit|clean|restore|fetch|pull|clone|reset\s+--hard|checkout\s+(\S+\s+)?--|checkout\s+\.|stash\s+(drop|clear)|branch\s+((?-i:-D)|-d\s+(-f|--force)|--delete\s+--force)|remote\s+(add|set-url))(?=$|[\s;&|)])'; Motivo = 'git que publica, usa a rede ou descarta trabalho (inclusive com -C ou no meio de um encadeamento)' },
+    @{ Padrao = '([;&|]|\$\()\s*(curl|wget|ssh|scp|sftp|rsync|nc|ncat|ftp|iwr|irm|Invoke-WebRequest|Invoke-RestMethod)(\.exe)?(?=$|\s)'; Motivo = 'acesso à rede no meio de um encadeamento' },
+    @{ Padrao = '([;&|]|\$\()\s*(rm|del|rmdir|rd|mv|Remove-Item|ri|Move-Item)(?=$|\s)'; Motivo = 'apaga ou move arquivos no meio de um encadeamento' }
 )
 
 # Curinga: compara o padrão com nomes de segredo conhecidos. Só considera trecho com 2+ caracteres literais
@@ -77,16 +96,6 @@ function Test-Curinga([string]$texto) {
         }
     }
     $null
-}
-
-function Write-Confirmar([string]$motivo) {
-    $saida = @{ hookSpecificOutput = @{
-        hookEventName            = 'PreToolUse'
-        permissionDecision       = 'ask'
-        permissionDecisionReason = "Hook bloquear-segredos: $motivo. Confira o que o comando faz antes de aprovar."
-    } }
-    [Console]::Out.Write(($saida | ConvertTo-Json -Compress -Depth 5))
-    exit 0
 }
 
 foreach ($t in $textos) {

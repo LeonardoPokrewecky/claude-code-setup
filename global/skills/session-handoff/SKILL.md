@@ -21,6 +21,6 @@ Produza um resumo estruturado (sem transcrição) e mostre na conversa:
 
 Onde salvar (só se o usuário pedir):
 - Repo com Git: `HANDOFF.md` na pasta de documentação, fora do repositório: `Documentação:` do `CLAUDE.md` do projeto; sem indicação, `<pasta-pai-do-repo>\docs\<nome-do-repo>\`. Se ficar dentro do repositório e `git check-ignore` não a ignorar, avisar e perguntar antes de gravar.
-- Projeto sem Git: registrar no `C:\Workspace\Memory\<Projeto>.memory`.
+- Projeto sem Git: registrar no `<pasta de memória>\<Projeto>.memory` (pasta em `~/.claude/maquina.md`).
 
 Fatos duradouros (preferência, armadilha, decisão de arquitetura) vão para a Auto Memory ou para o `CLAUDE.md` do projeto, não para o handoff.

@@ -1,4 +1,6 @@
-# Instala agents, skills e hooks do pacote (global\) em ~\.claude sem substituir nada em silencio.
+# Instala CLAUDE.md, agents, skills e hooks do pacote (global\) em ~\.claude sem substituir nada em silencio.
+# O CLAUDE.md global e substituido inteiro: o dry-run avisa e mostra o diff; o original vai para o backup.
+# maquina.example.md nao e instalado (cada maquina cria o seu ~/.claude/maquina.md; README, Passo 2).
 # Fluxo obrigatorio em 2 passos, igual ao merge-settings.ps1:
 #   1. -DryRun lista cada arquivo como NOVO, ALTERADO ou IGUAL com o SHA-256 de origem e destino, mostra o diff
 #      dos ALTERADOS e um codigo de confirmacao.
@@ -17,8 +19,11 @@ $Destino = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPa
 
 function Get-Sha([string]$caminho) { (Get-FileHash -LiteralPath $caminho -Algorithm SHA256).Hash.ToLower() }
 
-$itens = foreach ($pasta in 'agents', 'skills', 'hooks') {
-    Get-ChildItem -LiteralPath (Join-Path $origem $pasta) -Recurse -File | Sort-Object FullName | ForEach-Object {
+$arquivos = @(Get-Item -LiteralPath (Join-Path $origem 'CLAUDE.md')) + @(foreach ($pasta in 'agents', 'skills', 'hooks') {
+    Get-ChildItem -LiteralPath (Join-Path $origem $pasta) -Recurse -File | Sort-Object FullName
+})
+$itens = foreach ($arq in $arquivos) {
+    $arq | ForEach-Object {
         $rel = $_.FullName.Substring($origem.Length + 1)
         $dest = Join-Path $Destino $rel
         $shaOrigem = Get-Sha $_.FullName
@@ -63,6 +68,14 @@ if ($DryRun) {
             Compare-Object (Get-Content -LiteralPath $i.Destino -Encoding UTF8) (Get-Content -LiteralPath $i.Origem -Encoding UTF8) |
                 ForEach-Object { Write-Host "$(if ($_.SideIndicator -eq '=>') { '+' } else { '-' }) $($_.InputObject)" }
         }
+    }
+    $claude = $pendentes | Where-Object { $_.Rel -eq 'CLAUDE.md' -and $_.Status -eq 'ALTERADO' }
+    if ($claude) {
+        $linhas = @(Get-Content -LiteralPath $claude.Destino -Encoding UTF8).Count
+        Write-Host "`nATENCAO: o CLAUDE.md global atual ($linhas linhas) sera SUBSTITUIDO inteiro pelo do pacote." -ForegroundColor Yellow
+        Write-Host '  Regras de um projeto ou cliente especifico (deploy, banco, firewall, padroes de equipe) devem ir ANTES' -ForegroundColor Yellow
+        Write-Host '  para o CLAUDE.md do repositorio daquele projeto; dados desta maquina vao em ~/.claude/maquina.md.' -ForegroundColor Yellow
+        Write-Host '  O original fica em backups\instalar-<data-hora>\CLAUDE.md.' -ForegroundColor Yellow
     }
     Write-Host "`n$($pendentes.Count) arquivo(s) a gravar (NOVO/ALTERADO acima). Revise e rode de novo com: -Confirmar $codigo"
     return

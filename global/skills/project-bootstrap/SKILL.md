@@ -23,7 +23,9 @@ Nunca sobrescrever, apagar ou renomear nada. Nada é criado sem aprovação expl
 - **`.gitignore`**: somar as linhas de `project-templates\gitignore.claude` que faltam no `.gitignore` do projeto (comparar linha a linha lendo os dois em UTF-8 — `Get-Content -Encoding UTF8`; no PowerShell 5.1 o padrão é ANSI e linha acentuada duplica a cada rodada —, sem duplicar, sem reordenar o existente); mostrar só as linhas novas. Sem Git: não criar.
 - Skills/agentes específicos só se forem exclusivos deste projeto.
 - Projeto existente: mostrar o que será preservado e o que será adicionado, arquivo por arquivo.
-- Se existir `C:\Workspace\Memory\<Projeto>.memory`: propor levar stack, decisões e armadilhas para o `CLAUDE.md` do projeto.
+- Se existir `<pasta de memória>\<Projeto>.memory` (pasta em `~/.claude/maquina.md`): propor levar stack, decisões e armadilhas para o `CLAUDE.md` do projeto.
+
+- Ao final, propor a linha do projeto na tabela "Projetos atuais" de `~/.claude/maquina.md` (não no pacote).
 
 ## 3. Aplicar (após aprovação)
 1. Backup dos arquivos que serão alterados (`<arquivo>.bak-AAAAMMDD-HHmmss`).

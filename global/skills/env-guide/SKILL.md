@@ -1,6 +1,6 @@
 ---
 name: env-guide
-description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills e agentes existem, quando usar cada um e quais plugins ativar em cada projeto. Use ao iniciar/adotar projeto, ao decidir delegar a um agente, ou quando perguntarem "qual plugin/skill usar".
+description: Guia do ambiente Claude Code — quais plugins, skills e agentes existem, quando usar cada um e quais plugins ativar em cada projeto. Use ao iniciar/adotar projeto, ao decidir delegar a um agente, ou quando perguntarem "qual plugin/skill usar".
 ---
 
 # Guia do ambiente
@@ -22,13 +22,13 @@ description: Guia do ambiente Claude Code do Leonardo — quais plugins, skills 
 
 Regras:
 - Plugin de projeto vai em `<repo>\.claude\settings.json` → `enabledPlugins`. Nunca no global.
-- Modelos prontos: `project-templates\` do repositório `claude-code-setup` (caminho do clone local em cada máquina; ex.: `C:\workspace\Clade md\claude-code-setup`).
+- Modelos prontos: `project-templates\` do repositório `claude-code-setup` (caminho do clone local: linha "Clone do `claude-code-setup`" de `~/.claude/maquina.md`).
 - Marketplaces de terceiros com versão fixada (`ref` = tag no `settings.json`). Tag pode ser movida pelo autor: antes de atualizar (ou ao reinstalar), conferir que o commit da tag é o mesmo auditado (`git ls-remote <repo> refs/tags/<tag>`) e revisar o diff da tag nova: hooks, MCP, chamadas de rede.
 - Plugins oficiais (`claude-plugins-official`) seguem a versão mais recente: risco aceito. `context7` envia a consulta a um serviço externo (Upstash): nunca colocar código, dado ou segredo de cliente na consulta, só nome/versão da biblioteca e a dúvida. `supabase` acessa o banco (começar somente leitura em dev); `serena` baixa e roda código via `uvx`.
 - Commit de referência da tag (obtido na API do GitHub em 2026-11-03): `marketingskills` `v2.14.0` = `5ffe077d2e59486d91c5ccaecbd74b6973c32308`. Antes de instalar: `git ls-remote https://github.com/coreyhaines31/marketingskills refs/tags/v2.14.0` deve devolver o mesmo SHA; diferente = tag movida, não instalar sem auditar de novo.
 - **Global sem código de terceiro.** Único marketplace de terceiro: `marketingskills`, só na camada `marketing`. Removidos em 2026-11-03: `caveman` (sem uso) e `ponytail` (hooks `node` a cada prompt lendo a transcrição; substituído por `/simplify`, `/code-review`, `/limpar-codigo`, `/revisar arquitetura` e `/divida`). Instalação antiga com ponytail: o merge grava `ponytail@ponytail: false`; para remover de vez, desinstalar em `/plugin` e apagar `~/.config/ponytail/`.
 - Hook global `bloquear-segredos.ps1` (PreToolUse Bash/PowerShell). Ignora aspas e escapes no meio do nome (`.e""nv`) e reconhece o nome colado a `:`, `>`, `&` e `,`.
-  - **Bloqueia** comando que cite: `.env`, `.env.*`, `.envrc` e `*.env`; `appsettings.<Ambiente>.json`; `local.settings.json`; `*.pfx/.p12/.p8/.pem/.key/.jks/.keystore/.vault/.kdbx/.ppk`; `secrets/`, `*secrets*.json/.yaml`, `UserSecrets`; `.credentials.json`, `.git-credentials`, `.claude.json`; `id_rsa` e similares; `.ssh`, `.aws`, `.azure`, `.kube`, `.docker/config.json` e `.config/gh`; `.npmrc/.netrc/.pgpass/.pypirc`.
+  - **Bloqueia** comando que cite: `.env`, `.env.*`, `.envrc` e `*.env`; `appsettings.<Production|Prod|Staging|Homolog*|Local>.json` (o base e o `Development` ficam liberados: segredo de .NET vai em User Secrets ou variável de ambiente); `local.settings.json`; `*.pfx/.p12/.p8/.pem/.key/.jks/.keystore/.vault/.kdbx/.ppk`; `secrets/`, `*secrets*.json/.yaml`, `UserSecrets`; `.credentials.json`, `.git-credentials`, `.claude.json`; `id_rsa` e similares; `.ssh`, `.aws`, `.azure`, `.kube`, `.docker/config.json` e `.config/gh`; `.npmrc/.netrc/.pgpass/.pypirc`.
   - **Pede confirmação** para:
     - comando que cite `.claude/settings*`, `hooks`, `agents`, `skills`, `commands` ou `CLAUDE.md`, inclusive a escrita por redirecionamento, `Set-Content`, `Copy-Item` etc.;
     - `cd` para `.claude`;
@@ -37,7 +37,10 @@ Regras:
     - `Net.WebClient`, `HttpClient` e `Send-MailMessage`;
     - despejo de variáveis de ambiente e `user-secrets list`;
     - `web.config`;
-    - curinga que alcance um nome de segredo.
+    - `git` que publica, usa a rede ou descarta trabalho (`push`, `commit`, `fetch`, `pull`, `clone`, `reset --hard`, `clean`, `restore`, `checkout --`, `stash drop`, `branch -D`), inclusive com `-C pasta` ou no meio de `&&`/`;`/`|`;
+    - rede (`curl`, `ssh`, `Invoke-WebRequest`…) ou apagar/mover (`rm`, `del`, `mv`, `Remove-Item`…) no meio de um encadeamento;
+    - curinga que alcance um nome de segredo;
+    - qualquer falha interna do próprio hook (na dúvida, pergunta em vez de liberar).
   - Precisa de leitura legítima: o usuário roda com `! <comando>`. Limitações em README, "Limitações das proteções".
 - Autoproteção: o `settings.json` global e `~/.claude/hooks/` têm `deny` de Edit/Write. O settings de projeto e `~/.claude/CLAUDE.md`, `skills/` e `agents/` têm `ask`. Pelo shell, o hook pede confirmação. Não é garantia absoluta: nome montado em variável escapa do hook. Mudar só pelo `scripts\merge-settings.ps1` e pelo `scripts\instalar-arquivos.ps1`, rodados pelo usuário ou aprovados na confirmação do hook.
 - Plugin fora desta lista: revisar origem, licença, hooks e dados coletados e pedir aprovação.
@@ -70,14 +73,10 @@ Aplicadas por `scripts\merge-settings.ps1 -Target <repo>\.claude\settings.json -
 | `playwright` (opt-in) | `playwright`: testar UI no navegador | só a pedido; medir tokens |
 | `serena` (opt-in) | `serena`: navegação por símbolo; exige `uvx` | só a pedido; medir tokens |
 
-Repo sem Git: a defesa é o `deny` da `_base` + `C:\Workspace\Memory\<Projeto>.memory`.
+Repo sem Git: a defesa é o `deny` da `_base` + `<pasta de memória>\<Projeto>.memory`.
 
-## Projetos atuais (em `C:\Workspace`)
-| Projeto | Stack | Camadas | Situação |
-|---|---|---|---|
-| PlanoCarreiraDev | .NET 8 + MongoDB (sem Git) | `_base`, `dotnet` | `CLAUDE.md` + `.claude\settings.json` com `_base`+`dotnet` aplicados; usa `.memory` |
-| PlanoCarreiraDev.Frontend | Angular (sem Git) | `_base`, `angular` | `CLAUDE.md` + `.claude\settings.json` com `_base`+`angular` aplicados; sem `.memory` |
-| LeonardoPokrewecky | README de perfil (Git) | nenhuma | — |
+## Configuração por máquina
+Pasta de projetos, pasta de memória, caminho do clone deste pacote e a tabela de **projetos atuais** ficam em `~/.claude/maquina.md` (modelo: `global\maquina.example.md`; importado pelo `CLAUDE.md` global). Nada pessoal ou de cliente entra no pacote.
 
 ## Skills globais (invocadas automaticamente pelo modelo)
 | Skill | Quando usar |

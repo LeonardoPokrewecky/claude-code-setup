@@ -1,0 +1,31 @@
+name: testes
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pester:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        hook_shell: [powershell, pwsh]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pester 5
+        shell: pwsh
+        run: Install-Module Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
+      - name: Testes (hook com ${{ matrix.hook_shell }})
+        shell: pwsh
+        env:
+          HOOK_SHELL: ${{ matrix.hook_shell }}
+        run: |
+          $c = New-PesterConfiguration
+          $c.Run.Path = './tests'
+          $c.Run.Exit = $true
+          $c.Output.Verbosity = 'Detailed'
+          Invoke-Pester -Configuration $c
