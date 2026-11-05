@@ -84,6 +84,7 @@ Pasta de projetos, pasta de memória, caminho do clone deste pacote e a tabela d
 | `project-bootstrap` | Projeto novo ou adoção de projeto existente |
 | `env-guide` | Este guia |
 | `arquitetura-onion` | Backend .NET: camadas, regra de dependência, convenções e fatia vertical de funcionalidade nova |
+| `arquitetura-angular` | Frontend Angular: core/shared/features, regra de dependência, HTTP único, contrato com o backend e fatia vertical de feature nova |
 | `security-review` (embutida) | Revisão de segurança das mudanças pendentes |
 | `code-review` (embutida) | Revisão de bugs no diff |
 | `simplify` (embutida) | Reuso, simplificação e eficiência do código alterado (aplica as correções: rodar só com diff revisável) |

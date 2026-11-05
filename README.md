@@ -60,7 +60,7 @@ claude-code-setup\
 Detalhes de cada plugin e camada: skill `env-guide` (`global\skills\env-guide\SKILL.md`), que é a **fonte única** de plugins e camadas.
 
 ### 2.2 Skills
-- **Automáticas** (o Claude usa sozinho quando faz sentido): `env-guide` (guia do ambiente), `project-bootstrap` (prepara um projeto) e `arquitetura-onion` (padrão de camadas do backend .NET).
+- **Automáticas** (o Claude usa sozinho quando faz sentido): `env-guide` (guia do ambiente), `project-bootstrap` (prepara um projeto), `arquitetura-onion` (padrão de camadas do backend .NET) e `arquitetura-angular` (padrão do frontend Angular).
 - **Sob demanda** (só rodam quando **você** digita `/nome`; não ocupam contexto): `/revisar`, `/blueprint`, `/alterar-dados`, `/deploy-checklist`, `/medir-antes-depois`, `/divida`, `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem`, `/lgpd-audit`, `/session-handoff`.
 - Documentos gerados (blueprints, relatório LGPD, handoff) ficam **fora do repositório**, na pasta indicada na linha `Documentação:` do `CLAUDE.md` do projeto. A única exceção é o `DIVIDA.md`, que fica versionado na raiz do projeto.
 
@@ -186,7 +186,7 @@ Feche e abra o Claude Desktop → aba **Code** → nova sessão **Local**. Na pr
 | `/advisor` | Advisor = Opus |
 | `/plugin` | `context7` e `security-guidance` ativos; `claude-code-setup` desativado; nenhum de terceiro |
 | `/agents` | os 6 agentes da seção 2.3 |
-| "quais skills globais você tem?" | `env-guide`, `project-bootstrap` e `arquitetura-onion` (as sob demanda não aparecem na lista) |
+| "quais skills globais você tem?" | `env-guide`, `project-bootstrap`, `arquitetura-onion` e `arquitetura-angular` (as sob demanda não aparecem na lista) |
 
 Plugin oficial que não baixou: `/plugin install <nome>@claude-plugins-official`.
 
