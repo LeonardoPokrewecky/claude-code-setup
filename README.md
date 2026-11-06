@@ -215,5 +215,5 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 ### Pendências de validação
 - `echo .env` bloqueado pelo hook do plugin: confirmar numa sessão recarregada (`/reload-plugins`); o script em si bloqueia o caso.
 - Passo 5 do README (`git push` pede confirmação, `/plugin`, `/agents`, `/context`): conferir na interface após recarregar.
-- `npm test` do frontend (Karma/ChromeHeadless) não terminou na execução de 06/11/2026.
+- Frontend (projeto Angular de exemplo): `npm test` com ChromeHeadless passou, 31/31 testes, em 06/11/2026.
 - macOS, Linux/WSL2, sandbox (`-Perfil unix`) e devcontainer continuam não testados (tabela da seção 7).
