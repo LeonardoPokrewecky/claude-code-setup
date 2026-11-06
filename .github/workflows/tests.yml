@@ -20,13 +20,16 @@ jobs:
           - os: ubuntu-latest
             shell_testes: pwsh
     runs-on: ${{ matrix.os }}
+    # O contexto matrix vale em defaults.run, mas não em steps.shell.
+    defaults:
+      run:
+        shell: ${{ matrix.shell_testes }}
     steps:
       - uses: actions/checkout@v4
       - name: Pester 5+
         shell: pwsh
         run: Install-Module Pester -MinimumVersion 5.5.0 -MaximumVersion 6.99 -Force -Scope CurrentUser -SkipPublisherCheck
       - name: Testes (${{ matrix.os }}, ${{ matrix.shell_testes }})
-        shell: ${{ matrix.shell_testes }}
         env:
           HOOK_SHELL: ${{ matrix.shell_testes }}
         run: |
