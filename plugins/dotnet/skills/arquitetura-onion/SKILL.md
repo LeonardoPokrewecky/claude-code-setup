@@ -1,23 +1,25 @@
 ---
 name: arquitetura-onion
-description: Padrão de arquitetura onion para backend .NET — projetos por camada (começa enxuto, separa por demanda), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar.
+description: Padrão de arquitetura onion para backend .NET — Solution padrão de 9 projetos numerados (API a Tools; variante enxuta para projeto pequeno), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar.
 ---
 
 # Arquitetura onion (.NET)
 
-- **Projeto novo:** nasce neste padrão, com o conjunto mínimo de projetos.
-- **Projeto existente:** o `CLAUDE.md` do projeto prevalece. Ver seção 8.
+- **Projeto novo:** nasce no **padrão de 9 projetos numerados** (API, Application, Domain, Infra, Desktop, Async, Shared, Tests, Tools). Ler `referencia-9-projetos.md` (estrutura, camadas, dependências, regras). Criar **os 9 projetos desde o início**, mesmo os que ainda não têm código (Desktop, Async, Tools ficam como esqueleto que compila, sem classes de exemplo, com `README.md` de uma linha "Reservado, sem uso ainda"): a numeração nunca muda e a Solution já nasce no formato final. Teste de arquitetura (`08-…Tests/Architecture`) obrigatório desde o início; `Contracts` só quando há cliente externo da API (ver a referência). Projeto sem uso previsto pode ser omitido só se o `CLAUDE.md` do projeto registrar o motivo.
+- **Variante enxuta (seções 1 a 4 abaixo):** `Domain`/`Contracts`/`Application`/`Infra`/`Api`, para projeto pequeno ou quando o `CLAUDE.md` do projeto a escolhe. Não misturar as duas no mesmo projeto.
+- **Seções 5 a 10** (convenções de nome, responsabilidade das peças, filtros, fatia vertical, revisão) valem nos dois padrões.
+- **Projeto existente:** o `CLAUDE.md` do projeto prevalece. Ver seção 8. Nunca migrar para o padrão de 9 sem pedido.
 
 ## 1. Projetos: começar enxuto
 
 | Projeto | Contém | Referencia |
 |---|---|---|
-| `<Produto>.Core` | Entidades **com comportamento** (invariantes nos métodos, setters privados), value objects, enums de domínio, exceções de domínio, **interfaces** de repositório, `IUnitOfWork` e portas externas (`IEmailSender`, `IFileStorage`, `I<Sistema>Client`) | nada |
+| `<Produto>.Domain` | Entidades **com comportamento** (invariantes nos métodos, setters privados), value objects, enums de domínio, exceções de domínio, **interfaces** de repositório, `IUnitOfWork` e portas externas (`IEmailSender`, `IFileStorage`, `I<Sistema>Client`) | nada |
 | `<Produto>.Contracts` | DTOs da API: `<X>Request`, `<X>View`, `<X>Filter`, `PagedResult<T>`, enums expostos ao cliente | nada |
-| `<Produto>.Application` | Casos de uso, mappers entidade ↔ contrato, specifications de filtro/ordenação, validação de entrada, transação | Core, Contracts |
-| `<Produto>.Infra` | Implementações do Core por pasta: `Data/` (`DbContext`, configurações EF, migrations, repositórios, `UnitOfWork`), `Email/`, `Storage/`, `Integrations/<Sistema>/` | Core |
+| `<Produto>.Application` | Casos de uso, mappers entidade ↔ contrato, specifications de filtro/ordenação, validação de entrada, transação | Domain, Contracts |
+| `<Produto>.Infra` | Implementações do Domain por pasta: `Data/` (`DbContext`, configurações EF, migrations, repositórios, `UnitOfWork`), `Email/`, `Storage/`, `Integrations/<Sistema>/` | Domain |
 | `<Produto>.Api` | Host HTTP: controllers, autenticação/políticas, middlewares, `Program.cs` (composition root), jobs em `BackgroundService` enquanto rodarem no mesmo processo | Application, Contracts, Infra (só para registrar) |
-| Testes | `<Produto>.Core.Tests`, `<Produto>.Application.Tests`, `<Produto>.Infra.Tests`, `<Produto>.Architecture.Tests` | o projeto testado |
+| Testes | `<Produto>.Domain.Tests`, `<Produto>.Application.Tests`, `<Produto>.Infra.Tests`, `<Produto>.Architecture.Tests` | o projeto testado |
 
 ## 2. Separar por demanda
 
@@ -35,10 +37,10 @@ Ao separar, a regra de dependência da seção 3 continua valendo e o `Architect
 ## 3. Regra de dependência
 
 As referências apontam sempre para dentro.
-- `Core` e `Contracts` não referenciam nada do produto. `Core` não conhece DTO, e `Contracts` não conhece entidade.
-- `Application` não referencia EF Core nem `Infra*`: acessa dados só pelas interfaces do Core.
+- `Domain` e `Contracts` não referenciam nada do produto. `Domain` não conhece DTO, e `Contracts` não conhece entidade.
+- `Application` não referencia EF Domain nem `Infra*`: acessa dados só pelas interfaces do Domain.
 - Controllers não acessam repositório nem `DbContext`.
-- Projetos de mesmo nível não se referenciam (`Infra.Data.A` ↔ `Infra.Data.B`, `Integrations.A` ↔ `Integrations.B`). O que for comum sobe para o Core.
+- Projetos de mesmo nível não se referenciam (`Infra.Data.A` ↔ `Infra.Data.B`, `Integrations.A` ↔ `Integrations.B`). O que for comum sobe para o Domain.
 - `Workers` chama casos de uso da `Application` e não tem regra de negócio própria.
 - A regra vale por **teste**: `<Produto>.Architecture.Tests` (ex.: NetArchTest) falha se aparecer uma referência proibida.
 
@@ -52,11 +54,11 @@ As referências apontam sempre para dentro.
 ├── src/
 │   ├── 01-api/            <Produto>.Api/
 │   ├── 02-application/    <Produto>.Application/
-│   ├── 03-core/           <Produto>.Core/, <Produto>.Contracts/
+│   ├── 03-domain/           <Produto>.Domain/, <Produto>.Contracts/
 │   ├── 04-infra/          <Produto>.Infra/ (e Infra.Data.<Banco>/, Integrations.<Sistema>/ quando separar)
 │   ├── 05-workers/        <Produto>.Workers/ (só quando separar)
 │   └── 06-clients/        desktop e outros clientes dos contratos
-├── tests/                 <Produto>.Core.Tests/, ..., <Produto>.Architecture.Tests/
+├── tests/                 <Produto>.Domain.Tests/, ..., <Produto>.Architecture.Tests/
 └── tools/                 scripts e utilitários de desenvolvimento
 ```
 
@@ -71,8 +73,8 @@ As referências apontam sempre para dentro.
 Toda funcionalidade fica em `<Modulo>/<X>/` em **todos** os projetos, com o mesmo nome de módulo. Assim, uma busca pela pasta ou pelo namespace encontra as peças de uma vez.
 
 ```
-<Produto>.Core/Common/                     EntityBase.cs, IUnitOfWork.cs, DomainException.cs
-<Produto>.Core/<Modulo>/<X>/               <X>.cs, I<X>Repository.cs, E<X>Status.cs
+<Produto>.Domain/Common/                     EntityBase.cs, IUnitOfWork.cs, DomainException.cs
+<Produto>.Domain/<Modulo>/<X>/               <X>.cs, I<X>Repository.cs, E<X>Status.cs
 <Produto>.Contracts/Common/                PagedResult.cs
 <Produto>.Contracts/<Modulo>/<X>/          <X>Request.cs, <X>View.cs, <X>Filter.cs, E<X>Status.cs
 <Produto>.Application/<Modulo>/<X>/        I<X>AppService.cs, <X>AppService.cs, <X>Mapper.cs, <X>Specification.cs
@@ -112,7 +114,7 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 
 ## 6. Responsabilidade de cada peça
 
-- **Entidade (Core):** protege o próprio estado. Mudança de estado por método com validação (`pedido.Cancelar(motivo)`), sem `set` público. Regra que envolve uma única entidade fica nela, não no app service.
+- **Entidade (Domain):** protege o próprio estado. Mudança de estado por método com validação (`pedido.Cancelar(motivo)`), sem `set` público. Regra que envolve uma única entidade fica nela, não no app service.
 - **App service (Application):** um caso de uso por método. Valida a entrada, carrega as entidades pelo repositório, chama os métodos de domínio, faz `IUnitOfWork.CommitAsync` e devolve o contrato. Repositório não comita.
 - **Tamanho:** passou de ~7 métodos públicos ou ~300 linhas, dividir:
   - `<X>QueryService` para leitura e grade;
@@ -120,12 +122,12 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
   - caso de uso complexo (muitos passos ou dependências próprias) ganha classe própria `<Acao><X>AppService`.
 - **Composição, não herança:** acima de ~5 dependências no construtor, extrair um serviço menor e injetar. Classe base genérica (`CrudAppService<TEntidade, TView, TRequest>`) só para CRUD puro. Comportamento de família vai em serviço compartilhado injetado, nunca em base abstrata com dezenas de dependências.
 - **Mapper:** explícito e verificável pelo compilador. Pode ser à mão (`<X>Mapper` com `ToView()` e `ToEntity()`, mais uma `Expression<Func<X, XView>>` para projeção) ou com gerador de código de licença livre (ex.: Mapperly). Biblioteca de mapeamento com licença comercial só com decisão registrada via `/adr`.
-- **Enum exposto ao cliente:** existe no Core (domínio) e no Contracts (API), com conversão explícita no `<X>Mapper`. Um teste percorre `Enum.GetValues` dos dois lados e falha se algum valor não tiver par. Enum que o cliente não vê fica só no Core.
-- **Repositório (Infra):** implementa a interface do Core; leitura com `AsNoTracking`. Recebe specification e projeção e devolve entidade ou `PagedResult<TView>` já materializado. **Não expõe `IQueryable`** para fora da Infra. Implementação `internal`.
+- **Enum exposto ao cliente:** existe no Domain (domínio) e no Contracts (API), com conversão explícita no `<X>Mapper`. Um teste percorre `Enum.GetValues` dos dois lados e falha se algum valor não tiver par. Enum que o cliente não vê fica só no Domain.
+- **Repositório (Infra):** implementa a interface do Domain; leitura com `AsNoTracking`. Recebe specification e projeção e devolve entidade ou `PagedResult<TView>` já materializado. **Não expõe `IQueryable`** para fora da Infra. Implementação `internal`.
 - **Configuração EF:** um `<X>Configuration : IEntityTypeConfiguration<X>` por entidade. Migration sempre com `-Context <NomeDoContext>`.
 - **Controller (Api):** fino. `[ApiController]` + `[Authorize]` na classe e `[Authorize(Policy = "<recurso>.<acao>")]` em cada action. Recebe o contrato, chama **um** método de app service e devolve o contrato.
 - **Notificação após persistir** (e-mail, mensagem): falha é logada, nunca relançada. Envio crítico usa outbox.
-- **Job/Integração:** job idempotente (procura o registro existente antes de inserir). O cliente de integração traduz o payload externo para tipos do Core e nunca vaza DTO externo para dentro.
+- **Job/Integração:** job idempotente (procura o registro existente antes de inserir). O cliente de integração traduz o payload externo para tipos do Domain e nunca vaza DTO externo para dentro.
 
 ## 7. Filtros, ordenação e injeção de dependência
 
@@ -152,7 +154,7 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 
 ## 9. Fatia vertical de uma funcionalidade nova (checklist)
 
-1. Entidade com métodos de domínio + `I<X>Repository` em `Core/<Modulo>/<X>/`.
+1. Entidade com métodos de domínio + `I<X>Repository` em `Domain/<Modulo>/<X>/`.
 2. `<X>Configuration` em `Infra/Data/<Modulo>/<X>/`.
 3. Migration com `-Context` (gerar; aplicar só com autorização).
 4. `<X>Repository` (`internal`) implementando a interface.
@@ -171,7 +173,7 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 
 Apontar `arquivo:linha` e a camada correta quando aparecer:
 - regra no controller;
-- EF Core ou `IQueryable` na Application;
+- EF Domain ou `IQueryable` na Application;
 - entidade com `set` público mudando estado de fora;
 - filtro em string;
 - base abstrata acumulando dependências;
