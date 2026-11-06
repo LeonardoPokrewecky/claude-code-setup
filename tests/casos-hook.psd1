@@ -1,4 +1,4 @@
-@{
+﻿@{
     # Esperado: Bloqueia (exit 2), Confirma (JSON "ask"), Libera (exit 0 sem saída).
     Casos = @(
         # --- Bloqueia: arquivos de segredo ---
@@ -65,10 +65,7 @@
         @{ Comando = 'git stash drop'; Esperado = 'Confirma' }
         @{ Comando = 'git branch -D feature'; Esperado = 'Confirma' }
         @{ Comando = 'git remote set-url origin x'; Esperado = 'Confirma' }
-        @{ Comando = 'cd build && rm -rf out'; Esperado = 'Confirma' }
-        @{ Comando = 'ls; curl https://example.com'; Esperado = 'Confirma' }
-        @{ Comando = 'echo $(curl https://example.com)'; Esperado = 'Confirma' }
-        @{ Comando = 'dir | Remove-Item'; Esperado = 'Confirma' }
+        @{ Comando = 'git -c core.x=y push'; Esperado = 'Confirma' }
 
         # --- Libera: uso normal ---
         @{ Comando = 'git status'; Esperado = 'Libera' }
@@ -87,5 +84,20 @@
         @{ Comando = 'ls src | sort'; Esperado = 'Libera' }
         @{ Comando = 'cat README.md'; Esperado = 'Libera' }
         @{ Comando = 'rg "Component" src/app'; Esperado = 'Libera' }
+        # Falsos positivos corrigidos na evolução (medição da Fase 1).
+        @{ Comando = 'cat .env.example'; Esperado = 'Libera' }
+        @{ Comando = 'cp .env.sample .env.template'; Esperado = 'Libera' }
+        @{ Comando = 'node -e "console.log(obj.key)"'; Esperado = 'Libera' }
+        # Encadeamentos de rede/exclusão: cobertos pelas regras ask nativas, que dividem o comando
+        # (https://code.claude.com/docs/en/permissions#compound-commands); o hook não duplica.
+        @{ Comando = 'cd build && rm -rf out'; Esperado = 'Libera' }
+        @{ Comando = 'ls; curl https://example.com'; Esperado = 'Libera' }
+        @{ Comando = 'dir | Remove-Item'; Esperado = 'Libera' }
+
+        # --- Bloqueia: limites das correções acima ---
+        @{ Comando = 'cat .env.example.local'; Esperado = 'Bloqueia' }
+        @{ Comando = 'cat .env.production'; Esperado = 'Bloqueia' }
+        @{ Comando = 'type C:\certs\api.pfx'; Esperado = 'Bloqueia' }
+        @{ Comando = 'cat "keys/server.key"'; Esperado = 'Bloqueia' }
     )
 }

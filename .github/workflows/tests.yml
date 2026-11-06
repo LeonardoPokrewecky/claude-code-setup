@@ -9,21 +9,31 @@ permissions:
 
 jobs:
   pester:
-    runs-on: windows-latest
     strategy:
       fail-fast: false
       matrix:
-        hook_shell: [powershell, pwsh]
+        include:
+          - os: windows-latest
+            shell_testes: powershell
+          - os: windows-latest
+            shell_testes: pwsh
+          - os: ubuntu-latest
+            shell_testes: pwsh
+    runs-on: ${{ matrix.os }}
+    # O contexto matrix vale em defaults.run, mas não em steps.shell.
+    defaults:
+      run:
+        shell: ${{ matrix.shell_testes }}
     steps:
       - uses: actions/checkout@v4
-      - name: Pester 5
+      - name: Pester 5+
         shell: pwsh
-        run: Install-Module Pester -MinimumVersion 5.5.0 -Force -Scope CurrentUser -SkipPublisherCheck
-      - name: Testes (hook com ${{ matrix.hook_shell }})
-        shell: pwsh
+        run: Install-Module Pester -MinimumVersion 5.5.0 -MaximumVersion 6.99 -Force -Scope CurrentUser -SkipPublisherCheck
+      - name: Testes (${{ matrix.os }}, ${{ matrix.shell_testes }})
         env:
-          HOOK_SHELL: ${{ matrix.hook_shell }}
+          HOOK_SHELL: ${{ matrix.shell_testes }}
         run: |
+          Import-Module Pester -MinimumVersion 5.5.0
           $c = New-PesterConfiguration
           $c.Run.Path = './tests'
           $c.Run.Exit = $true

@@ -1,4 +1,10 @@
 {
+  "extraKnownMarketplaces": {
+    "kit-dev-ia": { "source": { "source": "github", "repo": "LeonardoPokrewecky/claude-code-setup" } }
+  },
+  "enabledPlugins": {
+    "base@kit-dev-ia": true
+  },
   "permissions": {
     "deny": [
       "Read(**/node_modules/**)",
@@ -7,7 +13,6 @@
       "Read(**/bin/**)",
       "Read(**/obj/**)",
       "Read(**/.vs/**)",
-      "Read(**/package-lock.json)",
       "Read(**/*.min.js)"
     ]
   }

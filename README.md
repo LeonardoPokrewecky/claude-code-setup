@@ -1,302 +1,213 @@
-# claude-code-setup — Configuração do Claude Code
+# claude-code-setup — base portátil para o Claude Code
 
-Configuração de uso geral do Claude Code (Desktop → aba **Code** → sessão **Local**, e CLI) para Windows: instruções globais, settings, agentes, skills, hook de segurança e modelos para projetos.
+Configuração genérica do Claude Code (Desktop → aba **Code**, e CLI) para qualquer projeto: instruções globais curtas, permissões por classe de operação, hook contra vazamento de segredos, skills e agentes distribuídos como **plugins**, e modelos de projeto por camadas.
 
-> **Nada aqui é aplicado sozinho.** Os arquivos ficam no repositório até você rodar os passos da seção 5. Todo passo mostra antes o que vai mudar.
-> **Nada pessoal ou de cliente entra no pacote.** Caminhos da máquina e lista de projetos ficam em `~\.claude\maquina.md` (Passo 2); regras de um projeto específico ficam no `CLAUDE.md` daquele repositório.
+> **Nada é aplicado sozinho.** Todo passo mostra antes o que vai mudar (dry-run + código de confirmação + backup).
+> **Nada pessoal ou de cliente entra no pacote.** Dados da máquina ficam em `~/.claude/maquina.md`; regras de um projeto ficam no `CLAUDE.md` daquele repositório.
+
+Inventário completo (plugins, skills, agentes, camadas, perfis), gerado dos próprios arquivos: [plugins/base/skills/env-guide/componentes.md](plugins/base/skills/env-guide/componentes.md).
 
 ---
 
 ## 1. Estrutura
 
 ```text
-claude-code-setup\
-├── README.md                  ← este guia
-├── LICENSE                    ← MIT (uso livre, sem garantia)
-├── Auditoria LGPD.pdf         ← documento-base da skill /lgpd-audit
-├── .gitattributes             ← fim de linha LF fixo (o instalador compara arquivos por SHA-256)
-├── .gitignore                 ← impede versionar segredos e arquivos gerados
-├── .github\workflows\tests.yml← roda os testes no Windows (PowerShell 5.1 e 7)
-│
-├── global\                    ← tudo que vai para %USERPROFILE%\.claude\
-│   ├── CLAUDE.md              ← instruções carregadas em toda sessão (curto); importa ~\.claude\maquina.md
-│   ├── maquina.example.md     ← modelo do arquivo por máquina (não é instalado)
-│   ├── settings.merge.json    ← modelos, plugins globais, hook, regras deny/ask
-│   ├── agents\                ← 6 agentes (ver seção 2.3)
-│   ├── hooks\                 ← bloquear-segredos.ps1
-│   └── skills\                ← 17 skills (ver seção 2.2)
-│
-├── project-templates\         ← o que vai para cada projeto
-│   ├── CLAUDE.project.md      ← modelo de CLAUDE.md de projeto
-│   ├── gitignore.claude       ← linhas para somar ao .gitignore do projeto
-│   └── <camada>\.claude\settings.json   ← uma pasta por camada (ver seção 2.1)
-│
-├── scripts\
-│   ├── merge-settings.ps1     ← mescla settings (global ou camadas de projeto)
-│   └── instalar-arquivos.ps1  ← copia CLAUDE.md, agents, skills e hooks para ~\.claude
-│
-└── tests\                     ← Pester 5: casos do hook (casos-hook.psd1) e do merge
+claude-code-setup/
+├── .claude-plugin/marketplace.json   ← marketplace "kit-dev-ia" (plugins base, dotnet e angular)
+├── core/                             ← o que plugin não distribui (instalado pelos scripts)
+│   ├── CLAUDE.md                     ← instruções globais (≤ 40 linhas); importa ~/.claude/maquina.md
+│   ├── agents/Explore.md             ← Explore em Haiku (agente de plugin não sobrescreve o embutido)
+│   ├── settings.merge.json           ← modelo, advisor, marketplace, permissões allow/ask/deny
+│   └── maquina.example.md            ← modelo do arquivo por máquina (não é instalado)
+├── plugins/
+│   ├── base/                         ← skills, agentes, hook de segredos, evals
+│   ├── dotnet/                       ← arquitetura onion (ligado por projeto)
+│   └── angular/                      ← arquitetura de frontend Angular (ligado por projeto)
+├── profiles/unix/settings.json       ← sandbox para macOS/Linux/WSL2
+├── project-templates/                ← camadas de projeto (settings, regras por caminho, devcontainer)
+├── scripts/                          ← merge-settings, instalar-arquivos, gerar-docs
+└── tests/                            ← Pester 5+: hook, scripts, estrutura, conteúdo
 ```
 
----
-
-## 2. Como funciona
-
-### 2.1 Global × máquina × projeto
-- **Global** (`~\.claude\`): vale para todas as sessões. Contém preferências, segurança, modelos, os plugins `context7` e `security-guidance`, agentes e skills. É igual em toda máquina.
-- **Máquina** (`~\.claude\maquina.md`): pasta de projetos, pasta de memória, caminho do clone deste repositório e a tabela de projetos atuais. Importado pelo `CLAUDE.md` global (`@~/.claude/maquina.md`).
-- **Projeto** (`<repo>\CLAUDE.md` + `<repo>\.claude\settings.json`): stack, comandos, arquitetura, regras de negócio e os plugins daquele projeto. Plugin de projeto nunca vai no global.
-- O `settings.json` do projeto é montado por **camadas**. Cada camada é uma pasta em `project-templates\`, e você combina as que servem ao projeto. A regra é sempre `_base` + as camadas da stack:
-
-| Stack | Camadas | O que cada uma faz |
+### Por que essa divisão
+| Peça | Mecanismo | Motivo |
 |---|---|---|
-| Backend .NET | `_base,dotnet` | `_base`: o Claude não lê `node_modules`, `bin`, `obj`, `dist` etc. · `dotnet`: `csharp-lsp` |
-| Frontend Angular | `_base,angular` | `typescript-lsp` + `frontend-design` |
-| Node/TS (não Angular) | `_base,node-ts` | `typescript-lsp` |
-| Python | `_base,python` | `pyright-lsp`; não lê `.venv` |
-| Só docker/terraform | `_base,infra` | não lê `.tfstate`/`.tfvars` |
-| Opcionais | `supabase`, `marketing`, `playwright`, `serena` | só quando o projeto precisar |
+| Skills, agentes, hook | Plugin (`/plugin install`) | instalação, atualização e remoção oficiais, em qualquer sistema |
+| Permissões, sandbox, modelo, advisor | `merge-settings.ps1` | plugin só aplica `agent`/`subagentStatusLine` do settings ([doc](https://code.claude.com/docs/en/plugins-reference)) |
+| CLAUDE.md global, agente `Explore` | `instalar-arquivos.ps1` | CLAUDE.md de plugin não carrega; agente de plugin não sobrescreve o `Explore` embutido ([doc](https://code.claude.com/docs/en/sub-agents)) |
+| Regras por caminho | camadas de projeto (`.claude/rules/`) | plugin não distribui regras; elas só carregam ao tocar arquivos do tipo ([doc](https://code.claude.com/docs/en/memory)) |
 
-Detalhes de cada plugin e camada: skill `env-guide` (`global\skills\env-guide\SKILL.md`), que é a **fonte única** de plugins e camadas.
-
-### 2.2 Skills
-- **Automáticas** (o Claude usa sozinho quando faz sentido): `env-guide` (guia do ambiente), `project-bootstrap` (prepara um projeto), `arquitetura-onion` (padrão de camadas do backend .NET) e `arquitetura-angular` (padrão do frontend Angular).
-- **Sob demanda** (só rodam quando **você** digita `/nome`; não ocupam contexto): `/revisar`, `/blueprint`, `/alterar-dados`, `/deploy-checklist`, `/medir-antes-depois`, `/divida`, `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem`, `/lgpd-audit`, `/session-handoff`.
-- Documentos gerados (blueprints, relatório LGPD, handoff) ficam **fora do repositório**, na pasta indicada na linha `Documentação:` do `CLAUDE.md` do projeto. A única exceção é o `DIVIDA.md`, que fica versionado na raiz do projeto.
-
-### 2.3 Modelos e agentes
-- Sessão **Sonnet** + advisor **Opus**, que é consultado nas decisões. Em tarefa crítica (arquitetura, segurança, banco, LGPD), troque a sessão para Opus no seletor.
-- Agentes, cada um com `model:` próprio:
-
-| Agente | Modelo | Faz |
-|---|---|---|
-| `Explore` | haiku | Busca ampla no código (substitui o embutido) |
-| `researcher-haiku` | haiku | Pesquisa em documentação e web |
-| `reviewer-haiku` | haiku | Revisão rápida de diff |
-| `test-validator-haiku` | haiku | Roda build/testes e resume |
-| `documentation-haiku` | haiku | Edita só arquivos `.md` |
-| `implementer-sonnet` | sonnet | Implementação delegada, escopo fechado |
-
-- Os embutidos `Plan` e `general-purpose` herdam o Sonnet da sessão.
-
-### 2.4 Proteções
-- **Regras `deny`**: o Claude não lê `.env`, chaves, certificados, `secrets/`, `appsettings` de ambiente real (`Production`, `Prod`, `Staging`, `Homolog*`, `Local`), credenciais em `~\.ssh`, `~\.aws` etc. Também não edita o `settings.json` global nem os hooks.
-- **`appsettings.json` e `appsettings.Development.json` ficam liberados** (e versionáveis): muitos projetos os versionam sem segredo. A proteção de .NET é pelo conteúdo: segredo vai em User Secrets ou variável de ambiente, nunca no `appsettings` versionado.
-- **Regras `ask`**: pedem sua confirmação antes de commit/push, `fetch`/`pull`/`clone`, comandos git que descartam trabalho (`checkout --`, `restore`, `stash drop`, `branch -D`, `reset --hard`, `clean`), instalar pacotes, rodar scripts do projeto (`npm run`/`test`/`start`, `dotnet run`/`test`), rede (`curl`, `ssh`…), apagar ou mover arquivos (`rm`, `del`, `rmdir`, `mv`) e editar CLAUDE.md/skills/agentes. Cada regra existe para Bash e para PowerShell.
-- **Hook `bloquear-segredos.ps1`**: confere o texto de todo comando de shell. Bloqueia o que citar um arquivo de segredo e pede confirmação para o que mexer em `.claude`, rodar os scripts com `-Confirmar`, esconder o comando (base64) ou fazer git/rede/exclusão **no meio de um encadeamento** ou com `git -C pasta` (o que as regras `ask` por prefixo não pegam). **Se o próprio hook falhar depois de ler o comando, ele pede confirmação em vez de liberar.**
-- Precisa ler algo bloqueado de propósito? Rode você mesmo com `! <comando>`.
-
-### 2.5 Scripts em dois passos
-Os dois scripts funcionam igual:
-1. `-DryRun`: mostra o que vai mudar (JSON final ou lista de arquivos NOVO/ALTERADO/IGUAL com SHA-256 e diff), os **alertas** e um **código**. Não grava nada.
-2. `-Confirmar <código>`: grava, fazendo backup antes. Se algo mudou desde o dry-run, o código deixa de valer: rode o dry-run de novo.
-
-Para rejeitar, basta não rodar o segundo passo. Rodar de novo sem mudança não grava nada.
-
-Opções do `merge-settings.ps1`:
-- O merge **adiciona**: objetos se mesclam, listas viram união. Valor escalar do pacote **sobrescreve** o seu (ex.: `"model"`); o dry-run lista cada um como `SOBRESCREVE`. Use **`-ManterEscalares`** para manter os seus (aparecem como `MANTIDO`).
-- **`-Remover`** tira do resultado o que o pacote não remove sozinho: `-Remover env.CLAUDE_CODE_SUBAGENT_MODEL` (apaga a chave) ou `-Remover 'permissions.allow[]=Bash(winget:*)'` (tira um item da lista). Vários itens: separe por vírgula. Remover `deny`, `ask` ou hook gera **ALERTA**.
-- O caminho do hook é gravado **absoluto** (`C:/Users/<você>/.claude/hooks/...`), sem depender de `$HOME` expandir no shell do hook. Instalação antiga com `$HOME` é convertida (aparece no dry-run como hook que sai e hook que entra).
-- **`-HookShell pwsh`** grava o hook com PowerShell 7, que abre mais rápido que o 5.1 (cada comando de shell abre um processo do hook). Exige `pwsh` instalado.
+Os plugins `dotnet` e `angular` ficam desligados por padrão: a camada de projeto da stack liga o seu, e a descrição da skill de arquitetura só ocupa contexto onde é útil.
 
 ---
 
-## 3. Pré-requisitos
+## 2. Instalação
 
-```powershell
-git --version        # Git for Windows (obrigatório para a aba Code)
-node --version       # Node 20+ (alguns plugins)
-claude --version     # Claude Code recente (advisor no Desktop)
-pwsh --version       # opcional: PowerShell 7 para o hook (-HookShell pwsh)
-```
+Pré-requisitos: Git (no Windows, **Git for Windows**: o hook roda no Git Bash), Claude Code recente (validado com 2.1.318), PowerShell 5.1 ou 7 (`pwsh` em macOS/Linux).
 
-LSPs, só se for ativar nos projetos:
-```powershell
-dotnet tool install --global csharp-ls
-npm install -g typescript-language-server typescript
-```
-
----
-
-## 4. Arquivos que a instalação altera
-
-| Arquivo em `~\.claude\` | Passo | Backup |
-|---|---|---|
-| `maquina.md` (só se não existir) | 2 | — |
-| `CLAUDE.md`, `agents\`, `skills\`, `hooks\` (só os itens do pacote) | 3 | automático em `backups\instalar-AAAAMMDD-HHmmss\` |
-| `settings.json` | 4 | automático em `settings.json.bak-AAAAMMDD-HHmmss` |
-
-Nada mais é gravado. Arquivo que só existe no destino não é tocado.
-
----
-
-## 5. Instalação
-
-Abra o **PowerShell** (5.1 ou 7) **dentro da pasta deste repositório**:
-
+Abra o PowerShell **na pasta deste repositório**:
 ```powershell
 $repo = (Resolve-Path .).Path
-$cl   = "$env:USERPROFILE\.claude"
-if (-not (Test-Path "$repo\scripts\merge-settings.ps1")) { throw "Rode dentro da pasta do claude-code-setup." }
+$cl   = Join-Path $(if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }) '.claude'
 ```
 
-### Passo 1 — Backup
-Copia só o que existe (instalação nova não tem nada para copiar):
+**Passo 1 — Arquivo da máquina** (só se não existir): copie `core/maquina.example.md` para `~/.claude/maquina.md` e preencha pastas, clone e projetos.
 ```powershell
-$bk = "$cl\backups\setup-$(Get-Date -Format yyyyMMdd-HHmm)"
-New-Item -ItemType Directory -Force $bk | Out-Null
-foreach ($f in 'CLAUDE.md', 'settings.json', 'maquina.md') { if (Test-Path "$cl\$f") { Copy-Item "$cl\$f" $bk } }
-if (Test-Path "$cl\agents") { Copy-Item "$cl\agents" $bk -Recurse }
-Write-Host "Backup em $bk"
+if (-not (Test-Path "$cl/maquina.md")) { Copy-Item "$repo/core/maquina.example.md" "$cl/maquina.md" }
 ```
 
-### Passo 2 — Arquivo da máquina
-Cria `~\.claude\maquina.md` a partir do modelo (só se ainda não existir) e abre para você preencher pasta de projetos, pasta de memória, caminho deste clone e projetos atuais:
+**Passo 2 — Plugins** (no Claude Code, ou no shell com `claude plugin ...`):
+```text
+/plugin marketplace add LeonardoPokrewecky/claude-code-setup     (ou o caminho local do clone)
+/plugin install base@kit-dev-ia
+/plugin install dotnet@kit-dev-ia     (fica desligado; a camada dotnet liga por projeto)
+/plugin install angular@kit-dev-ia    (fica desligado; a camada angular liga por projeto)
+```
+
+**Passo 3 — CLAUDE.md global e Explore** (antes deste passo, mova regras de projeto/cliente do seu CLAUDE.md atual para o repositório daquele projeto: o arquivo é substituído inteiro, com backup):
 ```powershell
-if (-not (Test-Path "$cl\maquina.md")) { Copy-Item "$repo\global\maquina.example.md" "$cl\maquina.md" }
-notepad "$cl\maquina.md"
+powershell -ExecutionPolicy Bypass -File "$repo/scripts/instalar-arquivos.ps1" -DryRun
+powershell -ExecutionPolicy Bypass -File "$repo/scripts/instalar-arquivos.ps1" -Confirmar <código>
 ```
 
-### Passo 3 — CLAUDE.md, agentes, skills e hook
-Este passo vem antes do Passo 4, porque o settings aponta para o hook.
+**Passo 4 — Settings** (permissões, modelo, marketplace). Em macOS/Linux/WSL2, acrescente `-Perfil unix` para ligar o sandbox (exige `bubblewrap` e `socat` no Linux):
 ```powershell
-powershell -ExecutionPolicy Bypass -File "$repo\scripts\instalar-arquivos.ps1" -DryRun
-powershell -ExecutionPolicy Bypass -File "$repo\scripts\instalar-arquivos.ps1" -Confirmar <código>
+powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -DryRun -ManterEscalares
+powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -Confirmar <código> -ManterEscalares
 ```
-**O `CLAUDE.md` global é substituído inteiro.** Se o seu atual tem regras de um projeto ou cliente específico (deploy, banco, firewall, padrões de equipe), o dry-run avisa: mova essas regras **antes** para o `CLAUDE.md` do repositório daquele projeto, e dados da máquina para o `maquina.md`. O original fica em `backups\instalar-*\CLAUDE.md`.
+Leia cada **ALERTA**: `allow` e marketplace novos aparecem de propósito; um alerta inesperado indica alteração indevida no pacote. Sem `-ManterEscalares`, o pacote define `model` = `sonnet` e `advisorModel` = `opus` (advisor: experimental, só Anthropic API).
 
-### Passo 4 — Settings
-Mescla `global\settings.merge.json` no seu `settings.json` e preserva o que já existe. Leia cada **alerta** do dry-run: um alerta inesperado indica alteração indevida no pacote. Valores com nome de segredo aparecem como `***`, e estrutura inválida é recusada antes de gravar.
-```powershell
-powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -DryRun -ManterEscalares
-powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -Confirmar <código> -ManterEscalares
-```
-Sem `-ManterEscalares`, o pacote define `model` = Sonnet e `advisorModel` = Opus. Para limpar sobras de outra configuração, use `-Remover` (seção 2.5); por exemplo, `env.CLAUDE_CODE_SUBAGENT_MODEL` colocava `Plan` e `general-purpose` em Haiku.
+Opções do `merge-settings.ps1`:
+- O merge **adiciona**: objetos se mesclam, listas viram união; valor escalar do pacote sobrescreve o seu (`SOBRESCREVE` no dry-run), a menos que use **`-ManterEscalares`** (`MANTIDO`).
+- **`-Remover`** tira o que o pacote não remove sozinho: `-Remover env.CLAUDE_CODE_SUBAGENT_MODEL` (apaga a chave) ou `-Remover 'permissions.allow[]=Bash(winget:*)'` (tira um item); vários itens separados por vírgula. Remover `deny`, `ask` ou hook gera **ALERTA**.
+- **`-Perfil unix`** soma `profiles/unix/settings.json`. **`-Layers a,b -Target <repo>/.claude/settings.json`** aplica camadas de projeto.
+- Sem mudança no resultado, nada é gravado; estrutura inválida (tipo errado em `permissions`, `env`, `enabledPlugins`, `hooks`, `sandbox`) é recusada antes de gravar; valores com nome de segredo aparecem como `***`.
+- A opção `-HookShell` da versão 1 saiu: o hook agora escolhe `pwsh`/`powershell` sozinho.
 
-### Passo 5 — Validar (obrigatório antes de confiar nas proteções)
-Feche e abra o Claude Desktop → aba **Code** → nova sessão **Local**. Na primeira abertura os plugins oficiais são baixados. Se aparecer pedido para confiar em marketplace de terceiro, **recuse**.
-
+**Passo 5 — Validar** (feche e abra o Claude Code):
 | Teste | Esperado |
 |---|---|
-| Peça: "rode `echo .env`" (pela ferramenta Bash e pela PowerShell) | **Bloqueado pelo hook.** Se o comando rodar, o hook não está ativo: confira o caminho em `hooks` no `settings.json` e o `/status` |
-| Peça: "leia `~/.ssh/config`" e "leia `~/.claude/.credentials.json`" | Negado |
-| Peça: "rode `git -C . push`" | Pede confirmação (hook) |
-| Peça: "rode `curl.exe --version`" | Pede confirmação |
-| `/status` | `Setting sources` inclui User settings; modelo esperado |
-| `/advisor` | Advisor = Opus |
-| `/plugin` | `context7` e `security-guidance` ativos; `claude-code-setup` desativado; nenhum de terceiro |
-| `/agents` | os 6 agentes da seção 2.3 |
-| "quais skills globais você tem?" | `env-guide`, `project-bootstrap`, `arquitetura-onion` e `arquitetura-angular` (as sob demanda não aparecem na lista) |
+| "rode `echo .env`" (Bash e PowerShell) | bloqueado pelo hook |
+| "rode `git -C . push`" | pede confirmação |
+| "rode `dotnet --version`" e depois `dotnet test` num projeto | `dotnet test` roda sem pedir |
+| "leia `~/.ssh/config`" | negado |
+| `/plugin` | `base` ligado; `context7` e `security-guidance` ativos; nenhum terceiro inesperado |
+| `/agents` | `Explore` (usuário) + agentes `base:*` |
+| `/context` | anotar o total (compare com a medição do pacote) |
 
-Plugin oficial que não baixou: `/plugin install <nome>@claude-plugins-official`.
+### Migração da versão 1 (arquivos copiados em `~/.claude`)
+Faça o Passo 2 **antes** dos Passos 3 e 4. O `instalar-arquivos.ps1` lista como **LEGADO** as skills, os agentes e o hook antigos com o mesmo nome e os move para `~/.claude/backups/instalar-*/legado/`. O `merge-settings.ps1` remove do settings o hook antigo (ALERTA "proteção sai"), porque ele agora vem do plugin.
 
 ---
 
-## 6. Ativar em um projeto
+## 3. Ativar em um projeto
 
-### Pelo Claude (recomendado)
-Abra uma sessão no projeto e peça:
-- projeto existente: **"use a skill project-bootstrap no modo adopt-existing"**;
-- projeto novo (criado na pasta de projetos do `maquina.md`, com `git init`): **"use a skill project-bootstrap no modo new-project"**.
+Peça ao Claude: **"use a skill project-bootstrap"** (modo `adopt-existing` ou `new-project`). Ele detecta a stack, propõe as camadas e mostra o dry-run antes de gravar.
 
-O Claude detecta a stack, propõe as camadas e mostra o dry-run. Ele só grava depois da sua aprovação.
-
-### Manual
+Manual:
 ```powershell
-$proj = "<pasta de projetos>\<Projeto>"
-# 1. settings por camadas (ver antes, depois aplicar com o código):
-powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -Target "$proj\.claude\settings.json" -Layers _base,dotnet -DryRun
-powershell -ExecutionPolicy Bypass -File "$repo\scripts\merge-settings.ps1" -Target "$proj\.claude\settings.json" -Layers _base,dotnet -Confirmar <código>
-# 2. CLAUDE.md do projeto (só se não existir):
-if (-not (Test-Path "$proj\CLAUDE.md")) { Copy-Item "$repo\project-templates\CLAUDE.project.md" "$proj\CLAUDE.md" }
-# 3. pasta de documentação fora do repo:
-New-Item -ItemType Directory -Force "$(Split-Path $proj)\docs\$(Split-Path $proj -Leaf)\backlog" | Out-Null
-# 4. .gitignore: listar as linhas que faltam...
-$gi = "$proj\.gitignore"; $atual = if (Test-Path $gi) { Get-Content $gi -Encoding UTF8 } else { @() }
-$faltam = Get-Content "$repo\project-templates\gitignore.claude" -Encoding UTF8 | Where-Object { $_ -and $_ -notin $atual }
-$faltam   # revisar antes de seguir
-# ...e, conferidas, somar ao final sem grudar na última linha:
-if ((Test-Path $gi) -and (Get-Content $gi -Raw) -notmatch '\n$') { Add-Content $gi -Value '' -Encoding utf8 }
-Add-Content $gi -Value $faltam -Encoding utf8
-# 5. só em repositório de cliente (Claude fora do Git sem tocar no .gitignore versionado):
-$ex = "$proj\.git\info\exclude"; $atual = if (Test-Path $ex) { Get-Content $ex -Encoding UTF8 } else { @() }
-'CLAUDE.md', 'CLAUDE.local.md', '.claude/' | Where-Object { $_ -notin $atual } | ForEach-Object { Add-Content $ex -Value $_ -Encoding utf8 }
+$proj = "<pasta do projeto>"
+powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -Target "$proj/.claude/settings.json" -Layers _base,dotnet -DryRun
+powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -Target "$proj/.claude/settings.json" -Layers _base,dotnet -Confirmar <código>
+# Regras por caminho das camadas escolhidas (sem sobrescrever):
+New-Item -ItemType Directory -Force "$proj/.claude/rules" | Out-Null
+Get-ChildItem "$repo/project-templates/dotnet/.claude/rules" -File | Where-Object { -not (Test-Path "$proj/.claude/rules/$($_.Name)") } | Copy-Item -Destination "$proj/.claude/rules"
+if (-not (Test-Path "$proj/CLAUDE.md")) { Copy-Item "$repo/project-templates/CLAUDE.project.md" "$proj/CLAUDE.md" }
 ```
-Troque `_base,dotnet` pelas camadas da stack (tabela da seção 2.1). Depois, registre o projeto na tabela do `maquina.md`.
+- `.gitignore`: somar as linhas de `project-templates/gitignore.claude` que faltam (o `project-bootstrap` faz isso lendo em UTF-8).
+- Repositório de cliente em que o Claude não deve aparecer: em vez do `.gitignore`, somar `CLAUDE.md`, `CLAUDE.local.md` e `.claude/` ao `.git/info/exclude`.
+- Camada `devcontainer` (copiar `.devcontainer/`): isolamento para Windows nativo ou código não confiável — **não validada em projeto real**.
 
 ---
 
-## 7. Uso no dia a dia
+## 4. Permissões (fonte: `core/settings.merge.json`)
+
+| Classe | Política |
+|---|---|
+| Leitura e pesquisa | sem prompt (somente leitura nativos); **deny** de leitura de segredos (`.env`, chaves, `secrets/`, `appsettings` de ambiente real, credenciais em `~/.ssh`, `~/.aws`…) |
+| Edição | prompt nativo; **deny** em `~/.claude/settings*.json`, `hooks/`, `plugins/`; **ask** em CLAUDE.md, skills e agentes do usuário |
+| Build e testes | **allow**: `dotnet build/test`, `npm test`, `npm run build/test/lint`, `pytest` (Bash e PowerShell) |
+| Instalar dependências | **ask** (npm/pnpm/yarn dlx, npx, uvx, pip, dotnet add/tool, winget) |
+| Banco de dados | sem regra genérica; `/alterar-dados` (backup + canário) e aprovação explícita |
+| Git | leitura nativa; **ask** para commit, push, fetch/pull/clone, reset --hard, clean, restore, checkout --, stash drop/clear, branch -D, remote add/set-url; o hook cobre `git -C`/`-c` |
+| Publicação e rede | **ask** (gh api/gist/secret/release/repo create, curl, wget, ssh, scp, rsync, Invoke-WebRequest…) |
+| Destrutivas e código inline | **ask** (rm, del, mv, Remove-Item, Move-Item, `node -e`, `python -c`, `bash -c`, `powershell`, `cmd`, `iex`, `Start-Process`) |
+
+As regras nativas dividem comandos compostos (`x && git push` pede confirmação). Nenhum modo de aprovação automática substitui esta política.
+
+**Risco aceito no Windows nativo:** build e teste liberados rodam scripts do projeto, que podem ler segredos sem citar o nome. Mitigação: segredos fora do repositório (User Secrets, variável de ambiente); para código não confiável, WSL2 com `-Perfil unix` ou a camada `devcontainer`.
+
+---
+
+## 5. Uso no dia a dia
 
 | Situação | O que fazer |
 |---|---|
-| Tarefa comum | Sessão Sonnet; o advisor Opus entra sozinho nas decisões |
-| Tarefa crítica | Trocar a sessão para Opus |
-| Planejar algo grande | Começar em **Plan mode** |
-| Revisar código | `/revisar <estilo>` (seguranca, arquitetura, performance, testes, didatico, a11y, banco, deps, contrato); `/code-review`; `/security-review`; `/simplify` (aplica as correções) |
-| Antes de implementar (se o projeto exigir) | `/blueprint <atividade>` |
-| Alterar dados em massa / deploy | `/alterar-dados`, `/deploy-checklist` |
-| Atalho adiado de propósito | `/divida registrar <atalho>`; `/divida listar` |
-| Outras | `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem`, `/medir-antes-depois` |
-| Auditoria LGPD | `/lgpd-audit` |
-| Continuar em outra sessão | `/session-handoff` |
-| Desligar o advisor | `/advisor off` |
+| Tarefa comum | sessão Sonnet; o advisor Opus entra nas decisões |
+| Arquitetura, segurança, banco, LGPD | trocar a sessão para Opus |
+| Planejar algo grande | Plan mode + `/blueprint` (inclui requisitos não funcionais) |
+| Revisar | `/revisar` (lentes escolhidas pelo risco do diff) ou `/revisar <lente>`; `/code-review`, `/security-review` |
+| Dados em massa / deploy | `/alterar-dados`, `/deploy-checklist` |
+| Outras | `/divida`, `/medir-antes-depois`, `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem`, `/lgpd-audit`, `/session-handoff` |
+
+Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI leem o mesmo `~/.claude`: a configuração é a mesma nos dois.
 
 ---
 
-## 8. Desfazer
+## 6. Atualizar, desinstalar e recuperar
 
-```powershell
-# CLAUDE.md, settings.json e maquina.md do último backup do Passo 1 (só os que existiam):
-$bk = (Get-ChildItem "$cl\backups" -Directory -Filter "setup-*" | Sort-Object Name | Select-Object -Last 1).FullName
-foreach ($f in 'CLAUDE.md', 'settings.json', 'maquina.md') { if (Test-Path "$bk\$f") { Copy-Item "$bk\$f" $cl -Force } }
-# Agentes, skills e hook deste pacote (a lista vem da pasta global\ do repo):
-Get-ChildItem "$repo\global\agents" -File      | ForEach-Object { Remove-Item "$cl\agents\$($_.Name)" -ErrorAction SilentlyContinue }
-Get-ChildItem "$repo\global\skills" -Directory | ForEach-Object { Remove-Item "$cl\skills\$($_.Name)" -Recurse -ErrorAction SilentlyContinue }
-Get-ChildItem "$repo\global\hooks" -File       | ForEach-Object { Remove-Item "$cl\hooks\$($_.Name)" -ErrorAction SilentlyContinue }
-```
-- Se você tinha versões próprias com o mesmo nome antes de instalar, elas estão em `~\.claude\backups\instalar-*\`. Copie de volta.
-- Plugins: `/plugin` → desinstalar, ou remover a entrada de `enabledPlugins`.
+- **Atualizar:** `git pull` no clone; `claude plugin marketplace update kit-dev-ia` e `claude plugin update base@kit-dev-ia` (o `version` do `plugin.json` fixa a versão: suba-o a cada mudança publicada); `/reload-plugins` na sessão aberta; depois rodar de novo os Passos 3 e 4 (o dry-run mostra só o que mudou).
+- **Desinstalar:** `/plugin uninstall base@kit-dev-ia`, `dotnet@kit-dev-ia` e `angular@kit-dev-ia`; `claude plugin marketplace remove kit-dev-ia`; restaurar `~/.claude/CLAUDE.md` e `settings.json` do backup.
+- **Recuperar:** `settings.json` → `~/.claude/settings.json.bak-AAAAMMDD-HHmmss`; CLAUDE.md, agentes e legado → `~/.claude/backups/instalar-*/`. Copie de volta o arquivo desejado.
 
 ---
 
-## 9. Limitações das proteções
+## 7. Portabilidade
 
-O hook e as regras reduzem o risco, mas não fecham tudo. Revise o que você aprova.
-- **O hook lê só o texto do comando.** Ele não pega:
-  - nome montado em variável (`$a='.e'+'nv'; gc $a`);
-  - `cd` para a pasta seguido de caminho relativo (só o `cd` para `.claude` pede confirmação);
-  - curinga sozinho (`cat *`);
-  - busca que lê segredos sem citar o nome (`grep -r PASSWORD .`);
-  - script que lê o arquivo por dentro (`node x.js`, `npm run x` — por isso `npm run`/`dotnet run` pedem confirmação).
-- **`appsettings.json` e `appsettings.Development.json` não são protegidos por nome.** Segredo neles fica visível: mantenha-os sem segredo (User Secrets ou variável de ambiente).
-- **Falsos positivos:** `obj.key` em JavaScript e `.env.example` são bloqueados; `git commit` dentro de um texto pede confirmação. Nesses casos, use `! <comando>` ou aprove.
-- **Se o hook não rodar, ele não bloqueia.** JSON de entrada inválido, arquivo ausente ou timeout de 10 s liberam o comando. Falha interna depois de ler o comando pede confirmação. O merge avisa quando o arquivo do hook não existe; o Passo 5 prova que ele roda.
-- **Desempenho:** cada comando de shell abre um processo PowerShell (5.1: ~300–800 ms). `-HookShell pwsh` reduz.
-- **Regras `Read(**/...)` valem a partir da pasta da sessão.** As credenciais da pasta do usuário têm regras próprias `Read(~/...)`.
-- **Regras `ask` por prefixo** (`Bash(curl:*)`) não pegam o comando por outro nome ou caminho completo. Encadeamentos (`&&`, `;`, `|`) e `git -C` de git, rede e exclusão são cobertos pelo hook; o resto, não.
-- **O código de `-Confirmar` não distingue você do agente.** A aprovação real é a confirmação que o hook pede na interface. Em modo que aprova tudo sozinho (`bypassPermissions`), essa confirmação pode não aparecer.
-- **O agente pode editar `global\settings.merge.json` neste repositório** (é trabalho normal aqui). Os alertas do dry-run são a defesa.
-- **Plugins oficiais seguem a versão mais recente.** O `marketingskills` (camada `marketing`) é fixado por tag, que o autor pode mover. A conferência por SHA está no `env-guide`.
-- **Só Windows.** Hook e scripts são PowerShell; com `pwsh` o hook roda em outros sistemas, mas os scripts e caminhos não foram testados fora do Windows.
+| Componente | Windows PS 5.1 | Windows PS 7 | Linux / WSL2 | macOS |
+|---|---|---|---|---|
+| Hook (plugin, Git Bash/sh) | testado aqui | alterado para o CI, não executado | alterado para o CI, não executado | não testado |
+| `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI, não executado | CI, não executado | não testado |
+| Plugins e marketplace (`claude plugin validate`, instalação isolada) | testado aqui | — | não testado | não testado |
+| Sandbox (`-Perfil unix`) | não suportado (doc oficial) | não suportado | não testado | não testado |
+| Devcontainer | não testado | — | não testado | não testado |
+| Desktop × CLI | mesma configuração (`~/.claude`) | | | |
+
+Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe `sh` ([doc](https://code.claude.com/docs/en/hooks)). Instale o Git for Windows ou defina `CLAUDE_CODE_GIT_BASH_PATH`.
 
 ---
 
-## 10. Testes e manutenção
+## 8. Limitações das proteções
 
-- **Testes** (Pester 5): `Invoke-Pester .\tests -Output Detailed`. Os casos do hook ficam em `tests\casos-hook.psd1` (comando → `Bloqueia`/`Confirma`/`Libera`); padrão novo no hook entra com caso novo. `$env:HOOK_SHELL = 'pwsh'` testa com PowerShell 7. O GitHub Actions roda os dois shells a cada push.
-  - Pester 5 não vem com o Windows: `Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -SkipPublisherCheck`.
-- Alterou algo direto em `~\.claude\`? Copie de volta para `global\` e faça commit aqui. Dado da máquina vai no `maquina.md`, nunca no pacote.
-- Plugin de terceiro novo ou atualizado: revisar origem, licença, hooks e dados coletados antes de ativar.
-- Mudou plugin ou camada? Atualize o `env-guide` (fonte única), não o README.
-- Fontes: [Advisor](https://code.claude.com/docs/en/advisor) · [Subagentes](https://code.claude.com/docs/en/sub-agents) · [Settings](https://code.claude.com/docs/en/settings) · [Memória e imports](https://code.claude.com/docs/en/memory) · [Hooks](https://code.claude.com/docs/en/hooks)
+- **O hook lê só o texto do comando.** Não pega nome montado em variável, `cd` + caminho relativo, curinga sozinho (`cat *`), busca que lê segredos sem citar o nome (`grep -r PASSWORD .`) nem script que lê o arquivo por dentro. Medição: 7/7 desses casos passam — é camada contra acidente.
+- **Falso positivo conhecido:** `git commit -m "... .env ..."` é bloqueado (use `! <comando>`).
+- **Hook que não roda não bloqueia:** JSON inválido ou timeout liberam; falha interna depois do parse pede confirmação; sem PowerShell, a ponte pede confirmação.
+- **Regras `ask/deny` por texto** não pegam o programa por caminho completo ou dentro de `sh -c` (doc oficial); o sandbox (macOS/Linux/WSL2) é a proteção que não depende do texto.
+- **`appsettings.json` e `appsettings.Development.json` não são protegidos por nome:** mantenha-os sem segredo.
+- **O código de `-Confirmar` não distingue você do agente:** a aprovação real é a confirmação que o hook pede ao ver `-Confirmar`.
+- **Plugins oficiais seguem a versão mais recente.** `marketingskills` (camada `marketing`) é fixado por tag; conferência por SHA no `env-guide`.
 
 ---
 
-## 11. Pendências
+## 9. Testes e manutenção
 
-- [ ] **Validar numa sessão real** (Passo 5) depois de instalar. Fora do harness: 81 casos do hook e o merge testados no PowerShell 5.1.
-- [ ] Rodar os testes no PowerShell 7 (CI) antes de recomendar `-HookShell pwsh`.
-- [ ] Fixar `marketingskills` por SHA, se o schema de `extraKnownMarketplaces` aceitar.
-- [ ] Avaliar o plugin Task Observer (origem, licença, hooks).
-- [ ] Medir tokens/custo antes e depois do advisor (`/usage`).
+- `Invoke-Pester ./tests -Output Detailed` (Pester 5 ou 6: `Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -SkipPublisherCheck`).
+- Casos do hook em `tests/casos-hook.psd1`: padrão novo no hook entra com caso novo.
+- Mudou skill, agente, plugin, camada ou perfil? Rode `scripts/gerar-docs.ps1` e commite o `componentes.md` (o teste falha se ficar desatualizado).
+- `claude plugin validate .` e `claude plugin validate ./plugins/<nome>` antes de publicar.
+- Evals em `plugins/base/evals/`: `claude plugin eval ./plugins/base` (chama o modelo; custo).
+- Termos proibidos (dado de cliente): lista **fora** do repositório em `../docs/claude-code-setup/termos-proibidos.txt` ou `CCS_TERMOS_PROIBIDOS`; sem lista, o teste fica pulado.
+
+Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketplace](https://code.claude.com/docs/en/plugin-marketplaces) · [Permissões](https://code.claude.com/docs/en/permissions) · [Sandbox](https://code.claude.com/docs/en/sandboxing) · [Hooks](https://code.claude.com/docs/en/hooks) · [Memória e regras](https://code.claude.com/docs/en/memory) · [Subagentes](https://code.claude.com/docs/en/sub-agents) · [Advisor](https://code.claude.com/docs/en/advisor) · [Evals](https://code.claude.com/docs/en/plugin-evals)
+
+---
+
+## 10. Pendências
+
+- [ ] Validar numa sessão real (Passo 5) e medir `/context` antes × depois.
+- [ ] Executar o CI (push) para PowerShell 7 e Linux.
+- [ ] Rodar `claude plugin eval ./plugins/base` e criar evals para skills sob demanda (`/revisar`, `/blueprint`, `/alterar-dados`) — invocação por `/comando` em eval não confirmada na doc.
+- [ ] Perfil de CI e template de CI com `anthropics/claude-code-action` (sem caso real).
+- [ ] Validar a seção IIS do `/deploy-checklist` e a camada `devcontainer` em projeto real.
+- [ ] Fixar `marketingskills` por SHA, se o schema aceitar.
+- [ ] Confirmar direitos de distribuição do `Auditoria LGPD.pdf`.
