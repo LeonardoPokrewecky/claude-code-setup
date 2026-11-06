@@ -62,6 +62,19 @@ Describe 'Skills' {
         $h['description'] | Should -Not -BeNullOrEmpty
         ($h['description'] + ' ' + $h['when_to_use']).Length | Should -BeLessOrEqual 1536 -Because 'limite da listagem de skills'
     }
+
+    It 'argument-hint de <Pasta>, se existir, é texto entre aspas (YAML lê [ ... ] sem aspas como lista)' -ForEach $skills {
+        $linha = @([IO.File]::ReadAllLines($Arquivo) | Where-Object { $_ -match '^argument-hint:' })
+        foreach ($l in $linha) { $l | Should -Not -Match '^argument-hint:\s*\[' }
+    }
+
+    It '/revisar tem o modo PR: modo-pr.md referenciado e pr no argument-hint' {
+        $pasta = Join-Path $raiz 'plugins/base/skills/revisar'
+        Test-Path -LiteralPath (Join-Path $pasta 'modo-pr.md') | Should -BeTrue
+        $skill = [IO.File]::ReadAllText((Join-Path $pasta 'SKILL.md'))
+        $skill | Should -Match '\(modo-pr\.md\)'
+        $skill | Should -Match 'argument-hint:\s*"\[auto\|pr\|'
+    }
 }
 
 Describe 'Agentes' {
@@ -101,6 +114,13 @@ Describe 'Core e settings' {
         $s = Read-Json (Join-Path $raiz 'core/settings.merge.json')
         foreach ($a in @($s.permissions.allow)) {
             $a | Should -Not -Match '(push|install|curl|wget|ssh|rm |Remove-Item|npx|run \*|run:\*|^Bash\(\*\)|^PowerShell\(\*\))'
+        }
+    }
+
+    It 'ações que alteram um PR pelo gh pedem confirmação (Bash e PowerShell)' {
+        $ask = @((Read-Json (Join-Path $raiz 'core/settings.merge.json')).permissions.ask)
+        foreach ($acao in 'merge', 'review', 'comment', 'close', 'edit', 'ready') {
+            foreach ($ferramenta in 'Bash', 'PowerShell') { $ask | Should -Contain "$ferramenta(gh pr ${acao}:*)" }
         }
     }
 

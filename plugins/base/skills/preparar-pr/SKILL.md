@@ -2,7 +2,7 @@
 name: preparar-pr
 description: Prepara o texto do PR a partir do diff (resumo, motivo, riscos, como testar, checklist). Não faz commit nem push. Só roda com /preparar-pr [branch base].
 disable-model-invocation: true
-argument-hint: [branch base]
+argument-hint: "[branch base]"
 ---
 
 Base: `$ARGUMENTS` (padrão: branch principal). **Não executar commit, push nem criar PR.**

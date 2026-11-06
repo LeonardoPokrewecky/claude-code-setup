@@ -1,14 +1,15 @@
 ---
 name: revisar
-description: Revisão somente leitura por lentes (seguranca, lgpd, arquitetura, qualidade, performance, testes, contrato, banco, deps, a11y, didatico). Sem lente, escolhe as lentes pelo risco do diff. Alvo: diff, caminho ou branch. Só roda com /revisar [lente|auto] [alvo].
+description: Revisão somente leitura por lentes (seguranca, lgpd, arquitetura, qualidade, performance, testes, contrato, banco, deps, a11y, didatico). Sem lente, escolhe as lentes pelo risco do diff. Alvo: diff, caminho ou branch. Modo PR (pr <número|branch>) checa CI e conflito e dá veredito. Só roda com /revisar [lente|auto|pr] [alvo].
 disable-model-invocation: true
-argument-hint: [auto|seguranca|lgpd|arquitetura|qualidade|performance|testes|contrato|banco|deps|a11y|didatico] [caminho | branch:<nome>]
+argument-hint: "[auto|pr|seguranca|lgpd|arquitetura|qualidade|performance|testes|contrato|banco|deps|a11y|didatico] [caminho | branch:<nome> | <número-do-PR> [completo]]"
 ---
 
 # Revisar — lentes escolhidas pelo risco
 
 Argumentos: `$ARGUMENTS` → 1ª palavra = lente (ou `auto`); resto = alvo. Primeira palavra que não é lente conhecida faz parte do alvo e a seleção é automática.
 Sem alvo: `git diff` + `git diff --cached`; sem Git: perguntar quais arquivos.
+**1ª palavra `pr`:** modo PR. Ler [modo-pr.md](modo-pr.md) e seguir aquele roteiro (pré-checagens de CI e conflito, leitura dos chamadores, lentes deste arquivo, veredito com bloqueantes). As seções abaixo valem dentro dele.
 
 **Somente leitura.** Não editar, não instalar, não commitar. Ler o `CLAUDE.md` do projeto para os padrões.
 **Revisão automática não é aprovação.** Ela aponta riscos; quem aprova é uma pessoa.

@@ -22,7 +22,7 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 ## Quando usar
 - Projeto sem `CLAUDE.md` → `project-bootstrap`. Camadas: sempre `_base` + as da stack (ver componentes.md); opcionais (`supabase`, `marketing`, `playwright`, `serena`, `devcontainer`) só a pedido.
 - Planejar algo grande → Plan mode + `/blueprint` (requisitos não funcionais incluídos).
-- Revisar → `/revisar` (escolhe as lentes pelo risco do diff) ou `/revisar <lente>`; `/code-review` e `/security-review` embutidos para o diff completo.
+- Revisar → `/revisar` (escolhe as lentes pelo risco do diff), `/revisar <lente>` ou `/revisar pr <número|branch>` (pull request: CI, conflito, veredito); `/code-review` e `/security-review` embutidos para o diff completo.
 - Dados em massa → `/alterar-dados`; deploy → `/deploy-checklist`; LGPD do app → `/lgpd-audit`.
 - Delegar: leitura ampla → `Explore`; pesquisa web → `researcher-haiku`; rodar testes → `test-validator-haiku`; só `.md` → `documentation-haiku`; implementação paralela → `implementer-sonnet`; uma lente de revisão → `revisor` (modelo da sessão; segurança/LGPD/arquitetura nunca em Haiku).
 - Agentes embutidos `Plan` e `general-purpose` herdam o modelo da sessão.

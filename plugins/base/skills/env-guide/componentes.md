@@ -29,7 +29,7 @@
 | `postmortem` | só `/postmortem` | Monta o post-mortem de um incidente ou bug sério (linha do tempo, causa raiz, impacto, ações). Só roda com /postmortem <descrição ou logs>. |
 | `preparar-pr` | só `/preparar-pr` | Prepara o texto do PR a partir do diff (resumo, motivo, riscos, como testar, checklist). Não faz commit nem push. Só roda com /preparar-pr [branch base]. |
 | `project-bootstrap` | automática + `/project-bootstrap` | Prepara um projeto para o ambiente Claude Code — modo new-project (projeto novo) ou adopt-existing (projeto existente). Cria/mescla CLAUDE.md e .claude/settings.json do projeto de forma conservadora e idempotente. Use quando o projeto não tiver CLAUDE.md ou o usuário pedir para preparar/adotar um projeto. |
-| `revisar` | só `/revisar` | Revisão somente leitura por lentes (seguranca, lgpd, arquitetura, qualidade, performance, testes, contrato, banco, deps, a11y, didatico). Sem lente, escolhe as lentes pelo risco do diff. Alvo: diff, caminho ou branch. Só roda com /revisar [lente\|auto] [alvo]. |
+| `revisar` | só `/revisar` | Revisão somente leitura por lentes (seguranca, lgpd, arquitetura, qualidade, performance, testes, contrato, banco, deps, a11y, didatico). Sem lente, escolhe as lentes pelo risco do diff. Alvo: diff, caminho ou branch. Modo PR (pr <número\|branch>) checa CI e conflito e dá veredito. Só roda com /revisar [lente\|auto\|pr] [alvo]. |
 | `session-handoff` | só `/session-handoff` | Gera um resumo de passagem de bastão quando uma tarefa vai continuar em outra sessão — objetivo, estado, decisões, arquivos, testes e próximos passos. Só roda com /session-handoff. |
 
 | Agente | Modelo | Ferramentas | Descrição |
@@ -63,7 +63,7 @@ Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if command -v pwsh >/dev/nul
 
 ## Permissões (`core/settings.merge.json`)
 
-Modelo `sonnet`, advisor `opus`. Regras: 32 allow, 158 ask, 58 deny. Política por classe de operação: README, seção Permissões.
+Modelo `sonnet`, advisor `opus`. Regras: 32 allow, 170 ask, 58 deny. Política por classe de operação: README, seção Permissões.
 
 ## Perfis (`profiles/`, `merge-settings.ps1 -Perfil <nome>`)
 

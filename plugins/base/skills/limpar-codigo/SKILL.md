@@ -2,7 +2,7 @@
 name: limpar-codigo
 description: Relatório de código morto, duplicado, imports/variáveis sem uso e simplificações possíveis (somente relatório). Só roda com /limpar-codigo [caminho].
 disable-model-invocation: true
-argument-hint: [caminho]
+argument-hint: "[caminho]"
 ---
 
 Alvo: `$ARGUMENTS` (vazio = projeto, ignorando `node_modules`, `dist`, `bin`, `obj`). **Só relatório; não editar.**

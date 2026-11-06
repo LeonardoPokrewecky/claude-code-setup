@@ -130,7 +130,7 @@ if (-not (Test-Path "$proj/CLAUDE.md")) { Copy-Item "$repo/project-templates/CLA
 | Instalar dependências | **ask** (npm/pnpm/yarn dlx, npx, uvx, pip, dotnet add/tool, winget) |
 | Banco de dados | sem regra genérica; `/alterar-dados` (backup + canário) e aprovação explícita |
 | Git | leitura nativa; **ask** para commit, push, fetch/pull/clone, reset --hard, clean, restore, checkout --, stash drop/clear, branch -D, remote add/set-url; o hook cobre `git -C`/`-c` |
-| Publicação e rede | **ask** (gh api/gist/secret/release/repo create, curl, wget, ssh, scp, rsync, Invoke-WebRequest…) |
+| Publicação e rede | **ask** (gh api/gist/secret/release/repo create, ações em PR (gh pr merge/review/comment/close/edit/ready), curl, wget, ssh, scp, rsync, Invoke-WebRequest…) |
 | Destrutivas e código inline | **ask** (rm, del, mv, Remove-Item, Move-Item, `node -e`, `python -c`, `bash -c`, `powershell`, `cmd`, `iex`, `Start-Process`) |
 
 As regras nativas dividem comandos compostos (`x && git push` pede confirmação). Nenhum modo de aprovação automática substitui esta política.
@@ -146,7 +146,7 @@ As regras nativas dividem comandos compostos (`x && git push` pede confirmação
 | Tarefa comum | sessão Sonnet; o advisor Opus entra nas decisões |
 | Arquitetura, segurança, banco, LGPD | trocar a sessão para Opus |
 | Planejar algo grande | Plan mode + `/blueprint` (inclui requisitos não funcionais) |
-| Revisar | `/revisar` (lentes escolhidas pelo risco do diff) ou `/revisar <lente>`; `/code-review`, `/security-review` |
+| Revisar | `/revisar` (lentes escolhidas pelo risco do diff), `/revisar <lente>` ou `/revisar pr <número|branch> [completo]` (CI, conflito com a base e veredito, só leitura); `/code-review`, `/security-review` |
 | Dados em massa / deploy | `/alterar-dados`, `/deploy-checklist` |
 | Outras | `/divida`, `/medir-antes-depois`, `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem`, `/lgpd-audit`, `/session-handoff` |
 
