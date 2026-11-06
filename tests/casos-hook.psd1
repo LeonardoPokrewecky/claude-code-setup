@@ -1,4 +1,4 @@
-@{
+﻿@{
     # Esperado: Bloqueia (exit 2), Confirma (JSON "ask"), Libera (exit 0 sem saída).
     Casos = @(
         # --- Bloqueia: arquivos de segredo ---

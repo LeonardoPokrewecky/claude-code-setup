@@ -1,0 +1,18 @@
+{
+  "name": "kit-dev-ia",
+  "description": "Plugins do claude-code-setup: base genérica (segurança, revisão, planejamento) e .NET.",
+  "owner": { "name": "Leonardo Pokrewecky" },
+  "plugins": [
+    {
+      "name": "base",
+      "source": "./plugins/base",
+      "description": "Hook de segredos, revisão por lentes, planejamento, alteração de dados, deploy, LGPD e agentes."
+    },
+    {
+      "name": "dotnet",
+      "source": "./plugins/dotnet",
+      "description": "Arquitetura onion para backend .NET. Ligado por projeto (camada dotnet).",
+      "defaultEnabled": false
+    }
+  ]
+}

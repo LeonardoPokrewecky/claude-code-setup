@@ -1,5 +1,5 @@
 # Mescla settings sem apagar o que ja existe: objetos mesclam por propriedade, arrays viram uniao, escalares sobrescrevem.
-# Global (padrao):  merge-settings.ps1 [-Target <settings.json>]            -> global\settings.merge.json
+# Global (padrao):  merge-settings.ps1 [-Target <settings.json>] [-Perfil unix] -> core/settings.merge.json
 # Camadas:          merge-settings.ps1 -Target <repo>\.claude\settings.json -Layers _base,dotnet,angular
 #                   (cada camada = project-templates\<nome>\.claude\settings.json; -Target e obrigatorio)
 # Fluxo obrigatorio em 2 passos (nada e gravado sem o usuario ver o resultado):
@@ -16,9 +16,7 @@
 #                      "caminho[]=valor" tira um item de lista (ex.: 'permissions.allow[]=Bash(winget:*)').
 #                      Remover deny/ask/hook gera ALERTA.
 #   -Perfil unix       soma profiles\unix\settings.json (sandbox ligado + credenciais negadas; macOS/Linux/WSL2).
-#   -HookShell pwsh    grava o hook com pwsh (PowerShell 7, abre mais rapido) em vez de powershell 5.1.
-# O caminho do hook em ~/.claude/hooks e gravado absoluto (sem $HOME/~), porque variavel que nao expande no shell
-# do hook faz o hook nao rodar e nao bloquear nada, sem aviso.
+# Hook: vem do plugin base. A entrada antiga do hook no settings e removida no merge (aparece como ALERTA).
 param(
     [string]$Target,
     [string[]]$Layers,
@@ -27,11 +25,12 @@ param(
     [string[]]$Remover,
     [switch]$ManterEscalares,
     # Perfil de ambiente somado ao settings global: profiles\<nome>\settings.json (ex.: unix = sandbox ligado).
-    [ValidateSet('unix')][string[]]$Perfil,
-    [ValidateSet('powershell', 'pwsh')][string]$HookShell = 'powershell'
+    [ValidateSet('unix')][string[]]$Perfil
 )
 $ErrorActionPreference = 'Stop'
 $root = Join-Path $PSScriptRoot '..'
+# Pasta do usuario em Windows (USERPROFILE) e em macOS/Linux (HOME).
+$pastaHome = if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }
 $utf8 = New-Object Text.UTF8Encoding $false
 
 $Layers = @($Layers | ForEach-Object { $_ -split ',' } | Where-Object { $_ })   # -File entrega "a,b" como 1 string
@@ -40,15 +39,15 @@ $Remover = @($Remover | ForEach-Object { $_ -split ',' } | Where-Object { $_ })
 if ($Layers) {
     if (-not $Target) { throw '-Layers exige -Target explicito (nunca grava no settings global por engano).' }
     $sources = $Layers | ForEach-Object {
-        $f = Join-Path $root "project-templates\$_\.claude\settings.json"
-        if (-not (Test-Path -LiteralPath $f)) { throw "Camada inexistente: $_" }
+        $f = Join-Path $root "project-templates/$_/.claude/settings.json"
+        if (-not (Test-Path -LiteralPath $f)) { throw "Camada inexistente (ou sem settings.json): $_" }
         $f
     }
 } else {
-    if (-not $Target) { $Target = "$env:USERPROFILE\.claude\settings.json" }
-    $sources = @(Join-Path $root 'global\settings.merge.json')
+    if (-not $Target) { $Target = Join-Path $pastaHome '.claude/settings.json' }
+    $sources = @(Join-Path $root 'core/settings.merge.json')
 }
-foreach ($p in @($Perfil | Where-Object { $_ })) { $sources += Join-Path $root "profiles\$p\settings.json" }
+foreach ($p in @($Perfil | Where-Object { $_ })) { $sources += Join-Path $root "profiles/$p/settings.json" }
 # Caminho absoluto pelo PowerShell: [IO.File] resolve relativo pelo diretorio do processo, que difere de $PWD apos cd.
 $Target = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Target)
 
@@ -91,20 +90,20 @@ function Merge-Json($a, $b, [string]$caminho) {
     }
 }
 
-# Grava caminho absoluto no hook do pacote e escolhe o shell. Aplicado ao alvo e ao pacote, para a uniao reconhecer
-# a mesma entrada (instalacao antiga com $HOME vira a nova, sem hook duplicado).
-$pastaUsuario = (($(if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME })) -replace '\\', '/').TrimEnd('/')
-function Set-HooksAbsolutos($o) {
+# Migracao: o hook bloquear-segredos agora vem do plugin base (plugins/base/hooks/hooks.json). A entrada antiga no
+# settings (~/.claude/hooks/bloquear-segredos.ps1) faria o hook rodar duas vezes, ou apontaria para arquivo que a
+# instalacao nova move para o backup. Sai do alvo e aparece no dry-run como protecao que sai (ALERTA), para o
+# usuario conferir que o plugin base esta instalado antes de confirmar.
+function Remove-HookLegado($o) {
     if (-not $o.hooks) { return }
-    foreach ($ev in $o.hooks.PSObject.Properties) {
-        foreach ($g in @($ev.Value)) {
-            foreach ($h in @($g.hooks)) {
-                if ("$($h.command)" -notmatch '\.claude[/\\]hooks[/\\]bloquear-segredos\.ps1') { continue }
-                $cmd = $h.command -replace '(\$HOME|\$\{HOME\}|~|\$env:USERPROFILE|%USERPROFILE%)[/\\]\.claude[/\\]hooks[/\\]', "$pastaUsuario/.claude/hooks/"
-                $h.command = $cmd -replace '^(powershell|pwsh)(\.exe)?(?=\s)', $HookShell
-            }
-        }
+    foreach ($ev in @($o.hooks.PSObject.Properties)) {
+        $grupos = @(foreach ($g in @($ev.Value)) {
+            $g.hooks = @(@($g.hooks) | Where-Object { "$($_.command)" -notmatch '\.claude[/\\]hooks[/\\]bloquear-segredos\.ps1' })
+            if ($g.hooks.Count) { $g }
+        })
+        if ($grupos.Count) { $ev.Value = $grupos } else { $o.hooks.PSObject.Properties.Remove($ev.Name) }
     }
+    if (-not @($o.hooks.PSObject.Properties).Count) { $o.PSObject.Properties.Remove('hooks') }
 }
 
 # -Remover: "caminho" apaga a chave; "caminho[]=valor" tira o item (texto exato) da lista.
@@ -141,7 +140,7 @@ function Get-Entradas($o, [string]$caminho) {
 }
 
 # Lista do que e seguro (so restringe ou desliga), nao do que e perigoso: chave nova desconhecida tambem gera alerta.
-# Sandbox: só as entradas que restringem (ligar, falhar sem sandbox, proibir fuga, negar credencial).
+# Sandbox: so as entradas que restringem (ligar, falhar sem sandbox, proibir fuga, negar credencial).
 $entradasSeguras = '^(\$schema=|permissions\.(deny|ask)\[\]=|enabledPlugins\.[^=]+=False$|sandbox\.(enabled|failIfUnavailable)=True$|sandbox\.allowUnsandboxedCommands=False$|sandbox\.credentials\.(files|envVars)\[\]=\{.*"mode":"deny"\}$)'
 
 # Devolve o indice de cada entrada nova fora da lista segura (o indice localiza a mesma entrada na versao mascarada).
@@ -195,7 +194,7 @@ function Get-HooksAusentes($o) {
     foreach ($ev in $o.hooks.PSObject.Properties) {
         foreach ($h in @($ev.Value | ForEach-Object { $_.hooks })) {
             if ("$($h.command)" -match '-File\s+"?([^"]+?\.ps1)') {
-                $arq = $Matches[1] -replace '^(\$HOME|~|\$env:USERPROFILE|%USERPROFILE%)', $env:USERPROFILE
+                $arq = $Matches[1] -replace '^(\$HOME|~|\$env:USERPROFILE|%USERPROFILE%)', $pastaHome
                 if (-not (Test-Path -LiteralPath $arq)) { $arq }
             }
         }
@@ -207,8 +206,8 @@ $textoAtual = if ($existe) { [IO.File]::ReadAllText($Target, $utf8) } else { $nu
 $a = if ($existe -and $textoAtual.Trim()) { $textoAtual | ConvertFrom-Json } else { New-Object psobject }
 $antes = @(Get-Entradas $a '')
 $antesMascarado = @(Get-Entradas $(if ($existe -and $textoAtual.Trim()) { $m = $textoAtual | ConvertFrom-Json; Hide-Segredos $m; $m } else { New-Object psobject }) '')
-Set-HooksAbsolutos $a
-foreach ($s in $sources) { $pacote = Read-Json $s; Set-HooksAbsolutos $pacote; Merge-Json $a $pacote '' }
+Remove-HookLegado $a
+foreach ($s in $sources) { $pacote = Read-Json $s; Merge-Json $a $pacote '' }
 $naoEncontrados = @(foreach ($r in @($Remover | Where-Object { $_ })) { if (-not (Remove-Entrada $a $r)) { $r } })
 if ($naoEncontrados.Count) { throw "-Remover sem efeito (caminho ou item inexistente), nada foi gravado:`n  " + ($naoEncontrados -join "`n  ") }
 

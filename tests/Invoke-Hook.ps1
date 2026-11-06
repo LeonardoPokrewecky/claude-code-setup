@@ -1,17 +1,38 @@
-# Executa o hook como o Claude Code faz (JSON no stdin, processo separado) e classifica o resultado.
-# Shell do hook: variável de ambiente HOOK_SHELL (powershell | pwsh); padrão powershell.
+﻿# Executa o hook como o Claude Code faz (JSON no stdin, processo separado) e classifica o resultado.
+# Shell do hook: variável de ambiente HOOK_SHELL (powershell | pwsh); padrão powershell no Windows, pwsh fora dele.
+# -ViaSh: roda pela ponte plugins/base/hooks/run-hook.sh (como o hooks.json do plugin), com o sh encontrado.
+function Get-ShParaHook {
+    $sh = Get-Command sh -ErrorAction SilentlyContinue
+    if ($sh) { return $sh.Source }
+    $git = Get-Command git -ErrorAction SilentlyContinue
+    if ($git) {
+        foreach ($rel in '..\bin\sh.exe', '..\usr\bin\sh.exe', '..\..\bin\sh.exe', '..\..\usr\bin\sh.exe') {
+            $c = Join-Path (Split-Path $git.Source) $rel
+            if (Test-Path -LiteralPath $c) { return (Resolve-Path -LiteralPath $c).ProviderPath }
+        }
+    }
+    $null
+}
+
 function Invoke-Hook {
     param(
         [Parameter(Mandatory)][string]$Comando,
-        [string]$Hook = (Join-Path $PSScriptRoot '..\global\hooks\bloquear-segredos.ps1')
+        [string]$Hook = (Join-Path $PSScriptRoot '../plugins/base/hooks/bloquear-segredos.ps1'),
+        [switch]$ViaSh
     )
-    $shell = if ($env:HOOK_SHELL) { $env:HOOK_SHELL } else { 'powershell' }
+    $padrao = if ($IsLinux -or $IsMacOS) { 'pwsh' } else { 'powershell' }
+    $shell = if ($env:HOOK_SHELL) { $env:HOOK_SHELL } else { $padrao }
     $entrada = @{ hook_event_name = 'PreToolUse'; tool_name = 'Bash'; tool_input = @{ command = $Comando } } | ConvertTo-Json -Compress
     $utf8 = New-Object Text.UTF8Encoding $false
 
     $psi = New-Object Diagnostics.ProcessStartInfo
-    $psi.FileName = $shell
-    $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$Hook`""
+    if ($ViaSh) {
+        $psi.FileName = Get-ShParaHook
+        $psi.Arguments = "`"$(Join-Path $PSScriptRoot '../plugins/base/hooks/run-hook.sh')`""
+    } else {
+        $psi.FileName = $shell
+        $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$Hook`""
+    }
     $psi.UseShellExecute = $false
     $psi.RedirectStandardInput = $true
     $psi.RedirectStandardOutput = $true
