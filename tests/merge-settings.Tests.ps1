@@ -5,8 +5,11 @@ BeforeAll {
 
     $script:ps = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
     function Invoke-Merge([string]$alvo, [string[]]$extra) {
+        # O GitHub Actions roda o passo com $ErrorActionPreference = 'Stop'; no PowerShell 5.1 o stderr do processo filho viraria exceção aqui.
+        $ErrorActionPreference = 'Continue'
         $saida = & $script:ps -NoProfile -ExecutionPolicy Bypass -File $script:merge -Target $alvo @extra *>&1 | Out-String
-        [pscustomobject]@{ Texto = $saida; Codigo = $(if ($saida -match '-Confirmar ([0-9a-f]{12})') { $Matches[1] }) }
+        # Linha: saída numa linha só (o pwsh quebra mensagens de erro na largura do console).
+        [pscustomobject]@{ Texto = $saida; Linha = ($saida -replace '\s*\r?\n\s*(\|\s*)?', ' '); Codigo = $(if ($saida -match '-Confirmar ([0-9a-f]{12})') { $Matches[1] }) }
     }
 
     function New-Alvo {
@@ -99,14 +102,14 @@ Describe 'merge-settings.ps1' {
         $s | Add-Member -NotePropertyName sandbox -NotePropertyValue ([pscustomobject]@{ enabled = 'sim' })
         [IO.File]::WriteAllText($alvo, ($s | ConvertTo-Json -Depth 10), $script:utf8)
         $r = Invoke-Merge $alvo @('-DryRun')
-        $r.Texto | Should -Match 'sandbox\.enabled deve ser true/false'
+        $r.Linha | Should -Match 'sandbox\.enabled deve ser true/false'
         $r.Codigo | Should -BeNullOrEmpty
     }
 
     It '-Remover inexistente recusa sem gravar' {
         $alvo = New-Alvo
         $r = Invoke-Merge $alvo @('-DryRun', '-Remover', 'nao.existe')
-        $r.Texto | Should -Match 'Remover sem efeito'
+        $r.Linha | Should -Match 'Remover sem efeito'
         $r.Codigo | Should -BeNullOrEmpty
     }
 }

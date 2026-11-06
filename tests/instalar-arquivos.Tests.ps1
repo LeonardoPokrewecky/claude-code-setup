@@ -3,8 +3,11 @@ BeforeAll {
     $script:inst = Join-Path $PSScriptRoot '../scripts/instalar-arquivos.ps1'
     $script:ps = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
     function Invoke-Inst([string]$dest, [string[]]$extra) {
+        # O GitHub Actions roda o passo com $ErrorActionPreference = 'Stop'; no PowerShell 5.1 o stderr do git (aviso de CRLF) viraria exceção aqui.
+        $ErrorActionPreference = 'Continue'
         $saida = & $script:ps -NoProfile -ExecutionPolicy Bypass -File $script:inst -Destino $dest @extra *>&1 | Out-String
-        [pscustomobject]@{ Texto = $saida; Codigo = $(if ($saida -match '-Confirmar ([0-9a-f]{12})') { $Matches[1] }) }
+        # Linha: saída numa linha só (o pwsh quebra mensagens de erro na largura do console).
+        [pscustomobject]@{ Texto = $saida; Linha = ($saida -replace '\s*\r?\n\s*(\|\s*)?', ' '); Codigo = $(if ($saida -match '-Confirmar ([0-9a-f]{12})') { $Matches[1] }) }
     }
     function New-Destino {
         $d = Join-Path ([IO.Path]::GetTempPath()) "inst-teste-$([guid]::NewGuid().ToString('n'))"
@@ -49,7 +52,7 @@ Describe 'instalar-arquivos.ps1' {
     It 'Código de outro plano é recusado' {
         $d = New-Destino
         $g = Invoke-Inst $d @('-Confirmar', '000000000000')
-        $g.Texto | Should -Match 'nao confere'
+        $g.Linha | Should -Match 'nao confere'
         Test-Path (Join-Path $d 'skills/revisar') | Should -BeTrue
     }
 }
