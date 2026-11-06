@@ -1,0 +1,10 @@
+{
+  "name": "angular",
+  "displayName": "Angular (arquitetura de frontend)",
+  "version": "2.0.0",
+  "description": "Padrão de arquitetura para frontend Angular: core/shared/features, regra de dependência, HTTP único, contrato com o backend e fatia vertical de feature nova.",
+  "author": { "name": "Leonardo Pokrewecky" },
+  "repository": "https://github.com/LeonardoPokrewecky/claude-code-setup",
+  "license": "MIT",
+  "keywords": ["angular", "typescript", "frontend", "arquitetura"]
+}

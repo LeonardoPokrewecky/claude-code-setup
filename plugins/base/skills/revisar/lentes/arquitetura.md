@@ -1,6 +1,6 @@
 # Lente: arquitetura
 
-Referência: seção Arquitetura do `CLAUDE.md` do projeto; backend .NET novo também a skill `arquitetura-onion` (plugin `dotnet`). O CLAUDE.md do projeto prevalece.
+Referência: seção Arquitetura do `CLAUDE.md` do projeto; backend .NET novo também a skill `arquitetura-onion` (plugin `dotnet`); frontend Angular novo, a `arquitetura-angular` (plugin `angular`). O CLAUDE.md do projeto prevalece.
 
 - **Dependências:** referência que aponta para fora (domínio conhecendo infraestrutura, controller acessando repositório/`DbContext`, projetos de mesmo nível se referenciando); ciclo entre módulos.
 - **Responsabilidade:** regra de negócio em controller, componente de UI ou script; método que ganhou um segundo comportamento por conveniência em vez de método próprio; classe/serviço "faz-tudo".

@@ -8,6 +8,7 @@
 |---|---|---|
 | `base` | sim | Hook de segredos, revisão por lentes, planejamento, alteração de dados, deploy, LGPD e agentes. |
 | `dotnet` | não (ligar por projeto) | Arquitetura onion para backend .NET. Ligado por projeto (camada dotnet). |
+| `angular` | não (ligar por projeto) | Arquitetura de frontend Angular. Ligado por projeto (camada angular). |
 
 ### Plugin `base`
 
@@ -47,6 +48,12 @@ Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if command -v pwsh >/dev/nul
 |---|---|---|
 | `arquitetura-onion` | automática + `/arquitetura-onion` | Padrão de arquitetura onion para backend .NET — projetos por camada (começa enxuto, separa por demanda), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar. |
 
+### Plugin `angular`
+
+| Skill | Invocação | Descrição |
+|---|---|---|
+| `arquitetura-angular` | automática + `/arquitetura-angular` | Padrão de arquitetura para frontend Angular — pastas core/shared/features, regra de dependência (feature não importa feature), acesso HTTP em um único serviço, URL em environments, estado com signal, contrato com o backend e checklist de funcionalidade nova. Use ao criar projeto Angular novo, adicionar feature/página ou revisar onde um código deve ficar. |
+
 ## Core (instalado por `scripts/instalar-arquivos.ps1`)
 
 | Arquivo | Descrição |
@@ -56,7 +63,7 @@ Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if command -v pwsh >/dev/nul
 
 ## Permissões (`core/settings.merge.json`)
 
-Modelo `sonnet`, advisor `opus`. Regras: 32 allow, 162 ask, 61 deny. Política por classe de operação: README, seção Permissões.
+Modelo `sonnet`, advisor `opus`. Regras: 32 allow, 158 ask, 58 deny. Política por classe de operação: README, seção Permissões.
 
 ## Perfis (`profiles/`, `merge-settings.ps1 -Perfil <nome>`)
 
@@ -67,7 +74,7 @@ Modelo `sonnet`, advisor `opus`. Regras: 32 allow, 162 ask, 61 deny. Política p
 | Camada | Plugins | Deny | Regras por caminho | Outros arquivos |
 |---|---|---|---|---|
 | `_base` | `base@kit-dev-ia` | 7 regra(s) | - | - |
-| `angular` | `typescript-lsp@claude-plugins-official`, `frontend-design@claude-plugins-official` | - | `angular.md` | - |
+| `angular` | `typescript-lsp@claude-plugins-official`, `frontend-design@claude-plugins-official`, `angular@kit-dev-ia` | - | `angular.md` | - |
 | `devcontainer` | - | - | - | `.devcontainer`, `README.md` |
 | `dotnet` | `csharp-lsp@claude-plugins-official`, `dotnet@kit-dev-ia` | - | `dotnet.md` | - |
 | `infra` | - | 4 regra(s) | - | - |

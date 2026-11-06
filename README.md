@@ -13,7 +13,7 @@ Inventário completo (plugins, skills, agentes, camadas, perfis), gerado dos pr�
 
 ```text
 claude-code-setup/
-├── .claude-plugin/marketplace.json   ← marketplace "kit-dev-ia" (plugins base e dotnet)
+├── .claude-plugin/marketplace.json   ← marketplace "kit-dev-ia" (plugins base, dotnet e angular)
 ├── core/                             ← o que plugin não distribui (instalado pelos scripts)
 │   ├── CLAUDE.md                     ← instruções globais (≤ 40 linhas); importa ~/.claude/maquina.md
 │   ├── agents/Explore.md             ← Explore em Haiku (agente de plugin não sobrescreve o embutido)
@@ -21,7 +21,8 @@ claude-code-setup/
 │   └── maquina.example.md            ← modelo do arquivo por máquina (não é instalado)
 ├── plugins/
 │   ├── base/                         ← skills, agentes, hook de segredos, evals
-│   └── dotnet/                       ← arquitetura onion (ligado por projeto)
+│   ├── dotnet/                       ← arquitetura onion (ligado por projeto)
+│   └── angular/                      ← arquitetura de frontend Angular (ligado por projeto)
 ├── profiles/unix/settings.json       ← sandbox para macOS/Linux/WSL2
 ├── project-templates/                ← camadas de projeto (settings, regras por caminho, devcontainer)
 ├── scripts/                          ← merge-settings, instalar-arquivos, gerar-docs
@@ -36,7 +37,7 @@ claude-code-setup/
 | CLAUDE.md global, agente `Explore` | `instalar-arquivos.ps1` | CLAUDE.md de plugin não carrega; agente de plugin não sobrescreve o `Explore` embutido ([doc](https://code.claude.com/docs/en/sub-agents)) |
 | Regras por caminho | camadas de projeto (`.claude/rules/`) | plugin não distribui regras; elas só carregam ao tocar arquivos do tipo ([doc](https://code.claude.com/docs/en/memory)) |
 
-Não existe plugin `frontend`: não há conteúdo próprio de frontend além das regras da camada `angular`. Um plugin novo só entra com caso real.
+Os plugins `dotnet` e `angular` ficam desligados por padrão: a camada de projeto da stack liga o seu, e a descrição da skill de arquitetura só ocupa contexto onde é útil.
 
 ---
 
@@ -60,6 +61,7 @@ if (-not (Test-Path "$cl/maquina.md")) { Copy-Item "$repo/core/maquina.example.m
 /plugin marketplace add LeonardoPokrewecky/claude-code-setup     (ou o caminho local do clone)
 /plugin install base@kit-dev-ia
 /plugin install dotnet@kit-dev-ia     (fica desligado; a camada dotnet liga por projeto)
+/plugin install angular@kit-dev-ia    (fica desligado; a camada angular liga por projeto)
 ```
 
 **Passo 3 — CLAUDE.md global e Explore** (antes deste passo, mova regras de projeto/cliente do seu CLAUDE.md atual para o repositório daquele projeto: o arquivo é substituído inteiro, com backup):
@@ -155,7 +157,7 @@ Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI 
 ## 6. Atualizar, desinstalar e recuperar
 
 - **Atualizar:** `git pull` no clone; `claude plugin marketplace update kit-dev-ia` e `claude plugin update base@kit-dev-ia` (o `version` do `plugin.json` fixa a versão: suba-o a cada mudança publicada); `/reload-plugins` na sessão aberta; depois rodar de novo os Passos 3 e 4 (o dry-run mostra só o que mudou).
-- **Desinstalar:** `/plugin uninstall base@kit-dev-ia` e `dotnet@kit-dev-ia`; `claude plugin marketplace remove kit-dev-ia`; restaurar `~/.claude/CLAUDE.md` e `settings.json` do backup.
+- **Desinstalar:** `/plugin uninstall base@kit-dev-ia`, `dotnet@kit-dev-ia` e `angular@kit-dev-ia`; `claude plugin marketplace remove kit-dev-ia`; restaurar `~/.claude/CLAUDE.md` e `settings.json` do backup.
 - **Recuperar:** `settings.json` → `~/.claude/settings.json.bak-AAAAMMDD-HHmmss`; CLAUDE.md, agentes e legado → `~/.claude/backups/instalar-*/`. Copie de volta o arquivo desejado.
 
 ---

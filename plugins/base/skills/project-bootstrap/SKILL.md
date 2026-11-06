@@ -27,6 +27,7 @@ Nunca sobrescrever, apagar ou renomear nada. Nada é criado sem aprovação expl
 - **Arquivos do Claude versionados?** Perguntar ao usuário. Padrão: sim (`CLAUDE.md` e `.claude\settings.json` são o contexto compartilhado do projeto). Repositório de cliente onde o Claude não deve aparecer: **não** mexer no `.gitignore` (é versionado e deixaria rastro); somar `CLAUDE.md`, `CLAUDE.local.md` e `.claude/` ao exclude local (caminho via `git rev-parse --git-path info/exclude`, cobre worktree), sem duplicar linha. Se algum deles já estiver em `git ls-files`, o exclude não tem efeito: avisar (tirar do índice/histórico só com pedido explícito).
 - Skills/agentes específicos só se forem exclusivos deste projeto.
 - Backend .NET: comparar os projetos/pastas com a skill `arquitetura-onion`; projeto novo nasce nesse padrão, projeto existente só registra as divergências na seção Arquitetura (sem mover nada).
+- Frontend Angular: mesma regra com a skill `arquitetura-angular` (plugin `angular`).
 - Projeto existente: mostrar o que será preservado e o que será adicionado, arquivo por arquivo.
 - Se existir `<pasta de memória>\<Projeto>.memory` (pasta em `~/.claude/maquina.md`): propor levar stack, decisões e armadilhas para o `CLAUDE.md` do projeto.
 

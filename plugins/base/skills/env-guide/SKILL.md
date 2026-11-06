@@ -16,6 +16,7 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 | Sandbox (macOS, Linux, WSL2) | `profiles/unix/` | `merge-settings.ps1 -Perfil unix`. Windows nativo: sem sandbox (doc oficial) → WSL2 ou camada `devcontainer` |
 | Skills, agentes, hook de segredos | plugin `base@kit-dev-ia` | `/plugin install base@kit-dev-ia` (ligado em todo projeto) |
 | `arquitetura-onion` | plugin `dotnet@kit-dev-ia` | desligado por padrão; a camada `dotnet` liga no projeto |
+| `arquitetura-angular` | plugin `angular@kit-dev-ia` | desligado por padrão; a camada `angular` liga no projeto |
 | Regras por caminho (`.claude/rules/`), settings de projeto | `project-templates/<camada>/` | skill `project-bootstrap` ou `merge-settings.ps1 -Layers` |
 
 ## Quando usar

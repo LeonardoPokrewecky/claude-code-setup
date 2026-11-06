@@ -2,7 +2,7 @@
 #   - core/CLAUDE.md          -> ~/.claude/CLAUDE.md (substituido inteiro; o dry-run mostra o diff)
 #   - core/agents/*.md        -> ~/.claude/agents/ (o Explore com modelo proprio: agente de plugin nao sobrescreve
 #                                o Explore embutido, https://code.claude.com/docs/en/sub-agents)
-# Skills, agentes e hook ficam nos plugins (plugins/base, plugins/dotnet), instalados por /plugin.
+# Skills, agentes e hook ficam nos plugins (plugins/base, plugins/dotnet, plugins/angular), instalados por /plugin.
 # Migracao da versao 1 (arquivos copiados em ~/.claude): skills, agentes e hook com o mesmo nome dos plugins sao
 # LEGADO; sem a migracao, a copia antiga venceria o comando sem prefixo (/revisar) e o hook rodaria duas vezes.
 # O legado vai para o backup (nunca e apagado).

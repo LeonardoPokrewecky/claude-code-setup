@@ -21,7 +21,7 @@ description: Padrão de arquitetura onion para backend .NET — projetos por cam
 
 ## 2. Separar por demanda
 
-Projeto novo só com motivo concreto, registrado em uma linha via `/adr`:
+Projeto novo só com motivo concreto, registrado em uma linha via `/adr` (sugerir ao usuário digitar `/adr`; é skill sob demanda):
 
 | Motivo | Separação |
 |---|---|
@@ -146,7 +146,9 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 
 - Seguir o padrão que o projeto já usa no módulo em questão; registrar as divergências na seção Arquitetura do `CLAUDE.md` do projeto.
 - Melhorias deste padrão entram **só em código novo** e só com OK do usuário (ex.: filtro tipado num módulo novo, teste de DI). Nunca mover projetos, pastas, namespaces ou renomear sufixos em massa sem pedido. Adotar as pastas numeradas num projeto existente quebra caminhos de deploy, CI, Dockerfile e scripts: só com plano que liste e atualize cada um.
-- Migração estrutural: propor com `/plano-migracao`, módulo a módulo.
+- Migração estrutural: sugerir ao usuário `/plano-migracao`, módulo a módulo.
+- **Adoção total pedida pelo usuário:** o pedido explícito prevalece sobre as regras acima, mas só com checklist: (1) commit/backup do estado atual; (2) baseline do contrato (JSON das respostas, rotas) antes de mexer; (3) etapas pequenas, com build e testes verdes a cada uma; (4) se há cliente em outro repositório, alterar os dois e comparar o contrato antes/depois; (5) registrar a decisão no `CLAUDE.md` do projeto; (6) o que não foi verificado (banco real, ponta a ponta) é **PARCIAL**.
+- **Condicional por stack** (registrar no `CLAUDE.md` como *Não se aplica* ou *Divergência*, sem inventar): persistência (`Infra/Data/Context` e migrations só com EF/SQL; MongoDB não tem DbContext); `.slnx` exige SDK com suporte (checar `global.json`); `[Authorize]` com políticas só se o projeto tem autenticação.
 
 ## 9. Fatia vertical de uma funcionalidade nova (checklist)
 

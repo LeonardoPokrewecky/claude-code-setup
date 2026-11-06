@@ -19,3 +19,4 @@ paths:
 - Angular 17+: publicar o conteúdo de `dist/<projeto>/browser/`; `<base href>` correto fora da raiz; `sourceMap` desligado em produção.
 - Página: `lang="pt-BR"` (ou o idioma do produto), `<title>` real, `meta description`, `theme-color`, favicon próprio.
 - Depois do deploy: aba nova com hard reload e conferir o hash do bundle (CDN/cache servem index antigo).
+- Estrutura de pastas e regra de dependência: skill `arquitetura-angular` (plugin `angular`); o CLAUDE.md do projeto prevalece.
