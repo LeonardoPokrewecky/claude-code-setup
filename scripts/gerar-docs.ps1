@@ -18,6 +18,12 @@ function Get-Front([string]$f) {
     $h
 }
 function Format-Celula([string]$s) { ($s -replace '\|', '\|').Trim() }
+# Ordem ordinal (independente da cultura do sistema): a saída precisa ser igual no Windows, no Linux e no CI.
+function Sort-Ordinal {
+    [object[]]$itens = @($input)
+    [Array]::Sort($itens, [Comparison[object]] { param($a, $b) [string]::CompareOrdinal($a.Name, $b.Name) })
+    $itens
+}
 
 $o = New-Object Collections.Generic.List[string]
 $o.Add('# Componentes do pacote (gerado)')
@@ -39,7 +45,7 @@ foreach ($p in $mkt.plugins) {
     $dir = Join-Path $raiz ($p.source -replace '^\./', '')
     $o.Add('')
     $o.Add("### Plugin ``$($p.name)``")
-    $skills = @(Get-ChildItem -LiteralPath (Join-Path $dir 'skills') -Directory -ErrorAction SilentlyContinue | Sort-Object Name)
+    $skills = @(Get-ChildItem -LiteralPath (Join-Path $dir 'skills') -Directory -ErrorAction SilentlyContinue | Sort-Ordinal)
     if ($skills) {
         $o.Add('')
         $o.Add('| Skill | Invocação | Descrição |')
@@ -50,7 +56,7 @@ foreach ($p in $mkt.plugins) {
             $o.Add("| ``$($h['name'])`` | $inv | $(Format-Celula $h['description']) |")
         }
     }
-    $agentes = @(Get-ChildItem -LiteralPath (Join-Path $dir 'agents') -File -Filter *.md -ErrorAction SilentlyContinue | Sort-Object Name)
+    $agentes = @(Get-ChildItem -LiteralPath (Join-Path $dir 'agents') -File -Filter *.md -ErrorAction SilentlyContinue | Sort-Ordinal)
     if ($agentes) {
         $o.Add('')
         $o.Add('| Agente | Modelo | Ferramentas | Descrição |')
@@ -76,7 +82,7 @@ $o.Add('')
 $o.Add('| Arquivo | Descrição |')
 $o.Add('|---|---|')
 $o.Add('| `core/CLAUDE.md` | Instruções globais (' + @([IO.File]::ReadAllLines((Join-Path $raiz 'core/CLAUDE.md'), $utf8)).Count + ' linhas) |')
-foreach ($a in Get-ChildItem -LiteralPath (Join-Path $raiz 'core/agents') -File -Filter *.md | Sort-Object Name) {
+foreach ($a in Get-ChildItem -LiteralPath (Join-Path $raiz 'core/agents') -File -Filter *.md | Sort-Ordinal) {
     $h = Get-Front $a.FullName
     $o.Add("| ``core/agents/$($a.Name)`` | agente ``$($h['name'])`` (``$($h['model'])``): $(Format-Celula $h['description']) |")
 }
@@ -90,7 +96,7 @@ $o.Add("Modelo ``$($s.model)``, advisor ``$($s.advisorModel)``. Regras: $(@($s.p
 $o.Add('')
 $o.Add('## Perfis (`profiles/`, `merge-settings.ps1 -Perfil <nome>`)')
 $o.Add('')
-foreach ($d in Get-ChildItem -LiteralPath (Join-Path $raiz 'profiles') -Directory | Sort-Object Name) {
+foreach ($d in Get-ChildItem -LiteralPath (Join-Path $raiz 'profiles') -Directory | Sort-Ordinal) {
     $j = Read-Json (Join-Path $d.FullName 'settings.json')
     $chaves = ($j.PSObject.Properties.Name | ForEach-Object { '`' + $_ + '`' }) -join ', '
     $o.Add('- `' + $d.Name + '`: chaves ' + $chaves)
@@ -101,7 +107,7 @@ $o.Add('## Camadas de projeto (`project-templates/`)')
 $o.Add('')
 $o.Add('| Camada | Plugins | Deny | Regras por caminho | Outros arquivos |')
 $o.Add('|---|---|---|---|---|')
-foreach ($d in Get-ChildItem -LiteralPath (Join-Path $raiz 'project-templates') -Directory | Sort-Object Name) {
+foreach ($d in Get-ChildItem -LiteralPath (Join-Path $raiz 'project-templates') -Directory | Sort-Ordinal) {
     $f = Join-Path $d.FullName '.claude/settings.json'
     $plugins = '-'; $deny = '-'
     if (Test-Path -LiteralPath $f) {

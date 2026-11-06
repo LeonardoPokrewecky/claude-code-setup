@@ -75,6 +75,13 @@ powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -Con
 ```
 Leia cada **ALERTA**: `allow` e marketplace novos aparecem de propósito; um alerta inesperado indica alteração indevida no pacote. Sem `-ManterEscalares`, o pacote define `model` = `sonnet` e `advisorModel` = `opus` (advisor: experimental, só Anthropic API).
 
+Opções do `merge-settings.ps1`:
+- O merge **adiciona**: objetos se mesclam, listas viram união; valor escalar do pacote sobrescreve o seu (`SOBRESCREVE` no dry-run), a menos que use **`-ManterEscalares`** (`MANTIDO`).
+- **`-Remover`** tira o que o pacote não remove sozinho: `-Remover env.CLAUDE_CODE_SUBAGENT_MODEL` (apaga a chave) ou `-Remover 'permissions.allow[]=Bash(winget:*)'` (tira um item); vários itens separados por vírgula. Remover `deny`, `ask` ou hook gera **ALERTA**.
+- **`-Perfil unix`** soma `profiles/unix/settings.json`. **`-Layers a,b -Target <repo>/.claude/settings.json`** aplica camadas de projeto.
+- Sem mudança no resultado, nada é gravado; estrutura inválida (tipo errado em `permissions`, `env`, `enabledPlugins`, `hooks`, `sandbox`) é recusada antes de gravar; valores com nome de segredo aparecem como `***`.
+- A opção `-HookShell` da versão 1 saiu: o hook agora escolhe `pwsh`/`powershell` sozinho.
+
 **Passo 5 — Validar** (feche e abra o Claude Code):
 | Teste | Esperado |
 |---|---|

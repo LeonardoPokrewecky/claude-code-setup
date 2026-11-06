@@ -1,6 +1,6 @@
 # Configuração desta máquina
 
-> Modelo. Copie para `~/.claude/maquina.md` e preencha (README, Passo 2). Este arquivo **não** é instalado pelos
+> Modelo. Copie para `~/.claude/maquina.md` e preencha (README, Passo 1). Este arquivo **não** é instalado pelos
 > scripts e não vai para o repositório: cada máquina tem o seu. Nunca coloque segredos aqui.
 
 - Pasta de projetos: `<ex.: D:\Projetos>` (projetos novos são criados aqui)

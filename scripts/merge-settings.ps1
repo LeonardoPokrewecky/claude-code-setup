@@ -241,6 +241,10 @@ function Show-Alertas {
     if ($saemProtecao.Count) {
         Write-Host "ALERTA: $($saemProtecao.Count) protecao(oes) sai(em) do alvo (deny/ask/hook). Confira:" -ForegroundColor Yellow
         $saemProtecao | ForEach-Object { Write-Host "  - $($antesMascarado[$_])" -ForegroundColor Yellow }
+        if (@($saemProtecao | Where-Object { $antes[$_] -match 'bloquear-segredos\.ps1' }).Count) {
+            Write-Host '  O hook bloquear-segredos antigo sai porque agora vem do plugin base. Instale-o ANTES de confirmar:' -ForegroundColor Yellow
+            Write-Host '  /plugin marketplace add LeonardoPokrewecky/claude-code-setup  e  /plugin install base@kit-dev-ia' -ForegroundColor Yellow
+        }
     }
     $saem | Where-Object { $_ -notin $saemProtecao } | ForEach-Object { Write-Host "  sai: $($antesMascarado[$_])" }
     $sobrescritos | ForEach-Object { Write-Host "  $_" -ForegroundColor Cyan }
