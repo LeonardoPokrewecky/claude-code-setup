@@ -66,6 +66,28 @@ Describe 'merge-settings.ps1' {
         $r2.Texto | Should -Match 'ALERTA: 1 protecao'
     }
 
+    It '-Perfil unix soma o sandbox; entradas que só restringem não geram alerta, allow gera' {
+        $alvo = New-Alvo
+        $r = Invoke-Merge $alvo @('-DryRun', '-Perfil', 'unix')
+        $r.Codigo | Should -Not -BeNullOrEmpty
+        $r.Texto | Should -Not -Match '\+ sandbox\.'
+        $r.Texto | Should -Match '\+ permissions\.allow\[\]=Bash\(dotnet test\)'
+        Invoke-Merge $alvo @('-Confirmar', $r.Codigo, '-Perfil', 'unix') | Out-Null
+        $s = [IO.File]::ReadAllText($alvo, $script:utf8) | ConvertFrom-Json
+        $s.sandbox.enabled | Should -BeTrue
+        @($s.sandbox.credentials.files | Where-Object path -eq '~/.ssh').Count | Should -Be 1
+    }
+
+    It 'Sandbox com tipo errado é recusado antes de gravar' {
+        $alvo = New-Alvo
+        $s = [IO.File]::ReadAllText($alvo, $script:utf8) | ConvertFrom-Json
+        $s | Add-Member -NotePropertyName sandbox -NotePropertyValue ([pscustomobject]@{ enabled = 'sim' })
+        [IO.File]::WriteAllText($alvo, ($s | ConvertTo-Json -Depth 10), $script:utf8)
+        $r = Invoke-Merge $alvo @('-DryRun')
+        $r.Texto | Should -Match 'sandbox\.enabled deve ser true/false'
+        $r.Codigo | Should -BeNullOrEmpty
+    }
+
     It '-Remover inexistente recusa sem gravar' {
         $alvo = New-Alvo
         $r = Invoke-Merge $alvo @('-DryRun', '-Remover', 'nao.existe')

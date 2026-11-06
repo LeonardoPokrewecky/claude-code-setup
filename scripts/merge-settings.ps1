@@ -15,6 +15,7 @@
 #   -Remover <itens>   remove do resultado: "caminho" apaga a chave (ex.: env.CLAUDE_CODE_SUBAGENT_MODEL) e
 #                      "caminho[]=valor" tira um item de lista (ex.: 'permissions.allow[]=Bash(winget:*)').
 #                      Remover deny/ask/hook gera ALERTA.
+#   -Perfil unix       soma profiles\unix\settings.json (sandbox ligado + credenciais negadas; macOS/Linux/WSL2).
 #   -HookShell pwsh    grava o hook com pwsh (PowerShell 7, abre mais rapido) em vez de powershell 5.1.
 # O caminho do hook em ~/.claude/hooks e gravado absoluto (sem $HOME/~), porque variavel que nao expande no shell
 # do hook faz o hook nao rodar e nao bloquear nada, sem aviso.
@@ -25,6 +26,8 @@ param(
     [string]$Confirmar,
     [string[]]$Remover,
     [switch]$ManterEscalares,
+    # Perfil de ambiente somado ao settings global: profiles\<nome>\settings.json (ex.: unix = sandbox ligado).
+    [ValidateSet('unix')][string[]]$Perfil,
     [ValidateSet('powershell', 'pwsh')][string]$HookShell = 'powershell'
 )
 $ErrorActionPreference = 'Stop'
@@ -45,6 +48,7 @@ if ($Layers) {
     if (-not $Target) { $Target = "$env:USERPROFILE\.claude\settings.json" }
     $sources = @(Join-Path $root 'global\settings.merge.json')
 }
+foreach ($p in @($Perfil | Where-Object { $_ })) { $sources += Join-Path $root "profiles\$p\settings.json" }
 # Caminho absoluto pelo PowerShell: [IO.File] resolve relativo pelo diretorio do processo, que difere de $PWD apos cd.
 $Target = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Target)
 
@@ -137,7 +141,8 @@ function Get-Entradas($o, [string]$caminho) {
 }
 
 # Lista do que e seguro (so restringe ou desliga), nao do que e perigoso: chave nova desconhecida tambem gera alerta.
-$entradasSeguras = '^(\$schema=|permissions\.(deny|ask)\[\]=|enabledPlugins\.[^=]+=False$)'
+# Sandbox: só as entradas que restringem (ligar, falhar sem sandbox, proibir fuga, negar credencial).
+$entradasSeguras = '^(\$schema=|permissions\.(deny|ask)\[\]=|enabledPlugins\.[^=]+=False$|sandbox\.(enabled|failIfUnavailable)=True$|sandbox\.allowUnsandboxedCommands=False$|sandbox\.credentials\.(files|envVars)\[\]=\{.*"mode":"deny"\}$)'
 
 # Devolve o indice de cada entrada nova fora da lista segura (o indice localiza a mesma entrada na versao mascarada).
 function Get-Alertas($antes, $depois) {
@@ -169,6 +174,9 @@ function Test-Estrutura($o) {
     }
     if ($null -ne $o.permissions.defaultMode -and $o.permissions.defaultMode -isnot [string]) { 'permissions.defaultMode deve ser texto' }
     if ($o.env) { foreach ($p in $o.env.PSObject.Properties) { if ($p.Value -isnot [string]) { "env.$($p.Name) deve ser texto" } } }
+    foreach ($k in 'enabled', 'failIfUnavailable', 'allowUnsandboxedCommands', 'autoAllowBashIfSandboxed') {
+        if ($null -ne $o.sandbox.$k -and $o.sandbox.$k -isnot [bool]) { "sandbox.$k deve ser true/false" }
+    }
     if ($o.enabledPlugins) { foreach ($p in $o.enabledPlugins.PSObject.Properties) { if ($p.Value -isnot [bool]) { "enabledPlugins.$($p.Name) deve ser true/false" } } }
     if ($o.hooks) {
         foreach ($ev in $o.hooks.PSObject.Properties) {

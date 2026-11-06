@@ -39,12 +39,14 @@ $textos = @($comando, ($comando -replace '["''`^]', '')) | Select-Object -Unique
 # (cobre "HEAD:.env", ".env>x", ".env&&", ".env,").
 $fim = '(?=$|[^\w.-])'
 $padroes = @(
-    "(?<![\w.-])\.env(rc)?(\.[\w-]+)*$fim",
+    # Modelos versionados (.env.example/.sample/.template/.dist) ficam liberados; .env.example.local continua bloqueado.
+    "(?<![\w.-])\.env(?!\.(example|sample|template|dist)$fim)(rc)?(\.[\w-]+)*$fim",
     "(^|[\s/\\:=<>|&;,])(?!(process|this|self|ctx|context|Deno|Bun)\.env)[\w-]+\.env$fim",
     # Só os de ambiente real: appsettings.json e appsettings.Development.json costumam ser versionados sem segredo.
     'appsettings\.([\w-]+\.)*(Production|Prod|Staging|Homolog\w*|Local)(\.[\w-]+)*\.json',
-    # Sensível a caixa e fora de variável: "$_.Key" e "$obj.key" não são arquivo.
-    ('(?-i:(?<!\$[\w:]*)(?<=[\w-])\.(pfx|p12|pem|key|vault|kdbx|ppk|jks|keystore|p8)' + $fim + ')'),
+    # Sensível a caixa e só como nome de arquivo (início de palavra, depois de espaço, aspas, barra ou operador):
+    # "$_.Key", "$obj.key" e "console.log(obj.key)" não são arquivo.
+    ('(?-i:(^|[\s"''/\\=:<>|&;,])[\w-][\w.-]*\.(pfx|p12|pem|key|vault|kdbx|ppk|jks|keystore|p8)' + $fim + ')'),
     '(?<![\w.-])secrets[/\\]',
     '[\w-]*secrets?[\w-]*\.(json|ya?ml)',
     'local\.settings\.json',
@@ -70,10 +72,10 @@ $padroesConfirmar = @(
     @{ Padrao = 'Net\.WebClient|Net\.Http\.HttpClient|Net\.Sockets|Net\.Mail|Send-MailMessage|Download(String|File|Data)|Upload(String|File|Data|Values)'; Motivo = 'acesso à rede ou envio de dados pelo .NET' },
     @{ Padrao = '(^|[\s;&|(])(printenv|(Get-ChildItem|gci|ls|dir)\s+env:)|(^|[;&|]\s*)(env|set)\s*($|[|;&>])|user-secrets\s+list'; Motivo = 'despeja variáveis de ambiente ou user-secrets' },
     @{ Padrao = '(?<![\w.-])web\.[\w.]*config(?=$|[^\w.-])'; Motivo = 'web.config pode conter connection string' },
-    # As regras "ask" do settings comparam só o início do comando: não pegam "git -C pasta push" nem "x && git push".
-    @{ Padrao = '(^|[\s;&|(])git(\.exe)?(\s+(-C|-c|--git-dir|--work-tree)(\s+|=)\S+)*\s+(push|commit|clean|restore|fetch|pull|clone|reset\s+--hard|checkout\s+(\S+\s+)?--|checkout\s+\.|stash\s+(drop|clear)|branch\s+((?-i:-D)|-d\s+(-f|--force)|--delete\s+--force)|remote\s+(add|set-url))(?=$|[\s;&|)])'; Motivo = 'git que publica, usa a rede ou descarta trabalho (inclusive com -C ou no meio de um encadeamento)' },
-    @{ Padrao = '([;&|]|\$\()\s*(curl|wget|ssh|scp|sftp|rsync|nc|ncat|ftp|iwr|irm|Invoke-WebRequest|Invoke-RestMethod)(\.exe)?(?=$|\s)'; Motivo = 'acesso à rede no meio de um encadeamento' },
-    @{ Padrao = '([;&|]|\$\()\s*(rm|del|rmdir|rd|mv|Remove-Item|ri|Move-Item)(?=$|\s)'; Motivo = 'apaga ou move arquivos no meio de um encadeamento' }
+    # As regras "ask" nativas dividem encadeamentos (&&, ;, |, $(...)), mas não pegam "git -C pasta push" nem
+    # "git -c x=y push" (https://code.claude.com/docs/en/permissions, "What a Bash rule doesn't match").
+    # Rede e exclusão no meio de encadeamento ficaram só nas regras nativas (o Claude Code divide o comando).
+    @{ Padrao = '(^|[\s;&|(])git(\.exe)?(\s+(-C|-c|--git-dir|--work-tree)(\s+|=)\S+)*\s+(push|commit|clean|restore|fetch|pull|clone|reset\s+--hard|checkout\s+(\S+\s+)?--|checkout\s+\.|stash\s+(drop|clear)|branch\s+((?-i:-D)|-d\s+(-f|--force)|--delete\s+--force)|remote\s+(add|set-url))(?=$|[\s;&|)])'; Motivo = 'git que publica, usa a rede ou descarta trabalho (inclusive com -C/-c)' }
 )
 
 # Curinga: compara o padrão com nomes de segredo conhecidos. Só considera trecho com 2+ caracteres literais

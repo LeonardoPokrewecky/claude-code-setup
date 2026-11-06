@@ -7,7 +7,6 @@
       "Read(**/bin/**)",
       "Read(**/obj/**)",
       "Read(**/.vs/**)",
-      "Read(**/package-lock.json)",
       "Read(**/*.min.js)"
     ]
   }
