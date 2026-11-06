@@ -43,7 +43,7 @@ Os plugins `dotnet` e `angular` ficam desligados por padrão: a camada de projet
 
 ## 2. Instalação
 
-Pré-requisitos: Git (no Windows, **Git for Windows**: o hook roda no Git Bash), Claude Code recente (validado com 2.1.318), PowerShell 5.1 ou 7 (`pwsh` em macOS/Linux).
+Pré-requisitos: Git (no Windows, **Git for Windows**: o hook roda no Git Bash), Claude Code recente (validado com 2.1.319), PowerShell 5.1 ou 7 (`pwsh` em macOS/Linux).
 
 Abra o PowerShell **na pasta deste repositório**:
 ```powershell
@@ -166,7 +166,7 @@ Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI 
 
 | Componente | Windows PS 5.1 | Windows PS 7 | Linux / WSL2 | macOS |
 |---|---|---|---|---|
-| Hook (plugin, Git Bash/sh) | testado aqui | alterado para o CI, não executado | alterado para o CI, não executado | não testado |
+| Hook (plugin, Git Bash/sh) | testado aqui | testado aqui (88 casos do `casos-hook.psd1` via `pwsh`) | alterado para o CI, não executado | não testado |
 | `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI, não executado | CI, não executado | não testado |
 | Plugins e marketplace (`claude plugin validate`, instalação isolada) | testado aqui | — | não testado | não testado |
 | Sandbox (`-Perfil unix`) | não suportado (doc oficial) | não suportado | não testado | não testado |
@@ -191,7 +191,7 @@ Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe 
 
 ## 9. Testes e manutenção
 
-- `Invoke-Pester ./tests -Output Detailed` (Pester 5 ou 6: `Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -SkipPublisherCheck`).
+- `Invoke-Pester ./tests -Output Detailed` (Pester 5 ou 6; o Windows PowerShell 5.1 traz o 3.4, então rode com `pwsh`; última execução: Pester 6.2.0, 215 aprovados, 0 falhas, 1 ignorado: `Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -SkipPublisherCheck`).
 - Casos do hook em `tests/casos-hook.psd1`: padrão novo no hook entra com caso novo.
 - Mudou skill, agente, plugin, camada ou perfil? Rode `scripts/gerar-docs.ps1` e commite o `componentes.md` (o teste falha se ficar desatualizado).
 - `claude plugin validate .` e `claude plugin validate ./plugins/<nome>` antes de publicar.
@@ -211,3 +211,9 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 - [ ] Validar a seção IIS do `/deploy-checklist` e a camada `devcontainer` em projeto real.
 - [ ] Fixar `marketingskills` por SHA, se o schema aceitar.
 - [ ] Confirmar direitos de distribuição do `Auditoria LGPD.pdf`.
+
+### Pendências de validação
+- `echo .env` bloqueado pelo hook do plugin: confirmar numa sessão recarregada (`/reload-plugins`); o script em si bloqueia o caso.
+- Passo 5 do README (`git push` pede confirmação, `/plugin`, `/agents`, `/context`): conferir na interface após recarregar.
+- `npm test` do frontend (Karma/ChromeHeadless) não terminou na execução de 06/11/2026.
+- macOS, Linux/WSL2, sandbox (`-Perfil unix`) e devcontainer continuam não testados (tabela da seção 7).
