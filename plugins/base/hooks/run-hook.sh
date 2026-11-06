@@ -1,5 +1,7 @@
 #!/bin/sh
 # Ponte portátil para o hook bloquear-segredos.ps1 (PreToolUse Bash/PowerShell).
+# O hooks.json já faz a escolha do PowerShell inline (economiza um processo por comando) e só chama este script
+# quando não acha pwsh nem powershell; ele também serve para rodar o hook à mão: sh run-hook.sh < entrada.json.
 # O Claude Code roda hooks em shell form no sh (macOS/Linux) ou no Git Bash (Windows):
 # https://code.claude.com/docs/en/hooks. O stdin (JSON do Claude Code) passa direto para o PowerShell via exec.
 # Prefere pwsh (PowerShell 7, abre mais rápido); no Windows sem pwsh usa o powershell 5.1.

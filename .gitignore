@@ -50,3 +50,6 @@ Desktop.ini
 .vs/
 .vscode/
 .idea/
+
+# Resultados de claude plugin eval.
+**/evals/results/

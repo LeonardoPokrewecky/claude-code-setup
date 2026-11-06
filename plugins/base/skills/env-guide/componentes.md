@@ -39,7 +39,7 @@
 | `revisor` | `inherit` | Read, Grep, Glob, Bash | Revisão somente leitura de um diff ou caminho com UMA lente (segurança, LGPD, arquitetura, qualidade, testes, contrato, banco, performance). Use quando a skill /revisar delegar uma lente, ou após implementar algo não trivial. O chamador informa o alvo e o arquivo da lente. |
 | `test-validator-haiku` | `haiku` | Read, Grep, Glob, Bash | Executa build e testes já existentes e autorizados (ex. dotnet build/test, npm run build/test) e resume o resultado. Use para validar uma mudança. |
 
-Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `sh "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.sh"`
+Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if command -v pwsh >/dev/null 2>&1; then exec pwsh -NoProfile -NonInteractive -File "${CLAUDE_PLUGIN_ROOT}/hooks/bloquear-segredos.ps1"; elif command -v powershell >/dev/null 2>&1; then exec powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/hooks/bloquear-segredos.ps1"; else sh "${CLAUDE_PLUGIN_ROOT}/hooks/run-hook.sh"; fi`
 
 ### Plugin `dotnet`
 

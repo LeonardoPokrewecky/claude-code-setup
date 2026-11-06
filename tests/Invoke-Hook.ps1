@@ -27,8 +27,12 @@ function Invoke-Hook {
 
     $psi = New-Object Diagnostics.ProcessStartInfo
     if ($ViaSh) {
+        # O comando real do hooks.json, com ${CLAUDE_PLUGIN_ROOT} substituído como o Claude Code faz, num sh -c.
+        $plugin = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../plugins/base')).ProviderPath -replace '\\', '/'
+        $cfg = [IO.File]::ReadAllText((Join-Path $plugin 'hooks/hooks.json'), $utf8) | ConvertFrom-Json
+        $cmd = $cfg.hooks.PreToolUse[0].hooks[0].command.Replace('${CLAUDE_PLUGIN_ROOT}', $plugin)
         $psi.FileName = Get-ShParaHook
-        $psi.Arguments = "`"$(Join-Path $PSScriptRoot '../plugins/base/hooks/run-hook.sh')`""
+        $psi.Arguments = '-c "' + $cmd.Replace('\', '\\').Replace('"', '\"') + '"'
     } else {
         $psi.FileName = $shell
         $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$Hook`""
