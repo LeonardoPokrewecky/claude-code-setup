@@ -1,14 +1,31 @@
 ---
 name: arquitetura-onion
-description: Padrão de arquitetura onion para backend .NET — Solution padrão de 9 projetos numerados (API a Tools; variante enxuta para projeto pequeno), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar.
+description: Padrão de arquitetura para backend .NET — Solution padrão de 9 projetos numerados (API a Tools) com Shared como shared kernel (entidades, enums e DTOs; ordem api → application → domain → infra; variante enxuta Domain/Contracts para projeto pequeno), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar.
 ---
 
 # Arquitetura onion (.NET)
 
-- **Projeto novo:** nasce no **padrão de 9 projetos numerados** (API, Application, Domain, Infra, Desktop, Async, Shared, Tests, Tools). Ler `referencia-9-projetos.md` (estrutura, camadas, dependências, regras). Criar **os 9 projetos desde o início**, mesmo os que ainda não têm código (Desktop, Async, Tools ficam como esqueleto que compila, sem classes de exemplo, com `README.md` de uma linha "Reservado, sem uso ainda"): a numeração nunca muda e a Solution já nasce no formato final. Teste de arquitetura (`08-…Tests/Architecture`) obrigatório desde o início; `Contracts` só quando há cliente externo da API (ver a referência). Projeto sem uso previsto pode ser omitido só se o `CLAUDE.md` do projeto registrar o motivo.
-- **Variante enxuta (seções 1 a 4 abaixo):** `Domain`/`Contracts`/`Application`/`Infra`/`Api`, para projeto pequeno ou quando o `CLAUDE.md` do projeto a escolhe. Não misturar as duas no mesmo projeto.
-- **Seções 5 a 10** (convenções de nome, responsabilidade das peças, filtros, fatia vertical, revisão) valem nos dois padrões.
-- **Projeto existente:** o `CLAUDE.md` do projeto prevalece. Ver seção 8. Nunca migrar para o padrão de 9 sem pedido.
+- **Projeto novo:** nasce no **padrão de 9 projetos numerados** (API, Application, Domain, Infra, Desktop, Async, Shared, Tests, Tools). Ler `referencia-9-projetos.md` (estrutura, camadas, dependências, regras). Criar **os 9 projetos desde o início**, mesmo os que ainda não têm código (Desktop, Async, Tools ficam como esqueleto que compila, sem classes de exemplo, com `README.md` de uma linha "Reservado, sem uso ainda"): a numeração nunca muda e a Solution já nasce no formato final. Teste de arquitetura (`08-…Tests/Architecture`) obrigatório desde o início. Projeto sem uso previsto pode ser omitido só se o `CLAUDE.md` do projeto registrar o motivo.
+- **Neste padrão, `Shared` é um shared kernel e não um projeto periférico:** entidades, enums, value objects e DTOs moram nele; `Domain` é a camada de serviço (regras entre entidades) e **não guarda entidades**; ordem de dependência `api → application → domain → infra`, e todas referenciam o Shared. Não confundir com a Onion/Clean clássica.
+- **Variante enxuta (seções 1 a 4 abaixo):** `Domain`/`Contracts`/`Application`/`Infra`/`Api`, para projeto pequeno ou quando o `CLAUDE.md` do projeto a escolhe; aqui o Domain tem as entidades. Não misturar as duas no mesmo projeto.
+- **Seções 5 a 10** (convenções de nome, responsabilidade das peças, filtros, fatia vertical, revisão) valem nos dois padrões; onde cada peça mora em cada um está na tabela abaixo.
+- **Projeto existente:** o `CLAUDE.md` do projeto prevalece. Respeitar a estrutura que ele já tem; aplicar este padrão só quando o usuário pedir (seção 8). Nunca migrar para o padrão de 9 sem pedido.
+
+## Onde mora cada peça
+
+| Peça | Padrão de 9 projetos | Variante enxuta |
+|---|---|---|
+| Entidade, value object | `07 Shared` | `Domain` |
+| Enum | `07 Shared` | `Domain` (de domínio) e `Contracts` (exposto ao cliente) |
+| DTO (`Request`, `View`, `Response`, `Filter`) | `07 Shared` | `Contracts` |
+| Interface de repositório, `IUnitOfWork` | `04 Infra` | `Domain` |
+| Implementação de repositório, mapeamento de persistência | `04 Infra` | `Infra` |
+| Regra entre mais de uma entidade | `03 Domain` (serviço de domínio) | `Domain` / `Application` |
+| Caso de uso (app service), mapper, specification | `02 Application` | `Application` |
+| Assinatura/validação de token, criptografia | `04 Infra` (middleware na `01 API`) | `Infra` |
+| Controller | `01 API` | `Api` |
+
+Pastas e nomes de cada projeto: seção 4 (enxuta) e `referencia-9-projetos.md` (9 projetos).
 
 ## 1. Projetos: começar enxuto
 
@@ -114,7 +131,7 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 
 ## 6. Responsabilidade de cada peça
 
-- **Entidade (Domain):** protege o próprio estado. Mudança de estado por método com validação (`pedido.Cancelar(motivo)`), sem `set` público. Regra que envolve uma única entidade fica nela, não no app service.
+- **Entidade (Domain na enxuta; Shared no padrão de 9):** protege o próprio estado. Mudança de estado por método com validação (`pedido.Cancelar(motivo)`), sem `set` público. Regra que envolve uma única entidade fica nela, não no app service. Regra que envolve mais de uma entidade: serviço de domínio (`Domain` no padrão de 9). No padrão de 9, a entidade não leva atributo de ORM nem de driver (`[Bson*]`, `[Table]`, `[Key]`, `[Column]`).
 - **App service (Application):** um caso de uso por método. Valida a entrada, carrega as entidades pelo repositório, chama os métodos de domínio, faz `IUnitOfWork.CommitAsync` e devolve o contrato. Repositório não comita.
 - **Tamanho:** passou de ~7 métodos públicos ou ~300 linhas, dividir:
   - `<X>QueryService` para leitura e grade;
@@ -122,8 +139,8 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
   - caso de uso complexo (muitos passos ou dependências próprias) ganha classe própria `<Acao><X>AppService`.
 - **Composição, não herança:** acima de ~5 dependências no construtor, extrair um serviço menor e injetar. Classe base genérica (`CrudAppService<TEntidade, TView, TRequest>`) só para CRUD puro. Comportamento de família vai em serviço compartilhado injetado, nunca em base abstrata com dezenas de dependências.
 - **Mapper:** explícito e verificável pelo compilador. Pode ser à mão (`<X>Mapper` com `ToView()` e `ToEntity()`, mais uma `Expression<Func<X, XView>>` para projeção) ou com gerador de código de licença livre (ex.: Mapperly). Biblioteca de mapeamento com licença comercial só com decisão registrada via `/adr`.
-- **Enum exposto ao cliente:** existe no Domain (domínio) e no Contracts (API), com conversão explícita no `<X>Mapper`. Um teste percorre `Enum.GetValues` dos dois lados e falha se algum valor não tiver par. Enum que o cliente não vê fica só no Domain.
-- **Repositório (Infra):** implementa a interface do Domain; leitura com `AsNoTracking`. Recebe specification e projeção e devolve entidade ou `PagedResult<TView>` já materializado. **Não expõe `IQueryable`** para fora da Infra. Implementação `internal`.
+- **Enum exposto ao cliente:** no **padrão de 9**, existe **um só** enum, no Shared, usado por entidade e por DTO (sem conversão nem teste de par). Na **variante enxuta**, existe no Domain (domínio) e no Contracts (API), com conversão explícita no `<X>Mapper`; um teste percorre `Enum.GetValues` dos dois lados e falha se algum valor não tiver par. Enum que o cliente não vê fica só no Domain.
+- **Repositório (Infra):** implementa a interface (que mora no `Domain` na enxuta e na própria `Infra` no padrão de 9); leitura com `AsNoTracking`. Recebe specification e projeção e devolve entidade ou `PagedResult<TView>` já materializado. **Não expõe `IQueryable`** para fora da Infra. Implementação `internal`.
 - **Configuração EF:** um `<X>Configuration : IEntityTypeConfiguration<X>` por entidade. Migration sempre com `-Context <NomeDoContext>`.
 - **Controller (Api):** fino. `[ApiController]` + `[Authorize]` na classe e `[Authorize(Policy = "<recurso>.<acao>")]` em cada action. Recebe o contrato, chama **um** método de app service e devolve o contrato.
 - **Notificação após persistir** (e-mail, mensagem): falha é logada, nunca relançada. Envio crítico usa outbox.
@@ -132,7 +149,7 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 ## 7. Filtros, ordenação e injeção de dependência
 
 **Filtros e ordenação de grade (tipados):**
-- `<X>Filter` (Contracts): propriedades tipadas (`string? Nome`, `DateOnly? De`, `E<X>Status? Status`) + `Page`, `PageSize`, `SortBy`, `SortDirection`.
+- `<X>Filter` (Contracts na enxuta; Shared no padrão de 9): propriedades tipadas (`string? Nome`, `DateOnly? De`, `E<X>Status? Status`) + `Page`, `PageSize`, `SortBy`, `SortDirection`.
 - `<X>Specification` (Application):
   - converte o filtro em `Expression<Func<X, bool>>`, combinando só os campos preenchidos;
   - ordenação por **lista branca**: `Dictionary<string, Expression<Func<X, object>>>`, com coluna padrão quando o nome é desconhecido.
@@ -150,15 +167,16 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 - Melhorias deste padrão entram **só em código novo** e só com OK do usuário (ex.: filtro tipado num módulo novo, teste de DI). Nunca mover projetos, pastas, namespaces ou renomear sufixos em massa sem pedido. Adotar as pastas numeradas num projeto existente quebra caminhos de deploy, CI, Dockerfile e scripts: só com plano que liste e atualize cada um.
 - Migração estrutural: sugerir ao usuário `/plano-migracao`, módulo a módulo.
 - **Adoção total pedida pelo usuário:** o pedido explícito prevalece sobre as regras acima, mas só com checklist: (1) commit/backup do estado atual; (2) baseline do contrato (JSON das respostas, rotas) antes de mexer; (3) etapas pequenas, com build e testes verdes a cada uma; (4) se há cliente em outro repositório, alterar os dois e comparar o contrato antes/depois; (5) registrar a decisão no `CLAUDE.md` do projeto; (6) o que não foi verificado (banco real, ponta a ponta) é **PARCIAL**.
+- **Reconhecer o padrão de 9 em projeto desconhecido:** existe um projeto `*.Shared` **sem nenhuma `ProjectReference`**, com `Entities`/`Dto`/`Enums`, e o `Domain` **não tem entidades**. Nesse caso, respeitar essa estrutura e aplicar a regra-alvo (entidade sem atributo de ORM, Shared leve, segurança fora do Shared) **só em código novo**. Legado que diverge (atributos de ORM nas entidades, pacote pesado ou pasta de segurança no Shared) é registrado como *Divergência* no `CLAUDE.md` do projeto, sem migração em massa; se o Shared é referenciado por cliente instalado, avisar o usuário do risco de distribuir segredo e dependência pesada.
 - **Condicional por stack** (registrar no `CLAUDE.md` como *Não se aplica* ou *Divergência*, sem inventar): persistência (`Infra/Data/Context` e migrations só com EF/SQL; MongoDB não tem DbContext); `.slnx` exige SDK com suporte (checar `global.json`); `[Authorize]` com políticas só se o projeto tem autenticação.
 
 ## 9. Fatia vertical de uma funcionalidade nova (checklist)
 
-1. Entidade com métodos de domínio + `I<X>Repository` em `Domain/<Modulo>/<X>/`.
-2. `<X>Configuration` em `Infra/Data/<Modulo>/<X>/`.
+1. Entidade com métodos de domínio (e enum) em `Domain/<Modulo>/<X>/` na enxuta, ou em `Shared/Entities/<Modulo>/` no padrão de 9; `I<X>Repository` no `Domain` (enxuta) ou em `Infra/Repositories/Interfaces/` (padrão de 9).
+2. `<X>Configuration` (mapeamento de persistência) em `Infra/Data/<Modulo>/<X>/` (enxuta) ou `Infra/Persistence/Configurations/` (padrão de 9).
 3. Migration com `-Context` (gerar; aplicar só com autorização).
 4. `<X>Repository` (`internal`) implementando a interface.
-5. `<X>Request` (`[Required]`/`[MaxLength]`), `<X>View`, `<X>Filter` em `Contracts/<Modulo>/<X>/`.
+5. `<X>Request` (`[Required]`/`[MaxLength]`), `<X>View`, `<X>Filter` em `Contracts/<Modulo>/<X>/` (enxuta) ou `Shared/Dto/<Modulo>/` e `Shared/Filters/` (padrão de 9).
 6. `<X>Mapper` + `<X>Specification` em `Application/<Modulo>/<X>/`.
 7. `I<X>AppService` + `<X>AppService` (ou Query/Command, se já nascer grande).
 8. `<X>Controller` com rota e políticas; política nova cadastrada onde o projeto registra permissões.
@@ -180,4 +198,5 @@ Apontar `arquivo:linha` e a camada correta quando aparecer:
 - app service acima do limite da seção 6;
 - projeto separado sem motivo da seção 2;
 - projeto na pasta numerada errada, pasta com espaço ou teste dentro de `src/`;
-- worker com regra de negócio própria.
+- worker com regra de negócio própria;
+- no padrão de 9: atributo de ORM na entidade do Shared; pacote pesado ou segurança/segredo no Shared; Application usando implementação de repositório, `DbContext` ou driver; entidade devolvida em controller (usar `View`/`Response`); regra de negócio em `Utils`/`Helpers`.

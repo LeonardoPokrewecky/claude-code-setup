@@ -46,7 +46,7 @@ Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if command -v pwsh >/dev/nul
 
 | Skill | Invocação | Descrição |
 |---|---|---|
-| `arquitetura-onion` | automática + `/arquitetura-onion` | Padrão de arquitetura onion para backend .NET — Solution padrão de 9 projetos numerados (API a Tools; variante enxuta para projeto pequeno), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar. |
+| `arquitetura-onion` | automática + `/arquitetura-onion` | Padrão de arquitetura para backend .NET — Solution padrão de 9 projetos numerados (API a Tools) com Shared como shared kernel (entidades, enums e DTOs; ordem api → application → domain → infra; variante enxuta Domain/Contracts para projeto pequeno), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar. |
 
 ### Plugin `angular`
 
