@@ -6,7 +6,7 @@
 - Pasta de projetos: `<ex.: D:\Projetos>` (projetos novos são criados aqui)
 - Pasta de memória (projetos sem Git): `<ex.: D:\Projetos\Memory>`
 - Clone do `claude-code-setup`: `<ex.: D:\Projetos\claude-code-setup>` (de onde vêm `project-templates\`, `profiles\` e `scripts\`)
-- Pasta de documentação padrão: `<pasta-pai-do-repo>\docs\<nome-do-repo>\` (fora do repositório)
+- Pasta de documentação padrão: `<pasta-pai-do-repo>\docs\<nome-do-repo>\` (fora do repositório; cada projeto pode optar por `docs/planejamento/` versionada, a skill pergunta)
 
 ## Projetos atuais
 | Projeto | Stack | Camadas | Situação |

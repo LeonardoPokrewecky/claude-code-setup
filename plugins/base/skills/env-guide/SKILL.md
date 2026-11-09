@@ -60,7 +60,7 @@ Descartados: Claude-Mem (conflita com Auto Memory e envia dados a terceiros), He
 - Autoproteção: `deny` de edição em `~/.claude/settings*.json`, `~/.claude/hooks/` e `~/.claude/plugins/`; `ask` em CLAUDE.md, skills e agentes do usuário.
 
 ## Documentos gerados pelas skills
-Pasta de documentação = `Documentação:` do CLAUDE.md do projeto; sem indicação, `<pasta-pai-do-repo>/docs/<nome-do-repo>/` (**fora do repositório**): `backlog/*.md` (`/blueprint`), `RELATORIO-LGPD.md` (`/lgpd-audit`), `HANDOFF.md` (`/session-handoff`). Exceção: `DIVIDA.md` (`/divida`) fica versionado na raiz do projeto.
+Pasta de documentação = `Documentação:` do CLAUDE.md do projeto; sem indicação, o padrão é `<pasta-pai-do-repo>/docs/<nome-do-repo>/` (**fora do repositório**; a skill pergunta se prefere `(versionada)` em `docs/planejamento/`): `backlog/*.md` (`/blueprint`), `RELATORIO-LGPD.md` (`/lgpd-audit`), `HANDOFF.md` (`/session-handoff`). Exceção: `DIVIDA.md` (`/divida`) fica versionado na raiz do projeto.
 
 ## Configuração por máquina
 Pastas, clone do pacote e tabela de projetos atuais ficam em `~/.claude/maquina.md` (modelo `core/maquina.example.md`). Nada pessoal ou de cliente entra no pacote.

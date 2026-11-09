@@ -1,6 +1,6 @@
 # <NomeProjeto>
 
-Documentação: `<pasta-pai-do-repo>\docs\<nome-do-repo>\` (fora do repositório: blueprints em `backlog\`, `RELATORIO-LGPD.md`, `HANDOFF.md`)
+Documentação: `<pasta-pai-do-repo>\docs\<nome-do-repo>\` (fora do repositório: blueprints em `backlog\`, `RELATORIO-LGPD.md`, `HANDOFF.md`) — ou `docs/planejamento/` (versionada, só em projeto próprio; a skill pergunta qual das duas)
 
 ## Stack
 - Backend: <ex.: .NET 10, ASP.NET Core, EF Core, SQL Server>

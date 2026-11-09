@@ -116,6 +116,7 @@ if (-not (Test-Path "$proj/CLAUDE.md")) { Copy-Item "$repo/project-templates/CLA
 ```
 - `.gitignore`: somar as linhas de `project-templates/gitignore.claude` que faltam (o `project-bootstrap` faz isso lendo em UTF-8).
 - Repositório de cliente em que o Claude não deve aparecer: em vez do `.gitignore`, somar `CLAUDE.md`, `CLAUDE.local.md` e `.claude/` ao `.git/info/exclude`.
+- **Documentação do projeto** (blueprints, relatório LGPD, handoff): as skills perguntam uma vez se fica **só local** (fora do repositório, padrão e obrigatório em projeto de cliente) ou **versionada no Git** do projeto (`docs/planejamento/`, só projeto próprio, para abrir em outro ambiente) e gravam a resposta na linha `Documentação:` do `CLAUDE.md`. Em ambos os casos, commit e push só a pedido.
 - Camada `devcontainer` (copiar `.devcontainer/`): isolamento para Windows nativo ou código não confiável — **não validada em projeto real**.
 
 ---

@@ -49,7 +49,7 @@ Ordem: Gravidade × Probabilidade; empate → menor esforço e menor risco.
 - **P3** boas práticas
 
 ## Etapa 5 — Relatório `RELATORIO-LGPD.md` na pasta de documentação (única escrita permitida)
-Fora do repositório do app: o relatório tem mapa de dados pessoais e falhas abertas, não vai para o git. Pasta = `Documentação:` do `CLAUDE.md` do projeto; sem indicação, `<pasta-pai-do-repo>\docs\<nome-do-repo>\`. Se ficar dentro do repositório e `git check-ignore` não a ignorar, avisar e perguntar antes de gravar.
+Por padrão fora do repositório do app: o relatório tem mapa de dados pessoais e falhas abertas, não vai para o git. Pasta = `Documentação:` do `CLAUDE.md` do projeto; sem indicação, **perguntar uma vez** onde fica a documentação, com as duas opções: (a) **só local**, fora do repositório (padrão; obrigatório em projeto de cliente); (b) **versionada no Git** do projeto, em `docs/planejamento/` (só projeto próprio, para abrir em outro ambiente). Gravar a resposta na linha `Documentação:` do `CLAUDE.md` (na opção (b), escrever `(versionada)` na linha). Nunca assumir; criar pasta ou repositório só após OK. Se ficar dentro do repositório, `git check-ignore` não a ignorar e a linha não disser `(versionada)`, avisar e perguntar antes de gravar (este relatório é o mais sensível: em repositório versionado, só se for privado).
 1. Resumo em 5 linhas · 2. Nota 🟢/🟡/🔴 com justificativa · 3. Os 3 problemas mais urgentes ·
 4. Tabela ranqueada: `# | Prioridade | Problema | Onde | Por que importa | Ganho | Risco ao implementar | Esforço | Como corrigir | Base legal` ·
 5. Detalhe por item (evidência, passo a passo, como testar, cuidados) · 6. O que já está bom · 7. O que não deu para verificar ·
