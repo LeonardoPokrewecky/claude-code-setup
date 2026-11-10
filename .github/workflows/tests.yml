@@ -19,6 +19,8 @@ jobs:
             shell_testes: pwsh
           - os: ubuntu-latest
             shell_testes: pwsh
+          - os: macos-latest
+            shell_testes: pwsh
     runs-on: ${{ matrix.os }}
     # O contexto matrix vale em defaults.run, mas não em steps.shell.
     defaults:

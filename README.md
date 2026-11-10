@@ -45,6 +45,14 @@ Os plugins `dotnet` e `angular` ficam desligados por padrão: a camada de projet
 
 Pré-requisitos: Git (no Windows, **Git for Windows**: o hook roda no Git Bash), Claude Code recente (validado com 2.1.319), PowerShell 5.1 ou 7 (`pwsh` em macOS/Linux).
 
+**PowerShell 7 (`pwsh`) é obrigatório em macOS/Linux:** os scripts, o hook de segredos e os testes são `.ps1`. Instale antes de começar:
+```bash
+brew install --cask powershell          # macOS
+# Linux: https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux
+pwsh -v                                  # confira
+```
+Sem `pwsh`, o plugin `base` instala, mas o hook de segredos não roda: a ponte `run-hook.sh` passa a **pedir confirmação em todo comando Bash**, e a leitura de `.env` via `cat` deixa de ser bloqueada. No Windows só com PowerShell 5.1 (sem `pwsh`), troque `pwsh -NoProfile -File` por `powershell -ExecutionPolicy Bypass -File` nos comandos abaixo.
+
 Abra o PowerShell **na pasta deste repositório**:
 ```powershell
 $repo = (Resolve-Path .).Path
@@ -53,6 +61,7 @@ $cl   = Join-Path $(if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }) '
 
 **Passo 1 — Arquivo da máquina** (só se não existir): copie `core/maquina.example.md` para `~/.claude/maquina.md` e preencha pastas, clone e projetos.
 ```powershell
+New-Item -ItemType Directory -Force $cl | Out-Null   # Mac/Linux novo: ~/.claude ainda não existe
 if (-not (Test-Path "$cl/maquina.md")) { Copy-Item "$repo/core/maquina.example.md" "$cl/maquina.md" }
 ```
 
@@ -66,14 +75,14 @@ if (-not (Test-Path "$cl/maquina.md")) { Copy-Item "$repo/core/maquina.example.m
 
 **Passo 3 — CLAUDE.md global e Explore** (antes deste passo, mova regras de projeto/cliente do seu CLAUDE.md atual para o repositório daquele projeto: o arquivo é substituído inteiro, com backup):
 ```powershell
-powershell -ExecutionPolicy Bypass -File "$repo/scripts/instalar-arquivos.ps1" -DryRun
-powershell -ExecutionPolicy Bypass -File "$repo/scripts/instalar-arquivos.ps1" -Confirmar <código>
+pwsh -NoProfile -File "$repo/scripts/instalar-arquivos.ps1" -DryRun
+pwsh -NoProfile -File "$repo/scripts/instalar-arquivos.ps1" -Confirmar <código>
 ```
 
 **Passo 4 — Settings** (permissões, modelo, marketplace). Em macOS/Linux/WSL2, acrescente `-Perfil unix` para ligar o sandbox (exige `bubblewrap` e `socat` no Linux):
 ```powershell
-powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -DryRun -ManterEscalares
-powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -Confirmar <código> -ManterEscalares
+pwsh -NoProfile -File "$repo/scripts/merge-settings.ps1" -DryRun -ManterEscalares
+pwsh -NoProfile -File "$repo/scripts/merge-settings.ps1" -Confirmar <código> -ManterEscalares
 ```
 Leia cada **ALERTA**: `allow` e marketplace novos aparecem de propósito; um alerta inesperado indica alteração indevida no pacote. Sem `-ManterEscalares`, o pacote define `model` = `sonnet` e `advisorModel` = `opus` (advisor: experimental, só Anthropic API).
 
@@ -107,8 +116,8 @@ Peça ao Claude: **"use a skill project-bootstrap"** (modo `adopt-existing` ou `
 Manual:
 ```powershell
 $proj = "<pasta do projeto>"
-powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -Target "$proj/.claude/settings.json" -Layers _base,dotnet -DryRun
-powershell -ExecutionPolicy Bypass -File "$repo/scripts/merge-settings.ps1" -Target "$proj/.claude/settings.json" -Layers _base,dotnet -Confirmar <código>
+pwsh -NoProfile -File "$repo/scripts/merge-settings.ps1" -Target "$proj/.claude/settings.json" -Layers _base,dotnet -DryRun
+pwsh -NoProfile -File "$repo/scripts/merge-settings.ps1" -Target "$proj/.claude/settings.json" -Layers _base,dotnet -Confirmar <código>
 # Regras por caminho das camadas escolhidas (sem sobrescrever):
 New-Item -ItemType Directory -Force "$proj/.claude/rules" | Out-Null
 Get-ChildItem "$repo/project-templates/dotnet/.claude/rules" -File | Where-Object { -not (Test-Path "$proj/.claude/rules/$($_.Name)") } | Copy-Item -Destination "$proj/.claude/rules"
@@ -175,7 +184,7 @@ Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI 
 | Componente | Windows PS 5.1 | Windows PS 7 | Linux / WSL2 | macOS |
 |---|---|---|---|---|
 | Hook (plugin, Git Bash/sh) | testado aqui | testado aqui (88 casos do `casos-hook.psd1` via `pwsh`) | alterado para o CI, não executado | não testado |
-| `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI, não executado | CI, não executado | não testado |
+| `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI, não executado | CI, não executado | CI (`macos-latest`), não executado |
 | Plugins e marketplace (`claude plugin validate`, instalação isolada) | testado aqui | — | não testado | não testado |
 | Sandbox (`-Perfil unix`) | não suportado (doc oficial) | não suportado | não testado | não testado |
 | Devcontainer | não testado | — | não testado | não testado |
