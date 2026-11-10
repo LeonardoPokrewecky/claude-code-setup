@@ -15,7 +15,7 @@ Quem consome (SPA própria, app móvel, terceiros/B2B, outros serviços), domín
 |---|---|---|
 | **A. Cookie de sessão `HttpOnly` + `Secure` + `SameSite`** (ou BFF) | SPA própria no mesmo site, dado sensível, revogação imediata | Anti-CSRF obrigatório (token ou `SameSite` estrito + cabeçalho); sessão no servidor/cache distribuído para escalar |
 | **B. JWT de acesso curto (5 a 15 min) + refresh token com rotação** | Móvel, terceiros, API pública, vários serviços | Revogação só via expiração curta + refresh controlado no servidor; refresh guardado com hash e detecção de reuso; nunca JWT longo em `localStorage` |
-| **C. IdP externo (OIDC): Keycloak, Entra ID, Auth0, Cognito…** | SSO, vários sistemas, MFA/social pronto, time pequeno | Não implementar o próprio protocolo; custo e dependência do provedor; validar `iss`, `aud`, `exp`, assinatura e `nonce`/PKCE |
+| **C. IdP externo (OIDC): Keycloak, Entra ID, Auth0, Cognito…** | SSO, vários sistemas, MFA/social pronto, time pequeno | Não implementar o próprio protocolo; custo e dependência do provedor; validar `iss`, `aud`, `exp`, assinatura, `state`, `nonce` e PKCE; `redirect_uri` com correspondência exata (sem curinga, evita redirecionamento aberto) |
 | **D. Identity/framework nativo** (ASP.NET Identity) | Usuários e senhas próprios, sem SSO | Política de senha, bloqueio por tentativas, confirmação de e-mail, hash adequado já embutido |
 
 Combinações são comuns (ex.: C para login + A para a sessão do navegador). Apresentar recomendação **com o critério que a decide**, e o que mudaria a recomendação.
@@ -24,8 +24,9 @@ Combinações são comuns (ex.: C para login + A para a sessão do navegador). A
 - **Senha:** hash lento com sal (Argon2id, bcrypt ou PBKDF2 com custo atual); nunca criptografia reversível, nunca log da senha tentada.
 - **Token/sessão:** expiração validada, assinatura com algoritmo fixado no servidor (rejeitar `none` e troca de algoritmo), chave fora do código (ver `/gestao-de-segredos`), rotação de chave, identificador de sessão imprevisível, renovar o identificador após login (fixação de sessão).
 - **Armazenamento no cliente:** token de longa duração fora de `localStorage`/`sessionStorage`; cookie com `HttpOnly`, `Secure`, `SameSite`; CSP para reduzir XSS.
-- **Login:** limite de tentativas por conta e por IP, mensagem igual para "usuário inexistente" e "senha errada", MFA para operação sensível, recuperação de senha com token de uso único e expiração curta.
-- **Autorização:** negar por padrão; checar dono do recurso no servidor (IDOR/acesso cruzado entre contas ou tenants); perfil e permissão vêm do servidor, nunca de campo enviado pelo cliente.
+- **Transporte do token:** nunca na URL ou na query string (vai para log, histórico e `Referer`); cookie com prefixo `__Host-` quando possível; token só no cabeçalho `Authorization` ou no cookie.
+- **Login:** limite de tentativas por **identidade e por origem**, bloqueando na tentativa que atinge o limite; mensagem e tempo de resposta iguais para "usuário inexistente" e "senha errada" (evita enumeração); nunca persistir a senha tentada; MFA para operação sensível, recuperação de senha com token de uso único e expiração curta.
+- **Autorização:** negar por padrão; checar dono do recurso no servidor (IDOR/acesso cruzado entre contas ou tenants); perfil e permissão vêm do servidor, nunca de campo enviado pelo cliente; o dono do recurso vem do token/sessão, nunca do corpo da requisição; DTO de entrada só com os campos editáveis (evita atribuição em massa de perfil ou saldo).
 - **Logout e revogação:** invalidar no servidor, não só apagar no cliente; bloquear usuário derruba sessões e refresh tokens.
 - **Auditoria (LGPD):** registrar login, falha, troca de senha e acesso a dado pessoal sem guardar senha, foto ou dado excessivo (ver `/lgpd-audit`).
 - **Ambiente:** bypass de login/2FA/pagamento só com checagem explícita de desenvolvimento, nunca ativo em produção.

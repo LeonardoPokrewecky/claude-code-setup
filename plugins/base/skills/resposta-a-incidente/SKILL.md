@@ -11,6 +11,7 @@ Incidente: `$ARGUMENTS`. **Orientação e análise somente leitura.** Nunca ler 
 1. **Classificar** a gravidade (crítico: dado pessoal/financeiro exposto, sistema fora do ar, invasão ativa; alto; médio; baixo) e o tipo (vazamento de dado, credencial exposta, acesso indevido, malware/ransomware, indisponibilidade, fraude, erro de operação).
 2. **Abrir o registro** com data/hora de cada ação (seção 7). Não apagar nada ainda.
 3. **Definir quem decide** (responsável pelo incidente) e quem precisa saber agora.
+4. **Canal seguro:** se houver suspeita de invasão, não coordenar pelo e-mail, chat ou servidor possivelmente comprometidos; usar canal alternativo e contas não afetadas.
 
 ## 1. Contenção (parar o dano sem destruir evidência)
 Escolher a menor ação que interrompe o dano, com o impacto dito:
@@ -34,7 +35,7 @@ Restaurar de backup **íntegro e anterior ao incidente** (testar antes de religa
 
 ## 6. Comunicação e LGPD
 - Comunicar internamente conforme a gravidade (liderança, jurídico, encarregado/DPO, suporte).
-- Se houver **dado pessoal** com risco ou dano relevante aos titulares, a LGPD prevê comunicação à ANPD e aos titulares, em prazo razoável. **Eu não decido a obrigação nem o prazo:** reunir fatos (seção 3) e levar ao encarregado/jurídico (ver `/lgpd-audit`).
+- Se houver **dado pessoal** com risco ou dano relevante aos titulares, a LGPD prevê comunicação à ANPD e aos titulares, dentro de prazo definido em regulamento da ANPD (verificar a resolução vigente, pois muda com o tempo). **Eu não decido a obrigação nem o prazo:** reunir fatos (seção 3) e levar ao encarregado/jurídico (ver `/lgpd-audit`).
 - Comunicação externa: fatos confirmados, sem especular causa nem culpado; um canal único e um responsável.
 - Contratos e seguros podem exigir aviso a clientes/parceiros/seguradora: verificar com o jurídico.
 

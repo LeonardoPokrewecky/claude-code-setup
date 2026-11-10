@@ -15,6 +15,7 @@ Onde roda (VM/IIS/Linux, container, PaaS, Kubernetes, serverless), o que é púb
 - **Acesso administrativo:** SSH/RDP por chave ou MFA, sem senha, sem login direto como root/administrador, contas nominais, acesso removido quando alguém sai.
 - **TLS:** só versões atuais, certificado válido com renovação automática, HTTP redireciona para HTTPS, HSTS.
 - **Cabeçalhos HTTP:** `Strict-Transport-Security`, `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`; sem cabeçalho que revele versão (`Server`, `X-Powered-By`); CORS com origens explícitas.
+- **Nuvem:** serviço de metadados da instância protegido (IMDSv2 ou equivalente) e bloqueado para a aplicação quando ela busca URLs (SSRF); bucket/armazenamento privado por padrão; chave de acesso de longa duração evitada em favor de papel temporário.
 - **Aplicação em produção:** Swagger/telas de depuração/detalhe de exceção desligados; variável de ambiente de produção correta (nenhum bypass de desenvolvimento ativo).
 - **Containers:** imagem base mínima e fixada por versão/digest, usuário sem privilégio de root, sistema de arquivos somente leitura quando possível, sem `--privileged`, sem socket do Docker montado, segredo fora da imagem e do `ARG`, varredura de vulnerabilidade da imagem.
 - **Isolamento:** um serviço por conta/contêiner, rede interna separada da pública, menor privilégio no banco (usuário da aplicação sem DDL em produção) e na nuvem (papéis mínimos).

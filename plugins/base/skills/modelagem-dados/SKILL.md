@@ -15,6 +15,8 @@ Entidades e regras de negócio, **consultas reais** (as 5 a 10 mais frequentes e
 - Entidades, relacionamentos (1:N, N:N com tabela de associação), chaves primárias e estrangeiras, restrições (`NOT NULL`, `UNIQUE`, `CHECK`), normalização até onde a leitura permite; desnormalizar só com consulta medida.
 - Tipos corretos: dinheiro em `decimal`/`numeric` (nunca ponto flutuante), datas em UTC, enum controlado, identificador (sequencial × GUID/UUID: custo de índice e exposição), texto com tamanho definido.
 - Concorrência: coluna de versão/token otimista onde houver disputa; evitar linha quente (saldo, contador); operação com efeito idempotente.
+- Multi-tenant: identificador do tenant em toda tabela relevante, presente em toda consulta (filtro global, visão por tenant ou segurança em nível de linha); teste com duas contas para provar que uma não lê a outra.
+- Dado pessoal nunca como chave, em índice sem necessidade, em URL ou em nome de arquivo.
 - Exclusão: lógica (marca + data) × física; cascata só quando intencional; compatível com LGPD (eliminação/anonimização).
 
 **Documental**

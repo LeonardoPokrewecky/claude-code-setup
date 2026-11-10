@@ -45,7 +45,7 @@ Regra de partida: **um relacional bem modelado resolve a maioria dos produtos**;
 Ferramenta à escolha (k6, NBomber, JMeter), em ambiente de homologação com **dado sintético/anonimizado** e volume parecido com o real (nunca dados reais sem autorização). Cenários: uso normal, pico (2× a 3×), pico prolongado e falha de dependência. Métricas: latência p95/p99, taxa de erro, requisições/s, conexões ativas, CPU/memória/IOPS do banco, tempo de consulta. Critério de aceite definido **antes** (ex.: p95 abaixo de X ms a Y req/s sem erro). Medir antes e depois de cada otimização (`/medir-antes-depois`).
 
 ## 7. Operação e dados
-Backup e teste de restauração, RPO/RTO, migrations reversíveis e testadas (`/plano-migracao`), monitoramento e alerta (lentidão, conexões, disco), retenção e exclusão conforme LGPD (`/lgpd-audit`), segredo da connection string fora do código (`/gestao-de-segredos`).
+Banco nunca exposto à internet, conexão com TLS, usuário da aplicação com menor privilégio e contas separadas para migração e leitura, dado em repouso criptografado, backup e teste de restauração, RPO/RTO, migrations reversíveis e testadas (`/plano-migracao`), monitoramento e alerta (lentidão, conexões, disco), retenção e exclusão conforme LGPD (`/lgpd-audit`), segredo da connection string fora do código (`/gestao-de-segredos`).
 
 ## Saída
 Recomendação (tipo de banco + estratégia de escala) **com o critério que a decide** e o que mudaria a escolha; tabela `etapa | estimativa (marcada como hipótese) | risco | como validar`; plano de teste de carga com critério de aceite; e "Não verifiquei:" (ex.: carga real, plano de execução das consultas, limites da hospedagem, custo).
