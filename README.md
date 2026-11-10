@@ -213,7 +213,7 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 ## 10. Pendências
 
 - [ ] Validar numa sessão real (Passo 5) e medir `/context` antes × depois.
-- [ ] Executar o CI (push) para PowerShell 7 e Linux.
+- [x] Executar o CI (push) para PowerShell 7 e Linux: passou (PR #3, 09/11/2026; Windows PowerShell 5.1, PowerShell 7 e Ubuntu).
 - [ ] Rodar `claude plugin eval ./plugins/base` e criar evals para skills sob demanda (`/revisar`, `/blueprint`, `/alterar-dados`) — invocação por `/comando` em eval não confirmada na doc.
 - [ ] Perfil de CI e template de CI com `anthropics/claude-code-action` (sem caso real).
 - [ ] Validar a seção IIS do `/deploy-checklist` e a camada `devcontainer` em projeto real.
