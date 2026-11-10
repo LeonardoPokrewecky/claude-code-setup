@@ -6,7 +6,7 @@
 
 | Plugin | Ligado por padrão | Descrição |
 |---|---|---|
-| `base` | sim | Hook de segredos, revisão por lentes, planejamento, alteração de dados, deploy, LGPD e agentes. |
+| `base` | sim | Hook de segredos, revisão por lentes, segurança, dados e integrações, testes e QA, design, requisitos e produto, deploy, LGPD e agentes. |
 | `dotnet` | não (ligar por projeto) | Arquitetura onion para backend .NET. Ligado por projeto (camada dotnet). |
 | `angular` | não (ligar por projeto) | Arquitetura de frontend Angular. Ligado por projeto (camada angular). |
 

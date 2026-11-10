@@ -43,3 +43,6 @@ Alvo: `$ARGUMENTS`. **Deploy só com autorização explícita nesta conversa.** 
 - Copiar preservando o que é do servidor: `appsettings.<Ambiente>.json`, `web.config` com variáveis de ambiente/segredos, pasta `logs`.
 - Variáveis de ambiente e segredos no pool/`web.config` do servidor, nunca no pacote.
 - Depois: `Start-WebAppPool`, HTTP 200 na URL real, log de inicialização (stdout log do módulo ASP.NET Core) sem erro, SHA-256 do pacote local × servidor, remover `app_offline.htm` e temporários.
+
+
+Ver também: `/regressao-e-smoke` (smoke pós-publicação e gatilho de reversão), `/endurecimento-de-infraestrutura` (superfície de ataque do servidor), `/entrega-sem-pendencia` (fechamento antes de publicar).

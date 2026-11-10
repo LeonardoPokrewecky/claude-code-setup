@@ -11,3 +11,6 @@ Alvo: `$ARGUMENTS`. Escrever **apenas arquivos de teste novos**; não alterar o 
 2. Cobrir: caminho feliz, bordas, erros e a regra de negócio relevante. Sem mocks desnecessários, sem dependência de banco/rede.
 3. Rodar o comando de teste do projeto e mostrar o resultado literal. Teste que falha por bug real: reportar, não "consertar" o teste.
 4. Terminar com "Não verifiquei:".
+
+
+Ver também: `/teste-de-api` (validar endpoints), `/automacao-e2e` (fluxos de interface), `/regressao-e-smoke` (o que reexecutar a cada entrega), `/laudo-de-evidencia` (relatório do que foi validado).

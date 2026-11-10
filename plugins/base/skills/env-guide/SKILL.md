@@ -24,6 +24,19 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 - Planejar algo grande → Plan mode + `/blueprint` (requisitos não funcionais incluídos).
 - Revisar → `/revisar` (escolhe as lentes pelo risco do diff), `/revisar <lente>` ou `/revisar pr <número|branch>` (pull request: CI, conflito, veredito); `/code-review` e `/security-review` embutidos para o diff completo.
 - Dados em massa → `/alterar-dados`; deploy → `/deploy-checklist`; LGPD do app → `/lgpd-audit`.
+- **Qual skill por tema** (todas manuais, só rodam por `/comando`; lista completa em componentes.md):
+
+| Tema | Skills | Como escolher |
+|---|---|---|
+| Requisitos e produto | `/historias-de-usuario`, `/priorizacao`, `/metricas-de-produto`, `/comunicacao-de-status`, `/blueprint` | Histórias = o quê e para quem (produto); `/blueprint` = como construir (técnico); `/priorizacao` ordena histórias, dívidas ou riscos |
+| Arquitetura e decisão | `/adr`, `/divida`, `/plano-migracao`, `/integracoes`, `/escolha-de-banco-e-capacidade` | `/adr` registra a decisão; banco e carga antes de modelar |
+| Dados | `/escolha-de-banco-e-capacidade` → `/modelagem-dados` → `/plano-migracao` (versões) ou `/alterar-dados` (dados em massa) | Tipo de banco e carga → esquema e índices → mudança segura |
+| Segurança | `/autenticacao-e-sessao`, `/gestao-de-segredos`, `/endurecimento-de-infraestrutura`, `/lgpd-audit`, `/revisar seguranca` | Código = revisar; servidor = endurecimento; credencial = segredos; login = autenticação |
+| Incidente | `/resposta-a-incidente` (durante) → `/postmortem` (depois) | Conter e preservar evidência primeiro; causa raiz depois |
+| Testes e qualidade | `/criar-testes` (unidade), `/teste-de-api`, `/automacao-e2e`, `/regressao-e-smoke`, `/laudo-de-evidencia`, `/medir-antes-depois` | Do mais barato (unidade) ao mais caro (E2E); laudo consolida o que foi validado |
+| Interface | `/sistema-de-design`, `/componentes-e-estados`, `/layout-responsivo`, `/revisar a11y` | Tokens primeiro, depois componentes e telas |
+| Entrega | `/entrega-sem-pendencia`, `/preparar-pr`, `/deploy-checklist`, `/session-handoff` | Fechar (sem pendência) → PR → publicar → passar o bastão |
+| Código | `/explicar`, `/limpar-codigo` | Entender antes de limpar |
 - Delegar: leitura ampla → `Explore`; pesquisa web → `researcher-haiku`; rodar testes → `test-validator-haiku`; só `.md` → `documentation-haiku`; implementação paralela → `implementer-sonnet`; uma lente de revisão → `revisor` (modelo da sessão; segurança/LGPD/arquitetura nunca em Haiku).
 - Agentes embutidos `Plan` e `general-purpose` herdam o modelo da sessão.
 

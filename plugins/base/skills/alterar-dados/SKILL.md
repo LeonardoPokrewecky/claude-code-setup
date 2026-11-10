@@ -31,3 +31,6 @@ Alvo: `$ARGUMENTS`. **Produção ou dados reais só com autorização explícita
 
 ## 4. Relatório
 Contagens (universo, alterados, erros), backup criado, canário validado (como), comando de rollback a partir do backup, "Não verifiquei:".
+
+
+Ver também: `/modelagem-dados` (esquema e migração segura), `/plano-migracao` (atualização de versão), `/resposta-a-incidente` se a alteração corrige um incidente.

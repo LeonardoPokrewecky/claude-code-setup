@@ -149,7 +149,14 @@ As regras nativas dividem comandos compostos (`x && git push` pede confirmação
 | Planejar algo grande | Plan mode + `/blueprint` (inclui requisitos não funcionais) |
 | Revisar | `/revisar` (lentes escolhidas pelo risco do diff), `/revisar <lente>` ou `/revisar pr <número|branch> [completo]` (CI, conflito com a base e veredito, só leitura); `/code-review`, `/security-review` |
 | Dados em massa / deploy | `/alterar-dados`, `/deploy-checklist` |
-| Outras | `/divida`, `/medir-antes-depois`, `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem`, `/lgpd-audit`, `/gestao-de-segredos`, `/autenticacao-e-sessao`, `/escolha-de-banco-e-capacidade`, `/modelagem-dados`, `/integracoes`, `/endurecimento-de-infraestrutura`, `/resposta-a-incidente`, `/teste-de-api`, `/regressao-e-smoke`, `/automacao-e2e`, `/laudo-de-evidencia`, `/entrega-sem-pendencia`, `/sistema-de-design`, `/layout-responsivo`, `/componentes-e-estados`, `/historias-de-usuario`, `/priorizacao`, `/metricas-de-produto`, `/comunicacao-de-status`, `/session-handoff` |
+| Produto e requisitos | `/historias-de-usuario`, `/priorizacao`, `/metricas-de-produto`, `/comunicacao-de-status` |
+| Dados | `/escolha-de-banco-e-capacidade`, `/modelagem-dados`, `/plano-migracao` |
+| Segurança | `/autenticacao-e-sessao`, `/gestao-de-segredos`, `/endurecimento-de-infraestrutura`, `/lgpd-audit` |
+| Incidente | `/resposta-a-incidente` (durante), `/postmortem` (depois) |
+| Integrações e decisões | `/integracoes`, `/adr`, `/divida` |
+| Testes e qualidade | `/criar-testes`, `/teste-de-api`, `/automacao-e2e`, `/regressao-e-smoke`, `/laudo-de-evidencia`, `/medir-antes-depois` |
+| Interface | `/sistema-de-design`, `/componentes-e-estados`, `/layout-responsivo` |
+| Entrega e código | `/entrega-sem-pendencia`, `/preparar-pr`, `/session-handoff`, `/explicar`, `/limpar-codigo` |
 
 Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI leem o mesmo `~/.claude`: a configuração é a mesma nos dois.
 
@@ -192,7 +199,7 @@ Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe 
 
 ## 9. Testes e manutenção
 
-- `Invoke-Pester ./tests -Output Detailed` (Pester 5 ou 6; o Windows PowerShell 5.1 traz o 3.4, então rode com `pwsh`; última execução: Pester 6.2.0, 215 aprovados, 0 falhas, 1 ignorado: `Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -SkipPublisherCheck`).
+- `Invoke-Pester ./tests -Output Detailed` (Pester 5 ou 6; o Windows PowerShell 5.1 traz o 3.4, então rode com `pwsh`; última execução: Pester 6.2.0, 274 aprovados, 0 falhas, 1 ignorado: `Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -SkipPublisherCheck`).
 - Casos do hook em `tests/casos-hook.psd1`: padrão novo no hook entra com caso novo.
 - Mudou skill, agente, plugin, camada ou perfil? Rode `scripts/gerar-docs.ps1` e commite o `componentes.md` (o teste falha se ficar desatualizado).
 - `claude plugin validate .` e `claude plugin validate ./plugins/<nome>` antes de publicar.
@@ -210,6 +217,10 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 - [ ] Rodar `claude plugin eval ./plugins/base` e criar evals para skills sob demanda (`/revisar`, `/blueprint`, `/alterar-dados`) — invocação por `/comando` em eval não confirmada na doc.
 - [ ] Perfil de CI e template de CI com `anthropics/claude-code-action` (sem caso real).
 - [ ] Validar a seção IIS do `/deploy-checklist` e a camada `devcontainer` em projeto real.
+- [ ] Revisar o conteúdo das skills novas de segurança e dados (`autenticacao-e-sessao`, `endurecimento-de-infraestrutura`, `resposta-a-incidente`, `modelagem-dados`, `integracoes`, `escolha-de-banco-e-capacidade`) com a lente `seguranca` e conferir recomendações contra fontes oficiais (OWASP, docs da Microsoft e do PostgreSQL) antes de publicar.
+- [ ] Criar evals para as skills novas (sem eval hoje).
+- [ ] Avaliar dividir o plugin `base` (36 skills) em plugins temáticos (segurança, QA e design, produto) e complementar `dotnet`/`angular` com autenticação, EF/índices e o lado de interface.
+- [ ] Skills de marketing e SEO (Luna, Lira, Rank do levantamento externo): decidir entre plugin opcional próprio ou o `marketingskills` externo.
 - [ ] Fixar `marketingskills` por SHA, se o schema aceitar.
 - [ ] Confirmar direitos de distribuição do `Auditoria LGPD.pdf`.
 

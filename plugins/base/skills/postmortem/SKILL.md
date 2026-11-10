@@ -12,3 +12,6 @@ Incidente em andamento (não só retrospectiva): **classificar a gravidade** (cr
 Diagnóstico sem adivinhar: processo que morre sem log → evidência externa (log do sistema, antivírus) correlacionada pelo horário exato; "serviço ativo" não prova que trabalha (comparar a hora da última linha de log com a do início do processo); processo em loop de reinício não aparece como falho (olhar contador de reinícios e log); antes de concluir que algo está exposto, testar **sem seguir redirecionamento**.
 
 Entregar: resumo (1–2 linhas) · impacto · linha do tempo · causa raiz (os 5 porquês, parar quando a causa for acionável) · o que funcionou/falhou na detecção · ações (corrigir, prevenir, detectar) com dono sugerido · "Não verifiquei:". Sem culpar pessoas.
+
+
+Ver também: `/resposta-a-incidente` (durante o incidente: conter, preservar evidência, comunicar) antes deste; `/gestao-de-segredos` se houve credencial exposta.
