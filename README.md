@@ -43,6 +43,8 @@ Os plugins `dotnet` e `angular` ficam desligados por padrão: a camada de projet
 
 ## 2. Instalação
 
+> Guia dedicado, com passo guiado por script (`install/instalar.ps1`), migração, backups e solução de problemas: [install/README.md](install/README.md).
+
 Pré-requisitos: Git (no Windows, **Git for Windows**: o hook roda no Git Bash), Claude Code recente (validado com 2.1.319), PowerShell 5.1 ou 7 (`pwsh` em macOS/Linux).
 
 **PowerShell 7 (`pwsh`) é obrigatório em macOS/Linux:** os scripts, o hook de segredos e os testes são `.ps1`. Instale antes de começar:
