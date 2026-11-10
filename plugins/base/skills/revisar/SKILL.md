@@ -1,8 +1,8 @@
 ---
 name: revisar
-description: Revisão somente leitura por lentes (seguranca, lgpd, arquitetura, qualidade, performance, testes, contrato, banco, deps, a11y, didatico). Sem lente, escolhe as lentes pelo risco do diff. Alvo: diff, caminho ou branch. Modo PR (pr <número|branch>) checa CI e conflito e dá veredito. Só roda com /revisar [lente|auto|pr] [alvo].
+description: Revisão somente leitura por lentes (seguranca, lgpd, arquitetura, qualidade, performance, testes, contrato, banco, integracoes, deps, a11y, didatico). Sem lente, escolhe as lentes pelo risco do diff. Alvo: diff, caminho ou branch. Modo PR (pr <número|branch>) checa CI e conflito e dá veredito. Só roda com /revisar [lente|auto|pr] [alvo].
 disable-model-invocation: true
-argument-hint: "[auto|pr|seguranca|lgpd|arquitetura|qualidade|performance|testes|contrato|banco|deps|a11y|didatico] [caminho | branch:<nome> | <número-do-PR> [completo]]"
+argument-hint: "[auto|pr|seguranca|lgpd|arquitetura|qualidade|performance|testes|contrato|banco|integracoes|deps|a11y|didatico] [caminho | branch:<nome> | <número-do-PR> [completo]]"
 ---
 
 # Revisar — lentes escolhidas pelo risco
@@ -26,6 +26,7 @@ Ler o diff inteiro (não só o `--stat`) e acionar **só** as lentes cujo gatilh
 | `testes` | código de produção alterado | [lentes/testes.md](lentes/testes.md) |
 | `contrato` | DTO, rota, controller, serviço HTTP do frontend | [lentes/contrato.md](lentes/contrato.md) |
 | `banco` | migration, schema, índice, script de dados | [lentes/banco.md](lentes/banco.md) |
+| `integracoes` | chamada HTTP a serviço externo, webhook, fila/mensageria, job, cliente de integração | [lentes/integracoes.md](lentes/integracoes.md) |
 | `performance` | laço sobre coleção grande, consulta em laço, renderização, cache | [lentes/performance.md](lentes/performance.md) |
 
 `deps`, `a11y` e `didatico` só rodam quando pedidas pelo nome ([deps](lentes/deps.md), [a11y](lentes/a11y.md), [didatico](lentes/didatico.md)).

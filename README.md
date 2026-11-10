@@ -149,7 +149,7 @@ As regras nativas dividem comandos compostos (`x && git push` pede confirmação
 | Planejar algo grande | Plan mode + `/blueprint` (inclui requisitos não funcionais) |
 | Revisar | `/revisar` (lentes escolhidas pelo risco do diff), `/revisar <lente>` ou `/revisar pr <número|branch> [completo]` (CI, conflito com a base e veredito, só leitura); `/code-review`, `/security-review` |
 | Dados em massa / deploy | `/alterar-dados`, `/deploy-checklist` |
-| Outras | `/divida`, `/medir-antes-depois`, `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem`, `/lgpd-audit`, `/session-handoff` |
+| Outras | `/divida`, `/medir-antes-depois`, `/criar-testes`, `/explicar`, `/limpar-codigo`, `/preparar-pr`, `/adr`, `/plano-migracao`, `/postmortem`, `/lgpd-audit`, `/gestao-de-segredos`, `/autenticacao-e-sessao`, `/escolha-de-banco-e-capacidade`, `/modelagem-dados`, `/integracoes`, `/endurecimento-de-infraestrutura`, `/resposta-a-incidente`, `/teste-de-api`, `/regressao-e-smoke`, `/automacao-e2e`, `/laudo-de-evidencia`, `/entrega-sem-pendencia`, `/sistema-de-design`, `/layout-responsivo`, `/componentes-e-estados`, `/historias-de-usuario`, `/priorizacao`, `/metricas-de-produto`, `/comunicacao-de-status`, `/session-handoff` |
 
 Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI leem o mesmo `~/.claude`: a configuração é a mesma nos dois.
 
