@@ -17,6 +17,9 @@ Alvo: `$ARGUMENTS`. **Deploy só com autorização explícita nesta conversa.** 
 ## Durante
 - Script remoto gerado no Windows: UTF-8 **sem BOM** e LF (BOM esvazia variável e `find $VAR -delete` vira `find -delete` na pasta atual).
 - Guardar o destino: `[ -n "$TARGET" ] && [ -d "$TARGET" ] || exit 1`, sempre entre aspas.
+- **Backup antes de limpar, encadeado com `&&` (ou `set -e`), nunca com `;`:** se a cópia falha por permissão, o script para; com `;` ele segue e apaga o destino sem cópia. Conferir que o backup existe e tem tamanho > 0; senão, abortar.
+- Pasta de dados do usuário dentro da raiz publicada (uploads, anexos): excluir da limpeza ou publicar de forma aditiva.
+- Manter o backup do estado anterior até a mudança ser aceita (é o único ponto de retorno).
 - Limpar preservando o que é do servidor: `find "$TARGET" -mindepth 1 -not -name 'appsettings*.json' -not -path "$TARGET/logs*" -delete`.
 - Reiniciar a unit exata; esperar o cold start antes de julgar 502.
 - Nunca abrir porta, mexer em firewall ou bind em `0.0.0.0` — serviço escuta em `127.0.0.1` atrás do NGINX.
@@ -25,6 +28,9 @@ Alvo: `$ARGUMENTS`. **Deploy só com autorização explícita nesta conversa.** 
 - `ls` do destino: só o tipo de conteúdo esperado (sem fonte em webroot, sem chunk de outro projeto, sem `appsettings` em webroot).
 - SHA-256 do pacote local × servidor; `systemctl is-active`; log de inicialização sem erro de configuração.
 - HTTP 200 na URL real (não só "serviço ativo"); frontend: aba nova com hard reload e conferir o hash do bundle.
+- **Verificar depois de iniciar o serviço**, nunca entre a extração e a partida (se a verificação falhar ali, ela vira a causa da indisponibilidade). Serviço que resolve segredo externo na partida pode demorar: repetir a verificação por algumas dezenas de segundos antes de reverter, senão a reversão desfaz um deploy correto.
+- **Reverter** do backup se a verificação falhar após as tentativas, e relatar a reversão.
+- **Smoke de menos de 2 minutos** (o que, se quebrar, é indisponibilidade): página inicial, login, uma leitura e uma escrita do fluxo central, health da API, sem erro no console. Falhou → interromper e reverter.
 - Remover pacotes e pastas temporárias no servidor e local.
 - Relatório em tabela: `componente | URL | pasta | HTTP | status`, mais "Não verifiquei:".
 - Correção em caminho de escrita só cobre registros futuros: consultar o legado e, se preciso, `/alterar-dados`.
@@ -37,3 +43,6 @@ Alvo: `$ARGUMENTS`. **Deploy só com autorização explícita nesta conversa.** 
 - Copiar preservando o que é do servidor: `appsettings.<Ambiente>.json`, `web.config` com variáveis de ambiente/segredos, pasta `logs`.
 - Variáveis de ambiente e segredos no pool/`web.config` do servidor, nunca no pacote.
 - Depois: `Start-WebAppPool`, HTTP 200 na URL real, log de inicialização (stdout log do módulo ASP.NET Core) sem erro, SHA-256 do pacote local × servidor, remover `app_offline.htm` e temporários.
+
+
+Ver também: `/regressao-e-smoke` (smoke pós-publicação e gatilho de reversão), `/endurecimento-de-infraestrutura` (superfície de ataque do servidor), `/entrega-sem-pendencia` (fechamento antes de publicar).

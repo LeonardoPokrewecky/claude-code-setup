@@ -24,3 +24,6 @@ Onde salvar (só se o usuário pedir):
 - Projeto sem Git: registrar no `<pasta de memória>\<Projeto>.memory` (pasta em `~/.claude/maquina.md`).
 
 Fatos duradouros (preferência, armadilha, decisão de arquitetura) vão para a Auto Memory ou para o `CLAUDE.md` do projeto, não para o handoff.
+
+
+Ver também: `/comunicacao-de-status` (relatório de andamento para equipe ou cliente, em vez de passagem de bastão entre sessões).

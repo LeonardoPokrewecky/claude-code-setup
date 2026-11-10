@@ -6,7 +6,7 @@
     {
       "name": "base",
       "source": "./plugins/base",
-      "description": "Hook de segredos, revisão por lentes, planejamento, alteração de dados, deploy, LGPD e agentes."
+      "description": "Hook de segredos, revisão por lentes, segurança, dados e integrações, testes e QA, design, requisitos e produto, deploy, LGPD e agentes."
     },
     {
       "name": "dotnet",

@@ -131,6 +131,8 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 
 ## 6. Responsabilidade de cada peça
 
+- **Teste rápido da camada:** se a regra continua verdadeira trocando o banco e a interface, ela é de domínio; se muda com o banco, é de `Infra`; se só ordena passos de um fluxo, é de `Application`.
+- **Leitura e escrita separadas (opcional):** quando a consulta de leitura começa a distorcer o modelo de escrita, separar: escrita normalizada com invariantes, leitura desnormalizada/projetada para a grade (`<X>QueryService`). Não adotar por antecipação.
 - **Entidade (Domain na enxuta; Shared no padrão de 9):** protege o próprio estado. Mudança de estado por método com validação (`pedido.Cancelar(motivo)`), sem `set` público. Regra que envolve uma única entidade fica nela, não no app service. Regra que envolve mais de uma entidade: serviço de domínio (`Domain` no padrão de 9). No padrão de 9, a entidade não leva atributo de ORM nem de driver (`[Bson*]`, `[Table]`, `[Key]`, `[Column]`).
 - **App service (Application):** um caso de uso por método. Valida a entrada, carrega as entidades pelo repositório, chama os métodos de domínio, faz `IUnitOfWork.CommitAsync` e devolve o contrato. Repositório não comita.
 - **Tamanho:** passou de ~7 métodos públicos ou ~300 linhas, dividir:
@@ -159,6 +161,8 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 **Injeção de dependência:**
 - Registro explícito em cada `DependencyInjection.cs`, ou por convenção (ex.: Scrutor por sufixo) quando houver muitos serviços. Tempo de vida decidido por tipo: `DbContext`/repositório/unit of work `Scoped`, cliente HTTP via `IHttpClientFactory`.
 - `ValidateOnBuild = true` e `ValidateScopes = true` no host.
+- Configuração tipada (`IOptions<T>`) com `ValidateDataAnnotations().ValidateOnStart()`: sem o registro, o objeto chega com valores padrão e **sem erro** (em validação de credencial, recusa qualquer valor, inclusive o correto).
+- Dado da requisição (usuário atual, tenant) resolvido do escopo da requisição em curso; um escopo criado à mão (`CreateScope`) devolve **outra** instância, vazia. Dependência `Scoped` dentro de `Singleton` prende um escopo morto.
 - Teste obrigatório que monta o container e resolve todos os controllers, jobs e app services. Serviço sem registro falha no build de testes, não em produção.
 
 ## 8. Projeto existente fora deste padrão
@@ -199,4 +203,5 @@ Apontar `arquivo:linha` e a camada correta quando aparecer:
 - projeto separado sem motivo da seção 2;
 - projeto na pasta numerada errada, pasta com espaço ou teste dentro de `src/`;
 - worker com regra de negócio própria;
+- caminho rápido que duplica uma decisão que já existe no caminho canônico (defeito num deles exige corrigir os dois; um auxiliar chamado por só um dos caminhos não resolve);
 - no padrão de 9: atributo de ORM na entidade do Shared; pacote pesado ou segurança/segredo no Shared; Application usando implementação de repositório, `DbContext` ou driver; entidade devolvida em controller (usar `View`/`Response`); regra de negócio em `Utils`/`Helpers`.

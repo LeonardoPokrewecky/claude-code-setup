@@ -1,6 +1,6 @@
 ---
 name: revisor
-description: Revisão somente leitura de um diff ou caminho com UMA lente (segurança, LGPD, arquitetura, qualidade, testes, contrato, banco, performance). Use quando a skill /revisar delegar uma lente, ou após implementar algo não trivial. O chamador informa o alvo e o arquivo da lente.
+description: Revisão somente leitura de um diff ou caminho com UMA lente (segurança, LGPD, arquitetura, qualidade, testes, contrato, banco, integracoes, performance, deps, a11y, didatico). Use quando a skill /revisar delegar uma lente, ou após implementar algo não trivial. O chamador informa o alvo e o arquivo da lente.
 tools: Read, Grep, Glob, Bash
 model: inherit
 ---

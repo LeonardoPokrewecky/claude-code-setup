@@ -26,7 +26,11 @@ Alvo: `$ARGUMENTS`. **Produção ou dados reais só com autorização explícita
 2. Aplicar em **um** registro de baixo risco (`updateOne`/`WHERE id = ...`).
 3. Esperar o ciclo do worker mais lento; validar logs, estado e telas.
 4. Só então o lote completo. Se houver worker lendo o campo: parar o worker → migrar → validar → religar.
-5. Correção em caminho de escrita só cobre registros futuros: avaliar legado e aplicar este fluxo a ele.
+5. Correção em caminho de escrita só cobre registros futuros: avaliar legado e aplicar este fluxo a ele. **Contar as linhas legadas afetadas antes de declarar o defeito resolvido** e conferir a contagem de novo depois.
+6. Antes de afirmar que gravou em produção, provar a qual instância/banco o serviço realmente se conecta (base com o mesmo nome em outro servidor pode ser cópia que ninguém lê).
 
 ## 4. Relatório
 Contagens (universo, alterados, erros), backup criado, canário validado (como), comando de rollback a partir do backup, "Não verifiquei:".
+
+
+Ver também: `/modelagem-dados` (esquema e migração segura), `/plano-migracao` (atualização de versão), `/resposta-a-incidente` se a alteração corrige um incidente.

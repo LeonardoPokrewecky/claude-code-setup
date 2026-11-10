@@ -17,3 +17,6 @@ Atividade: `$ARGUMENTS`. **Não implementar nada nesta skill** — ela termina c
    - **Use cases:** no mínimo 5 — caminho feliz, bordas, erros (entrada inválida, permissão, concorrência/replay quando houver).
    - **Resultado:** deixar a seção vazia com os campos "Entregue", "Commits", "Pendências", "Lições" — preenchida ao final da atividade.
 5. Mostrar o caminho do arquivo e um resumo de 3 linhas. Diagnóstico puro (sem alterar código) não precisa de blueprint: registrar a conclusão no `CLAUDE.md` do projeto (se for armadilha ou decisão duradoura) ou no `.memory` (projeto sem Git).
+
+
+Ver também: `/historias-de-usuario` (requisitos e critérios de aceite em linguagem de produto), `/priorizacao`, `/modelagem-dados`, `/integracoes`, `/escolha-de-banco-e-capacidade`, `/autenticacao-e-sessao` quando o desenho tocar esses temas.

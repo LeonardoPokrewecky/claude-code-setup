@@ -11,3 +11,6 @@ Alvo: `$ARGUMENTS`. **Somente leitura; nada é atualizado.**
 2. Pesquisar o guia oficial de migração da versão alvo (usar `context7` ou docs oficiais) e listar breaking changes que atingem este código (`caminho:linha`).
 3. Entregar: pré-requisitos, passos em ordem, riscos, como validar (build/testes), **como reverter** e estimativa de esforço.
 4. Terminar com "Não verifiquei:". Executar só se o usuário pedir, com backup/branch antes.
+
+
+Ver também: `/modelagem-dados` (migração de esquema em etapas), `/alterar-dados` (dados em massa).

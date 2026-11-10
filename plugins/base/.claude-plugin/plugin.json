@@ -1,8 +1,8 @@
 {
   "name": "base",
   "displayName": "Base (segurança, revisão, planejamento)",
-  "version": "2.2.0",
-  "description": "Hook de segredos, revisão por lentes, planejamento com requisitos, alteração de dados, deploy, LGPD e agentes especializados para qualquer stack.",
+  "version": "2.4.0",
+  "description": "Hook de segredos, revisão por lentes, segurança (autenticação, segredos, infraestrutura, incidente, LGPD), dados e integrações, testes e QA, design de interface, requisitos e produto, deploy e agentes especializados para qualquer stack.",
   "author": { "name": "Leonardo Pokrewecky" },
   "repository": "https://github.com/LeonardoPokrewecky/claude-code-setup",
   "license": "MIT",

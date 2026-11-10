@@ -20,3 +20,6 @@ Registro: `DIVIDA.md` na raiz do projeto (criar com o título `# Dívida técnic
 2. Para cada item aberto, conferir se o `arquivo:linha` ainda existe e se o trecho continua lá (Grep). Trecho sumiu ou mudou: marcar **resolvida?** no relatório — não apagar nem marcar `[x]` sozinho.
 3. Entregar tabela `risco | arquivo:linha | atalho | gatilho | idade (dias) | situação`, do maior risco ao menor; empate → mais antiga primeiro.
 4. Fechar itens (`[x]`) só quando o usuário confirmar, item a item. Terminar com "Não verifiquei:".
+
+
+Ver também: `/priorizacao` para ordenar a fila de dívidas por valor, custo e risco.
