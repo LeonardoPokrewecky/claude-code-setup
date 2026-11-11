@@ -128,6 +128,7 @@ if (-not (Test-Path "$proj/CLAUDE.md")) { Copy-Item "$repo/project-templates/CLA
 - `.gitignore`: somar as linhas de `project-templates/gitignore.claude` que faltam (o `project-bootstrap` faz isso lendo em UTF-8).
 - Repositório de cliente em que o Claude não deve aparecer: em vez do `.gitignore`, somar `CLAUDE.md`, `CLAUDE.local.md` e `.claude/` ao `.git/info/exclude`.
 - **Documentação do projeto** (blueprints, relatório LGPD, handoff): as skills perguntam uma vez se fica **só local** (fora do repositório, padrão e obrigatório em projeto de cliente) ou **versionada no Git** do projeto (`docs/planejamento/`, só projeto próprio, para abrir em outro ambiente) e gravam a resposta na linha `Documentação:` do `CLAUDE.md`. Em ambos os casos, commit e push só a pedido.
+- **Blueprint com aprovação:** toda alteração não trivial começa por um blueprint (status `RASCUNHO vN`) aberto no navegador pelo `ver-blueprint.ps1`; o Claude só implementa depois de um "aprovado" explícito, marca o checklist durante a implementação (dá para retomar depois de `/clear`) e fecha com a avaliação de brechas. Trivial (1 arquivo, até ~20 linhas, sem banco, autenticação, contrato, segredos ou dados de usuário) dispensa. A regra fica no `core/CLAUDE.md`: depois de atualizar o pacote, rodar `/plugin update` e o `instalar-arquivos.ps1`. Um hook que bloqueie edição sem blueprint aprovado fica para depois, só se a regra falhar no uso real.
 - Camada `devcontainer` (copiar `.devcontainer/`): isolamento para Windows nativo ou código não confiável — **não validada em projeto real**.
 
 ---
@@ -157,7 +158,7 @@ As regras nativas dividem comandos compostos (`x && git push` pede confirmação
 |---|---|
 | Tarefa comum | sessão Sonnet; o advisor Opus entra nas decisões |
 | Arquitetura, segurança, banco, LGPD | trocar a sessão para Opus |
-| Planejar algo grande | Plan mode + `/blueprint` (inclui requisitos não funcionais) |
+| Alteração não trivial | skill `blueprint` (automática ou `/blueprint`): blueprint aberto no navegador, implementação só após você aprovar, avaliação de brechas no fim. Algo grande: junto com o Plan mode |
 | Revisar | `/revisar` (lentes escolhidas pelo risco do diff), `/revisar <lente>` ou `/revisar pr <número|branch> [completo]` (CI, conflito com a base e veredito, só leitura); `/code-review`, `/security-review` |
 | Dados em massa / deploy | `/alterar-dados`, `/deploy-checklist` |
 | Produto e requisitos | `/historias-de-usuario`, `/priorizacao`, `/metricas-de-produto`, `/comunicacao-de-status` |

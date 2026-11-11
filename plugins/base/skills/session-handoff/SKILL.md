@@ -12,6 +12,7 @@ Produza um resumo estruturado (sem transcrição) e mostre na conversa:
 ## Handoff — <tarefa> (<AAAA-MM-DD>)
 **Objetivo:** ...
 **Estado:** concluído / em andamento / bloqueado
+**Blueprint:** caminho do blueprint ativo e status (`APROVADO`/`EM ANDAMENTO`), se houver — a próxima sessão continua pelo checklist dele
 **Feito:** itens com arquivo:linha
 **Decisões:** decisão + motivo
 **Testes:** comando e resultado literal
