@@ -15,8 +15,12 @@ Atividade: `$ARGUMENTS`. **Não implementar nada nesta skill** — ela termina c
    - **Requisitos não funcionais:** percorrer a [lista](requisitos.md) e marcar cada item como *se aplica* (com o critério) ou *não se aplica* (uma linha com o motivo). Nunca omitir a lista.
    - **Checklist:** cada arquivo/componente a criar ou alterar, marcável (`- [ ]`), incluindo testes e documentação.
    - **Use cases:** no mínimo 5 — caminho feliz, bordas, erros (entrada inválida, permissão, concorrência/replay quando houver).
-   - **Resultado:** deixar a seção vazia com os campos "Entregue", "Commits", "Pendências", "Lições" — preenchida ao final da atividade.
-5. Mostrar o caminho do arquivo e um resumo de 3 linhas. Diagnóstico puro (sem alterar código) não precisa de blueprint: registrar a conclusão no `CLAUDE.md` do projeto (se for armadilha ou decisão duradoura) ou no `.memory` (projeto sem Git).
+   - **Resultado:** deixar a seção vazia com os campos "Aprovado", "Entregue", "Commits", "Pendências", "Lições" — preenchida ao final da atividade.
+5. Mostrar o caminho do arquivo e um resumo de 3 linhas.
+6. Abrir no navegador: gerar uma cópia **HTML local** do blueprint (título, tabelas e checklists legíveis, sem script externo) na pasta temporária da sessão e abrir com `Start-Process <arquivo.html>`. **Nunca publicar em serviço externo** (Artifact, nuvem): o blueprint descreve causa raiz e pode ser de projeto de cliente. A cópia HTML não vai para o repositório. Se não houver navegador ou o comando falhar, apenas informar o caminho do `.md`.
+7. Terminar com "Posso implementar?" e **aguardar aprovação explícita**. Registrar no blueprint, ao aprovar, a linha `Aprovado: <data> — escopo: <o que foi autorizado>` na seção Resultado.
+
+Diagnóstico puro (sem alterar código) não precisa de blueprint: registrar a conclusão no `CLAUDE.md` do projeto (se for armadilha ou decisão duradoura) ou no `.memory` (projeto sem Git).
 
 
 Ver também: `/historias-de-usuario` (requisitos e critérios de aceite em linguagem de produto), `/priorizacao`, `/modelagem-dados`, `/integracoes`, `/escolha-de-banco-e-capacidade`, `/autenticacao-e-sessao` quando o desenho tocar esses temas.
