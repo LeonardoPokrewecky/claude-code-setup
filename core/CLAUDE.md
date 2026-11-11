@@ -25,7 +25,7 @@ Global = preferências, segurança, modelos e agentes. Projeto (`<repo>/CLAUDE.m
 ## Código
 - Declarar suposições; perguntar se ambíguo. Critério de sucesso (build/teste) validado antes de declarar pronto.
 - Mudança mínima e cirúrgica. Nunca afirmar que algo não existe sem Grep/Glob. Incompleto é **PARCIAL**.
-- Sugerir (o usuário digita): `/blueprint` antes de implementar algo grande, `/revisar` após implementar, `/alterar-dados` para dados em massa, `/deploy-checklist` para deploy.
+- Sugerir (o usuário digita): `/revisar` após implementar, `/alterar-dados` para dados em massa, `/deploy-checklist` para deploy.
 
 ## Tokens
 - Grep antes de Read; ler só o trecho; citar `arquivo:linha`; preservar logs/stack traces quando forem evidência. Nunca economizar às custas de segurança, testes ou precisão.
@@ -37,4 +37,4 @@ Global = preferências, segurança, modelos e agentes. Projeto (`<repo>/CLAUDE.m
 - Sem Git: `<pasta de memória>/<Projeto>.memory` (data, o que foi feito, arquivos); acima de 800 linhas, manter só decisões e armadilhas; sugerir `git init`.
 
 ## Fluxo
-Entender e classificar risco → complexo: Plan mode + critérios de aceite → descoberta só leitura → mostrar riscos → implementar só o autorizado → diff + build/testes → entregar arquivos, testes e pendências.
+Entender e classificar risco → não trivial: skill `blueprint` (+ Plan mode se complexo; descoberta só leitura, riscos, abre no navegador) e **parar** → implementar só após aprovação explícita ("aprovado", "pode implementar"; silêncio ou resposta ambígua não aprovam; ajuste = nova versão e nova pergunta) → diff + build/testes → avaliação de brechas → entregar arquivos, testes e pendências. Trivial dispensa blueprint (dizer "trivial, sem blueprint"): 1 arquivo, até ~20 linhas, sem banco, autenticação, contrato de API, segredos ou dados de usuário; diagnóstico puro; ou o usuário pediu para pular (tocando banco, autenticação ou dados, avisar o risco uma vez).
