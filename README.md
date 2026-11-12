@@ -167,7 +167,7 @@ As regras nativas dividem comandos compostos (`x && git push` pede confirmação
 | Incidente | `/resposta-a-incidente` (durante), `/postmortem` (depois) |
 | Integrações e decisões | `/integracoes`, `/adr`, `/divida` |
 | Testes e qualidade | `/criar-testes`, `/teste-de-api`, `/automacao-e2e`, `/regressao-e-smoke`, `/laudo-de-evidencia`, `/medir-antes-depois` |
-| Interface | `/sistema-de-design`, `/componentes-e-estados`, `/layout-responsivo` |
+| Interface | `desenvolvimento-de-interfaces` (automática: criar, auditar ou corrigir telas; escolhe as especialidades), `/referencias-visuais`, `/sistema-de-design`, `/componentes-e-estados`, `/layout-responsivo`, `/inspecao-visual` (Playwright: capturas, larguras, console e rede), `/automacao-e2e`, `/revisar interface`, `/revisar a11y` |
 | Entrega e código | `/entrega-sem-pendencia`, `/preparar-pr`, `/session-handoff`, `/explicar`, `/limpar-codigo` |
 
 Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI leem o mesmo `~/.claude`: a configuração é a mesma nos dois.
@@ -231,10 +231,11 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 - [ ] Validar a seção IIS do `/deploy-checklist` e a camada `devcontainer` em projeto real.
 - [ ] Revisar o conteúdo das skills novas de segurança e dados (`autenticacao-e-sessao`, `endurecimento-de-infraestrutura`, `resposta-a-incidente`, `modelagem-dados`, `integracoes`, `escolha-de-banco-e-capacidade`) com a lente `seguranca` e conferir recomendações contra fontes oficiais (OWASP, docs da Microsoft e do PostgreSQL) antes de publicar.
 - [ ] Criar evals para as skills novas (sem eval hoje).
-- [ ] Avaliar dividir o plugin `base` (36 skills) em plugins temáticos (segurança, QA e design, produto) e complementar `dotnet`/`angular` com autenticação, EF/índices e o lado de interface.
+- [ ] Avaliar dividir o plugin `base` (39 skills) em plugins temáticos (segurança, QA e design, produto) e complementar `dotnet`/`angular` com autenticação, EF/índices e o lado de interface.
 - [ ] Skills de marketing e SEO (Luna, Lira, Rank do levantamento externo): decidir entre plugin opcional próprio ou o `marketingskills` externo.
 - [ ] Fixar `marketingskills` por SHA, se o schema aceitar.
 - [ ] Confirmar direitos de distribuição do `Auditoria LGPD.pdf`.
+- [ ] Validar `desenvolvimento-de-interfaces` e `/inspecao-visual` num frontend real com a camada `playwright` (nomes das ferramentas `browser_*` do MCP, captura, console e rede) e criar evals para elas.
 
 ### Pendências de validação
 - `echo .env` bloqueado pelo hook do plugin: confirmar numa sessão recarregada (`/reload-plugins`); o script em si bloqueia o caso.

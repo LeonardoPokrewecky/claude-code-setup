@@ -5,7 +5,7 @@ disable-model-invocation: true
 argument-hint: "[caminho do repo] | auditar"
 ---
 
-Alvo: `$ARGUMENTS` (sem argumento: perguntar se é criar ou auditar). Leitura livre; criar/alterar estilos é edição de código dentro do escopo autorizado. Respeitar o que o projeto já usa (Angular Material, Tailwind, CSS próprio) antes de propor troca.
+Alvo: `$ARGUMENTS` (sem argumento: perguntar se é criar ou auditar). Leitura livre; criar/alterar estilos é edição de código dentro do escopo autorizado. Respeitar o que o projeto já usa (Angular Material, Tailwind, CSS próprio) antes de propor troca: em projeto existente, o sistema implementado prevalece e mudança precisa de motivo. Referência externa: `/referencias-visuais`.
 
 ## 1. Levantar
 Marca e público, bibliotecas de UI existentes, temas exigidos (claro/escuro), acessibilidade alvo (WCAG AA), e o estado atual (Grep por cores/medidas fixas repetidas, `!important`, estilos duplicados).
@@ -29,4 +29,4 @@ Contraste mínimo AA (4,5:1 texto normal, 3:1 texto grande e componentes) nos do
 Listar valores literais repetidos que deveriam ser token, cores sem par no outro tema, contrastes abaixo do mínimo e componentes duplicados, com `arquivo:linha`.
 
 ## Saída
-Tabela de tokens (`papel | claro | escuro | uso`) ou de achados (`arquivo:linha | problema | token sugerido`), a abordagem recomendada com o critério que a decide e "Não verifiquei:" (ex.: telas não renderizadas, contraste real no navegador).
+Tabela de tokens (`papel | claro | escuro | uso`) ou de achados (`arquivo:linha | problema | token sugerido`), a abordagem recomendada com o critério que a decide e "Não verifiquei:" (ex.: telas não renderizadas, contraste real no navegador — conferir com a `/inspecao-visual`).

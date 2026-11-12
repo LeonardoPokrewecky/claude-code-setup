@@ -10,7 +10,7 @@ Alvo: `$ARGUMENTS` (sem argumento: perguntar o componente ou a tela). Leitura li
 ## 1. Componente
 - **API mínima e clara:** entradas tipadas, saídas por evento, sem conhecer a regra de negócio nem a origem dos dados (apresentacional); lógica de dados no contêiner/serviço.
 - **Variantes** por propriedade (tamanho, tom, densidade), nunca por cópia do componente.
-- **Estados de interação:** padrão, hover, foco visível, ativo, desabilitado, carregando, erro; todos com contraste AA e sem depender só de cor.
+- **Estados de interação** (só os que se aplicam ao componente): padrão, hover, foco visível, ativo, desabilitado, carregando, erro, sucesso, vazio, selecionado; todos com contraste AA e sem depender só de cor.
 - **Acessibilidade:** elemento semântico certo (botão é `button`), rótulo acessível, navegação por teclado, `aria-*` só quando o HTML nativo não basta, anúncio de erro e de carregamento.
 - **Composição:** slots/conteúdo projetado em vez de propriedades demais.
 
@@ -21,9 +21,10 @@ Alvo: `$ARGUMENTS` (sem argumento: perguntar o componente ou a tela). Leitura li
 4. **Sucesso/Dados:** o estado normal, inclusive com muito conteúdo e texto longo.
 5. **Parcial/Offline:** dados antigos, falha de uma parte, ação pendente.
 Formulário: validação junto do campo, envio desabilita o botão (evita duplo envio), confirmação de ação destrutiva.
+Padrões recorrentes, cada um com seus estados: tabela (ordenação, vazio, carregando com esqueleto), paginação, filtro e pesquisa (sem resultado, limpar filtros), modal e menu (abre, fecha com Esc, devolve o foco), notificação (some sozinha só se não for erro), confirmação de ação.
 
 ## 3. Teste
-Um teste por estado e por variante relevante (ver `/criar-testes`), incluindo foco por teclado e leitor de tela nos fluxos principais.
+Um teste por estado e por variante relevante (ver `/criar-testes`), incluindo foco por teclado e leitor de tela nos fluxos principais. Estados vistos no navegador com a `/inspecao-visual`.
 
 ## Saída
 Tabela `componente | variantes | estados cobertos | lacunas`, a tela com os cinco estados descritos e "Não verifiquei:" (ex.: leitor de tela real, navegadores, telas não renderizadas).

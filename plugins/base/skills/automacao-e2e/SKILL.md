@@ -13,9 +13,21 @@ Poucos fluxos de alto valor: login, o caminho principal de negócio, pagamento/o
 ## 2. Opções de ferramenta (validar na implementação)
 | Opção | Quando favorece |
 |---|---|
-| **Playwright** | Multi-navegador, esperas automáticas, rastreio e vídeo embutidos; boa escolha padrão |
+| **Playwright** | **Padrão do pacote** (dependência autorizada): multi-navegador, esperas automáticas, rastreio, capturas e comparação visual embutidos |
 | **Cypress** | Time já familiarizado, ótimo depurador; um navegador por vez na execução |
 | **Testes de componente** (do próprio framework) | Quando o fluxo não precisa do sistema inteiro |
+
+Projeto que já usa outra ferramenta: manter a dele. Instalar o Playwright no projeto continua exigindo pedido explícito.
+
+## 2b. Níveis (proporcionais ao risco)
+| Nível | Cobre |
+|---|---|
+| Componente | renderização, propriedades, eventos, estados, validação |
+| Integração | componentes juntos, fluxo de formulário, navegação entre páginas |
+| Ponta a ponta | login, cadastro, edição, exclusão, pesquisa, filtros, operação crítica do negócio |
+| Visual | `toHaveScreenshot` por largura; mascarar data/hora e conteúdo dinâmico (`mask`), `animations: 'disabled'`, dado fixo; diferença irrelevante não reprova (limiar `maxDiffPixelRatio`); referência atualizada só com aprovação |
+| Acessibilidade | teclado e foco por teste; verificação automática (ex.: `@axe-core/playwright`) só se aprovada pela política de dependências, sempre com inspeção complementar |
+Não criar teste artificial só para aumentar a contagem.
 
 ## 3. Estabilidade
 - Seletor por papel/rótulo acessível ou `data-testid`; nunca por classe de estilo ou posição.

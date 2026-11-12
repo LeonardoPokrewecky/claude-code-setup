@@ -25,6 +25,7 @@ Global = preferências, segurança, modelos e agentes. Projeto (`<repo>/CLAUDE.m
 ## Código
 - Declarar suposições; perguntar se ambíguo. Critério de sucesso (build/teste) validado antes de declarar pronto.
 - Mudança mínima e cirúrgica. Nunca afirmar que algo não existe sem Grep/Glob. Incompleto é **PARCIAL**.
+- Projeto novo com backend e frontend: dois projetos independentes (nunca o front dentro de pasta do back, como `wwwroot/` ou `web/`); detalhes no `project-bootstrap`.
 - Sugerir (o usuário digita): `/revisar` após implementar, `/alterar-dados` para dados em massa, `/deploy-checklist` para deploy.
 
 ## Tokens
@@ -32,8 +33,7 @@ Global = preferências, segurança, modelos e agentes. Projeto (`<repo>/CLAUDE.m
 - Repo sem Git: Glob/Grep com caminho explícito, evitando `node_modules`, `dist`, `bin`, `obj`.
 
 ## Memória
-- Auto Memory para preferências e fatos duradouros; contexto fixo do projeto no CLAUDE.md do projeto.
-- Repo com Git: sem log de atividades. Continuar depois: `/session-handoff`.
+- Auto Memory para preferências e fatos duradouros; contexto fixo do projeto no CLAUDE.md do projeto. Repo com Git: sem log de atividades; continuar depois: `/session-handoff`.
 - Sem Git: `<pasta de memória>/<Projeto>.memory` (data, o que foi feito, arquivos); acima de 800 linhas, manter só decisões e armadilhas; sugerir `git init`.
 
 ## Fluxo

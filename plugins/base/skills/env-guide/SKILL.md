@@ -24,7 +24,7 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 - Qualquer alteração não trivial → skill `blueprint` (automática ou `/blueprint`): documento no navegador, implementação só após aprovação explícita, avaliação de brechas no fim. Algo grande: junto com o Plan mode.
 - Revisar → `/revisar` (escolhe as lentes pelo risco do diff), `/revisar <lente>` ou `/revisar pr <número|branch>` (pull request: CI, conflito, veredito); `/code-review` e `/security-review` embutidos para o diff completo.
 - Dados em massa → `/alterar-dados`; deploy → `/deploy-checklist`; LGPD do app → `/lgpd-audit`.
-- **Qual skill por tema** (todas manuais, só rodam por `/comando`, exceto `blueprint`, que também é automática; lista completa em componentes.md):
+- **Qual skill por tema** (todas manuais, só rodam por `/comando`, exceto `blueprint` e `desenvolvimento-de-interfaces`, que também são automáticas; lista completa em componentes.md):
 
 | Tema | Skills | Como escolher |
 |---|---|---|
@@ -34,7 +34,7 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 | Segurança | `/autenticacao-e-sessao`, `/gestao-de-segredos`, `/endurecimento-de-infraestrutura`, `/lgpd-audit`, `/revisar seguranca` | Código = revisar; servidor = endurecimento; credencial = segredos; login = autenticação |
 | Incidente | `/resposta-a-incidente` (durante) → `/postmortem` (depois) | Conter e preservar evidência primeiro; causa raiz depois |
 | Testes e qualidade | `/criar-testes` (unidade), `/teste-de-api`, `/automacao-e2e`, `/regressao-e-smoke`, `/laudo-de-evidencia`, `/medir-antes-depois` | Do mais barato (unidade) ao mais caro (E2E); laudo consolida o que foi validado |
-| Interface | `/sistema-de-design`, `/componentes-e-estados`, `/layout-responsivo`, `/revisar a11y` | Tokens primeiro, depois componentes e telas |
+| Interface | `desenvolvimento-de-interfaces` (coordena; modos criar, auditar, corrigir), `/referencias-visuais`, `/sistema-de-design`, `/componentes-e-estados`, `/layout-responsivo`, `/inspecao-visual`, `/automacao-e2e`, `/revisar a11y`, `/revisar interface` | A coordenadora escolhe as especialidades; tokens antes de componentes; nada pronto sem inspeção no navegador (Playwright) |
 | Entrega | `/entrega-sem-pendencia`, `/preparar-pr`, `/deploy-checklist`, `/session-handoff` | Fechar (sem pendência) → PR → publicar → passar o bastão |
 | Código | `/explicar`, `/limpar-codigo` | Entender antes de limpar |
 - Delegar: leitura ampla → `Explore`; pesquisa web → `researcher-haiku`; rodar testes → `test-validator-haiku`; só `.md` → `documentation-haiku`; implementação paralela → `implementer-sonnet`; uma lente de revisão → `revisor` (modelo da sessão; segurança/LGPD/arquitetura nunca em Haiku).
@@ -51,7 +51,8 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 | `infra` | só `docker-compose*.yml` / `*.tf` |
 | `supabase` | o projeto usa Supabase |
 | `marketing` | landing page, copy, SEO |
-| `playwright`, `serena`, `devcontainer` | só a pedido |
+| `playwright` | a pedido; recomendada em projeto de frontend (habilita a `/inspecao-visual`) |
+| `serena`, `devcontainer` | só a pedido |
 
 ## Plugins oficiais e de terceiros
 | Plugin | Escopo | Quando usar |
@@ -60,7 +61,8 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 | `security-guidance` | Global | Sempre ativo: avisos ao editar e revisão do diff |
 | `claude-code-setup` | Global, desligado | Ligar com `/plugin` só para pedir sugestões de automação; desligar depois |
 | `csharp-lsp`, `typescript-lsp`, `pyright-lsp`, `frontend-design` | Projeto (camadas) | Ver componentes.md |
-| `playwright`, `serena` | Projeto, opt-in | Só a pedido; medir tokens. `serena` baixa e roda código via `uvx` |
+| `playwright` | Projeto, opt-in | Dependência autorizada para inspeção visual e testes de navegador; ligar no projeto de frontend; medir tokens |
+| `serena` | Projeto, opt-in | Só a pedido; medir tokens. `serena` baixa e roda código via `uvx` |
 | `supabase` | Projeto | Só se o projeto usar Supabase; começar somente leitura em dev |
 | `marketing-skills` (terceiro) | Projeto (camada `marketing`) | Tag `v2.14.0` = `5ffe077d2e59486d91c5ccaecbd74b6973c32308` (2026-11-03). Antes de instalar: `git ls-remote https://github.com/coreyhaines31/marketingskills refs/tags/v2.14.0` deve devolver o mesmo SHA |
 
