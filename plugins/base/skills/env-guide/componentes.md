@@ -68,13 +68,13 @@ Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if command -v pwsh >/dev/nul
 
 | Skill | Invocação | Descrição |
 |---|---|---|
-| `arquitetura-onion` | automática + `/arquitetura-onion` | Padrão de arquitetura para backend .NET — Solution padrão de 9 projetos numerados (API a Tools) com Shared como shared kernel (entidades, enums e DTOs; ordem api → application → domain → infra; variante enxuta Domain/Contracts para projeto pequeno), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar. |
+| `arquitetura-onion` | automática + `/arquitetura-onion` | Padrão de arquitetura para backend .NET — pastas de solution numeradas por camada (01-api a 07-shared, mais tests/ e tools/) com Shared como shared kernel leve (entidades, enums e DTOs; direção api → application → domain → infra), allowlist de consumo por host, teste de arquitetura obrigatório, regras de fila e contrato, variante enxuta Domain/Contracts para projeto pequeno, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade. Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar. |
 
 ### Plugin `angular`
 
 | Skill | Invocação | Descrição |
 |---|---|---|
-| `arquitetura-angular` | automática + `/arquitetura-angular` | Padrão de arquitetura para frontend Angular — pastas core/shared/features, regra de dependência (feature não importa feature), acesso HTTP em um único serviço, URL em environments, estado com signal, contrato com o backend e checklist de funcionalidade nova. Use ao criar projeto Angular novo, adicionar feature/página ou revisar onde um código deve ficar. |
+| `arquitetura-angular` | automática + `/arquitetura-angular` | Padrão de arquitetura para frontend Angular — core (guards, interceptors, models, services, utils), layouts/<nome>-shell, shared sem regra de negócio e pages/<tela>; standalone, inject(), zoneless e signals; rotas com loadComponent sob guard; contrato centralizado com o backend; URL em environment; regras de sessão e rede em arquivo de referência. Use ao criar projeto Angular novo, adicionar página/tela ou revisar onde um código deve ficar. |
 
 ## Core (instalado por `scripts/instalar-arquivos.ps1`)
 
