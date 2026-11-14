@@ -4,7 +4,7 @@ description: Auditoria LGPD completa e somente leitura de um app (web/mobile/API
 disable-model-invocation: true
 ---
 
-# Auditoria LGPD (baseada em "Auditoria LGPD.pdf")
+# Auditoria LGPD (baseada em fontes oficiais, ver Etapa 0)
 
 Papel: auditor sênior de privacidade e segurança. Entregar relatório em português simples para leigos.
 
@@ -17,6 +17,7 @@ Papel: auditor sênior de privacidade e segurança. Entregar relatório em portu
 ## Etapa 0 — Legislação vigente (pesquisar antes do código)
 Fontes oficiais primeiro (planalto.gov.br, gov.br/anpd, DOU); anotar link e data. Sem confirmação oficial: marcar "a confirmar".
 Confirmar: LGPD Arts. 6º, 7º, 8º, 9º, 10, 11, 14, 15–16, 18–20, 33–39, 41, 46–49, 52; Res. CD/ANPD 4/2023 (dosimetria: até 2% do faturamento, limitado a R$ 50 mi por infração); Res. 15/2024 (incidentes: 3 dias úteis); Res. 2/2022 (pequeno porte); Res. 18/2024 (encarregado); Res. 19/2024 (transferência internacional); ECA Digital (Lei 15.211/2025); situação institucional da ANPD (MP 1.317/2025) e guias dos últimos 12 meses.
+Hierarquia: fonte primária (lei, resolução, site oficial) vale mais que guia ou artigo de terceiros; fontes que repetem a mesma origem contam como uma; anotar a data de acesso. Citação ou número de fonte secundária só entra como "a confirmar".
 Resumo "O que a lei exige hoje" → anexo do relatório.
 
 ## Etapa 1 — Reconhecimento
@@ -28,6 +29,7 @@ Fontes: migrations/schemas, models/ORM, formulários, endpoints, SDKs, logs, coo
 
 ## Etapa 3 — Avaliação por área
 Cada achado com evidência (arquivo:linha/rota/tela) e status **Confirmado / Provável / Não verificável**.
+Natureza do achado: **capacidade existente** (o código/manifesto permite a coleta ou o envio) × **comportamento confirmado** (observado em execução, com evidência). Sem execução (esta auditoria é somente leitura), nada é "confirmado em produção": o achado fica como capacidade e entra na lista de **pendências dinâmicas** (o que só teste em ambiente de desenvolvimento ou captura de rede resolve, ex.: "o CPF vai para o relatório de falhas?"). Conclusão só quando duas fontes independentes concordam (ex.: código + configuração; manifesto + chamada de rede).
 - **A. Transparência (Art. 9º)**: política existe, acessível antes do cadastro, completa, bate com o código, tem data/versão.
 - **B. Minimização e base legal (6º, 7º, 11)**: dados sem uso, base legal por finalidade, sensíveis sem base, obrigatórios desnecessários.
 - **C. Consentimento (8º)**: caixa pré-marcada, separado por finalidade, registro (quando/versão), revogação fácil, cookies antes do aceite.
@@ -35,7 +37,7 @@ Cada achado com evidência (arquivo:linha/rota/tela) e status **Confirmado / Pro
 - **E. Direitos do titular (18–19)**: acessar, corrigir, excluir conta de verdade (banco, storage, terceiros), exportar, revogar; canal e prazo de 15 dias.
 - **F. Encarregado/canal (41)**.
 - **G. Retenção e eliminação (15–16)**: prazos e rotina que apaga.
-- **H. Terceiros e transferência internacional (33–39)**: operador, dados, país, DPA, mecanismo válido; IA treina com os dados?
+- **H. Terceiros e transferência internacional (33–39)**: operador, dados, país, DPA, mecanismo válido; IA treina com os dados? Mapear cada destinatário por categoria (governo/controlador, operador nacional, terceiro estrangeiro) e o que cada um recebe.
 - **I. Incidentes (48 + Res. 15/2024)**: plano, prazo, registro, logs de acesso.
 - **J. Crianças e adolescentes (14 + ECA Digital)**: verificação de idade, consentimento parental, sem perfilamento.
 - **K. Decisões automatizadas (20)**: informa e permite revisão?
@@ -53,7 +55,8 @@ Por padrão fora do repositório do app: o relatório tem mapa de dados pessoais
 1. Resumo em 5 linhas · 2. Nota 🟢/🟡/🔴 com justificativa · 3. Os 3 problemas mais urgentes ·
 4. Tabela ranqueada: `# | Prioridade | Problema | Onde | Por que importa | Ganho | Risco ao implementar | Esforço | Como corrigir | Base legal` ·
 5. Detalhe por item (evidência, passo a passo, como testar, cuidados) · 6. O que já está bom · 7. O que não deu para verificar ·
-8. Mapa de dados · 9. Anexo "O que a lei exige hoje" (links + data) · 10. Aviso: avaliação técnica, não substitui orientação jurídica.
+8. Mapa de dados · 9. Anexo "O que a lei exige hoje" (links + data) · 10. Aviso: avaliação técnica, não substitui orientação jurídica ·
+11. **Cobertura e pontos cegos:** o que foi lido (pastas, arquivos, versão/commit), o que ficou de fora (backups, outros clones, produção, terceiros) e a lista de **pendências dinâmicas** (seção "Natureza do achado" acima), para a auditoria ser reproduzível.
 
 ## Etapa 6 — Parar
 Terminar com: "Relatório pronto. Não alterei nada no seu app. Se quiser que eu comece as correções, diga exatamente quais itens (ex.: 'pode implementar os itens 1, 2 e 4'). Recomendo começar pelos P0."

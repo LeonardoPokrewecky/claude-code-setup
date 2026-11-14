@@ -15,6 +15,13 @@ Alvo: `$ARGUMENTS` (sem argumento: usar os resultados desta sessão). **Somente 
 5. **Não verifiquei:** o que ficou fora do escopo ou sem ambiente.
 6. **Próximos passos:** correções, casos a automatizar (`/regressao-e-smoke`).
 
+## Fontes externas (quando o laudo cita lei, documentação ou terceiros)
+- **Hierarquia:** primária (lei, norma, documentação oficial, código-fonte) > secundária (artigo, guia de terceiros) > baixa (fórum, blog sem fonte). Fonte primária que contradiz a afirmação limita a conclusão.
+- **Independência:** fontes que repetem a mesma origem contam como **uma**.
+- **Conferir a citação:** o trecho diz mesmo o que se atribui a ele? Número com período, base de comparação e denominador.
+- **Status graduado:** além de aprovado/reprovado/pulado, use **não verificável** e **precisa de mais evidência**; nunca arredondar para aprovado.
+- Registrar a **data de acesso** e o link; marcar como desatualizado o que depende de fonte que mudou.
+
 ## Regras
 - Toda aprovação tem evidência; decisão final sempre justificada.
 - Resultado ambíguo é registrado como ressalva, não arredondado para aprovado.
