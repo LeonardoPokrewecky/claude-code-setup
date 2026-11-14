@@ -190,7 +190,7 @@ Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI 
 | `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI, não executado | CI, não executado | CI (`macos-latest`), não executado |
 | Plugins e marketplace (`claude plugin validate`, instalação isolada) | testado aqui | — | não testado | não testado |
 | Sandbox (`-Perfil unix`) | não suportado (doc oficial) | não suportado | não testado | não testado |
-| Devcontainer | não testado | — | não testado | não testado |
+| Devcontainer | parcial: contêiner base testado com `docker run` (isolamento ok; falha de permissão do volume corrigida); feature oficial e autenticação não testadas | — | não testado | não testado |
 | Desktop × CLI | mesma configuração (`~/.claude`) | | | |
 
 Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe `sh` ([doc](https://code.claude.com/docs/en/hooks)). Instale o Git for Windows ou defina `CLAUDE_CODE_GIT_BASH_PATH`.

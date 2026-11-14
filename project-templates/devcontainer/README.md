@@ -8,7 +8,12 @@ Isolamento para Windows nativo (onde o sandbox do Claude Code não roda) ou para
 - Firewall de saída (`init-firewall.sh`) e hardening: ver o container de referência em `anthropics/claude-code/.devcontainer`.
 - Dentro do container (Linux), aplicar o perfil `unix` (`merge-settings.ps1 -Perfil unix`, com `pwsh`) para ligar o sandbox também.
 
-Não testado aqui: o build do container e a autenticação dentro dele.
+## Resultado da validação parcial (2026-11-14, Docker Desktop 29.9.2 no Windows)
+Testado com `docker run` na imagem `mcr.microsoft.com/devcontainers/base:ubuntu`, usuário `vscode`, volume nomeado em `/home/vscode/.claude`, sem montar nada do host:
+- Usuário `vscode` (uid 1000); `SSH_AUTH_SOCK` vazio; sem `credential.helper`; sem `docker.sock`; sem variáveis `ANTHROPIC_*`, `GITHUB_*`, `GH_*` ou `AWS_*`; nenhuma montagem ligada ao host.
+- **Falha achada e corrigida:** o volume nomeado é criado com dono `root` quando `/home/vscode/.claude` não existe na imagem, e o `vscode` não consegue gravar ali (`Permission denied`). Correção no template: `postCreateCommand` com `sudo chown -R vscode:vscode /home/vscode/.claude`; o comando foi testado no contêiner e o volume ficou gravável.
+- **Não testado:** a feature oficial `claude-code`, o `postCreateCommand` executado pelo próprio Dev Containers (não há CLI `devcontainer` instalada; a extensão do VS Code exige o botão "Reopen in Container"), a autenticação do Claude Code dentro do contêiner e a checagem de `~/.ssh` e `~/.aws` (o hook `bloquear-segredos` barra comandos que citam esses nomes; rodar com `! <comando>`).
+- Camada continua **não validada em projeto real**.
 
 ## Roteiro de validação (sem credencial real, sem dado real)
 
