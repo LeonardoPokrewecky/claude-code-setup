@@ -1,31 +1,35 @@
 ---
 name: arquitetura-onion
-description: Padrão de arquitetura para backend .NET — Solution padrão de 9 projetos numerados (API a Tools) com Shared como shared kernel (entidades, enums e DTOs; ordem api → application → domain → infra; variante enxuta Domain/Contracts para projeto pequeno), regra de dependência testada, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade (entidade → configuração EF → repositório → contrato → caso de uso → controller). Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar.
+description: Padrão de arquitetura para backend .NET — pastas de solution numeradas por camada (01-api a 07-shared, mais tests/ e tools/) com Shared como shared kernel leve (entidades, enums e DTOs; direção api → application → domain → infra), allowlist de consumo por host, teste de arquitetura obrigatório, regras de fila e contrato, variante enxuta Domain/Contracts para projeto pequeno, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade. Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar.
 ---
 
 # Arquitetura onion (.NET)
 
-- **Projeto novo:** nasce no **padrão de 9 projetos numerados** (API, Application, Domain, Infra, Desktop, Async, Shared, Tests, Tools). Ler `referencia-9-projetos.md` (estrutura, camadas, dependências, regras). Criar **os 9 projetos desde o início**, mesmo os que ainda não têm código (Desktop, Async, Tools ficam como esqueleto que compila, sem classes de exemplo, com `README.md` de uma linha "Reservado, sem uso ainda"): a numeração nunca muda e a Solution já nasce no formato final. Teste de arquitetura (`08-…Tests/Architecture`) obrigatório desde o início. Projeto sem uso previsto pode ser omitido só se o `CLAUDE.md` do projeto registrar o motivo.
-- **Neste padrão, `Shared` é um shared kernel e não um projeto periférico:** entidades, enums, value objects e DTOs moram nele; `Domain` é a camada de serviço (regras entre entidades) e **não guarda entidades**; ordem de dependência `api → application → domain → infra`, e todas referenciam o Shared. Não confundir com a Onion/Clean clássica.
+- **Projeto novo:** nasce no **padrão numerado** (o padrão do Monitor): pastas `01-api`, `02-application`, `03-domain`, `04-infra`, `05-desktop`, `06-async`, `07-shared`, mais `tests/` e `tools/` na raiz. Ler `referencia-estrutura.md` (estrutura, camadas, dependências, allowlist de hosts, segredos, regras de robustez). Cada pasta pode ter mais de um projeto (`<Produto>.Domain.<Sub>`, `<Produto>.Infra.Data.<Banco>`), sem espaço no nome; **só se cria a pasta que tem projeto** (a numeração nunca muda). Teste de arquitetura em `tests/` obrigatório desde o início (modelo em `exemplo-teste-arquitetura.md`).
+- **Neste padrão, `Shared` é um shared kernel leve e não um projeto periférico:** entidades, enums, value objects, `Request`/`View`/`Response`, `FiltroBy`/`OrdemBy`, options e constantes de claims moram nele; **proibido** EF Core, driver, Playwright, Redis, Key Vault, segredo e assinatura de token. `Domain` é a camada de serviço (regras entre entidades) e **não guarda entidades**; direção `Api/Worker/Tools → Application → Domain → Infra → Shared`. O Shared é dos executáveis .NET; o front nunca o consome.
+- **Hosts:** consomem a Application. Usar o Domain direto (ex.: executável de navegação) só se declarado no `CLAUDE.md` (namespace + motivo) **e** na allowlist do teste de arquitetura. O agente instalado no cliente (`05-desktop`) não referencia `Infra.Security` nem pacote pesado.
+- **Segredos:** `.env` e `appsettings` por options tipadas. Key Vault **não** é implementado; só a migração futura está documentada na referência, e só roda a pedido do usuário.
+- **Robustez (referência, seções 9 e 10):** contrato sempre aditivo, reivindicação atômica (`UPDATE … WHERE status = esperado`), três garantias de fila, autorização pela tabela de vínculo canônica; ADR antes de decisão estrutural (`/adr`), medir antes de otimizar (`/medir-antes-depois`), idempotência.
 - **Variante enxuta (seções 1 a 4 abaixo):** `Domain`/`Contracts`/`Application`/`Infra`/`Api`, para projeto pequeno ou quando o `CLAUDE.md` do projeto a escolhe; aqui o Domain tem as entidades. Não misturar as duas no mesmo projeto.
 - **Seções 5 a 10** (convenções de nome, responsabilidade das peças, filtros, fatia vertical, revisão) valem nos dois padrões; onde cada peça mora em cada um está na tabela abaixo.
-- **Projeto existente:** o `CLAUDE.md` do projeto prevalece. Respeitar a estrutura que ele já tem; aplicar este padrão só quando o usuário pedir (seção 8). Nunca migrar para o padrão de 9 sem pedido.
+- **Projeto existente:** o `CLAUDE.md` do projeto prevalece. Respeitar a estrutura que ele já tem; aplicar este padrão só quando o usuário pedir (seção 8). Nunca migrar para o padrão numerado sem pedido.
+- **Front e back separados:** projetos independentes, nunca o front numa pasta do back; a regra e a organização estão no `project-bootstrap`. Contrato: OpenAPI do backend ou o checklist da `arquitetura-angular`.
 
 ## Onde mora cada peça
 
-| Peça | Padrão de 9 projetos | Variante enxuta |
+| Peça | Padrão numerado | Variante enxuta |
 |---|---|---|
-| Entidade, value object | `07 Shared` | `Domain` |
-| Enum | `07 Shared` | `Domain` (de domínio) e `Contracts` (exposto ao cliente) |
-| DTO (`Request`, `View`, `Response`, `Filter`) | `07 Shared` | `Contracts` |
-| Interface de repositório, `IUnitOfWork` | `04 Infra` | `Domain` |
-| Implementação de repositório, mapeamento de persistência | `04 Infra` | `Infra` |
-| Regra entre mais de uma entidade | `03 Domain` (serviço de domínio) | `Domain` / `Application` |
-| Caso de uso (app service), mapper, specification | `02 Application` | `Application` |
-| Assinatura/validação de token, criptografia | `04 Infra` (middleware na `01 API`) | `Infra` |
-| Controller | `01 API` | `Api` |
+| Entidade, value object | `07-shared` | `Domain` |
+| Enum | `07-shared` | `Domain` (de domínio) e `Contracts` (exposto ao cliente) |
+| DTO (`Request`, `View`, `Response`, `Filter`, `FiltroBy`/`OrdemBy`) | `07-shared` | `Contracts` |
+| Interface de repositório, `IUnitOfWork` | `04-infra` | `Domain` |
+| Implementação de repositório, Map (mapeamento de persistência) | `04-infra` | `Infra` |
+| Regra entre mais de uma entidade | `03-domain` (serviço de domínio) | `Domain` / `Application` |
+| Caso de uso (app service), mapper, specification | `02-application` | `Application` |
+| Assinatura/validação de token, criptografia | `04-infra` (`Infra.Security`; middleware na `01-api`) | `Infra` |
+| Controller | `01-api` | `Api` |
 
-Pastas e nomes de cada projeto: seção 4 (enxuta) e `referencia-9-projetos.md` (9 projetos).
+Pastas e nomes de cada projeto: seção 4 (enxuta) e `referencia-estrutura.md` (padrão numerado).
 
 ## 1. Projetos: começar enxuto
 
@@ -73,8 +77,8 @@ As referências apontam sempre para dentro.
 │   ├── 02-application/    <Produto>.Application/
 │   ├── 03-domain/           <Produto>.Domain/, <Produto>.Contracts/
 │   ├── 04-infra/          <Produto>.Infra/ (e Infra.Data.<Banco>/, Integrations.<Sistema>/ quando separar)
-│   ├── 05-workers/        <Produto>.Workers/ (só quando separar)
-│   └── 06-clients/        desktop e outros clientes dos contratos
+│   ├── 05-desktop/        executáveis de borda e clientes dos contratos
+│   └── 06-async/          <Produto>.Workers/ (só quando separar)
 ├── tests/                 <Produto>.Domain.Tests/, ..., <Produto>.Architecture.Tests/
 └── tools/                 scripts e utilitários de desenvolvimento
 ```
@@ -83,7 +87,7 @@ As referências apontam sempre para dentro.
 - Nome da pasta: `NN-camada`, minúsculo, sem espaço (espaço exige aspas em CLI, Docker, CI e scripts de deploy).
 - `src/` só tem código que vai para produção; testes em `tests/` e utilitários em `tools/`, na raiz.
 - **Pasta física = pasta da solution** (mesma árvore no Explorer e no `.slnx`). Cada projeto fica na sua própria pasta, com o nome do projeto.
-- A pasta numerada só existe quando tem projeto: buraco na numeração é normal (sem `05-workers` enquanto os jobs rodam na Api). Os números não mudam quando uma pasta nasce.
+- A pasta numerada só existe quando tem projeto: buraco na numeração é normal (sem `06-async` enquanto os jobs rodam na Api). Os números não mudam quando uma pasta nasce.
 
 ### Dentro de cada projeto: o mesmo caminho em todos
 
@@ -133,7 +137,7 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 
 - **Teste rápido da camada:** se a regra continua verdadeira trocando o banco e a interface, ela é de domínio; se muda com o banco, é de `Infra`; se só ordena passos de um fluxo, é de `Application`.
 - **Leitura e escrita separadas (opcional):** quando a consulta de leitura começa a distorcer o modelo de escrita, separar: escrita normalizada com invariantes, leitura desnormalizada/projetada para a grade (`<X>QueryService`). Não adotar por antecipação.
-- **Entidade (Domain na enxuta; Shared no padrão de 9):** protege o próprio estado. Mudança de estado por método com validação (`pedido.Cancelar(motivo)`), sem `set` público. Regra que envolve uma única entidade fica nela, não no app service. Regra que envolve mais de uma entidade: serviço de domínio (`Domain` no padrão de 9). No padrão de 9, a entidade não leva atributo de ORM nem de driver (`[Bson*]`, `[Table]`, `[Key]`, `[Column]`).
+- **Entidade (Domain na enxuta; Shared no padrão numerado):** protege o próprio estado. Mudança de estado por método com validação (`pedido.Cancelar(motivo)`), sem `set` público. Regra que envolve uma única entidade fica nela, não no app service. Regra que envolve mais de uma entidade: serviço de domínio (`Domain` no padrão numerado). No padrão numerado, a entidade não leva atributo de ORM nem de driver (`[Bson*]`, `[Table]`, `[Key]`, `[Column]`).
 - **App service (Application):** um caso de uso por método. Valida a entrada, carrega as entidades pelo repositório, chama os métodos de domínio, faz `IUnitOfWork.CommitAsync` e devolve o contrato. Repositório não comita.
 - **Tamanho:** passou de ~7 métodos públicos ou ~300 linhas, dividir:
   - `<X>QueryService` para leitura e grade;
@@ -141,8 +145,8 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
   - caso de uso complexo (muitos passos ou dependências próprias) ganha classe própria `<Acao><X>AppService`.
 - **Composição, não herança:** acima de ~5 dependências no construtor, extrair um serviço menor e injetar. Classe base genérica (`CrudAppService<TEntidade, TView, TRequest>`) só para CRUD puro. Comportamento de família vai em serviço compartilhado injetado, nunca em base abstrata com dezenas de dependências.
 - **Mapper:** explícito e verificável pelo compilador. Pode ser à mão (`<X>Mapper` com `ToView()` e `ToEntity()`, mais uma `Expression<Func<X, XView>>` para projeção) ou com gerador de código de licença livre (ex.: Mapperly). Biblioteca de mapeamento com licença comercial só com decisão registrada via `/adr`.
-- **Enum exposto ao cliente:** no **padrão de 9**, existe **um só** enum, no Shared, usado por entidade e por DTO (sem conversão nem teste de par). Na **variante enxuta**, existe no Domain (domínio) e no Contracts (API), com conversão explícita no `<X>Mapper`; um teste percorre `Enum.GetValues` dos dois lados e falha se algum valor não tiver par. Enum que o cliente não vê fica só no Domain.
-- **Repositório (Infra):** implementa a interface (que mora no `Domain` na enxuta e na própria `Infra` no padrão de 9); leitura com `AsNoTracking`. Recebe specification e projeção e devolve entidade ou `PagedResult<TView>` já materializado. **Não expõe `IQueryable`** para fora da Infra. Implementação `internal`.
+- **Enum exposto ao cliente:** no **padrão numerado**, existe **um só** enum, no Shared, usado por entidade e por DTO (sem conversão nem teste de par). Na **variante enxuta**, existe no Domain (domínio) e no Contracts (API), com conversão explícita no `<X>Mapper`; um teste percorre `Enum.GetValues` dos dois lados e falha se algum valor não tiver par. Enum que o cliente não vê fica só no Domain.
+- **Repositório (Infra):** implementa a interface (que mora no `Domain` na enxuta e na própria `Infra` no padrão numerado); leitura com `AsNoTracking`. Recebe specification e projeção e devolve entidade ou `PagedResult<TView>` já materializado. **Não expõe `IQueryable`** para fora da Infra. Implementação `internal`.
 - **Configuração EF:** um `<X>Configuration : IEntityTypeConfiguration<X>` por entidade. Migration sempre com `-Context <NomeDoContext>`.
 - **Controller (Api):** fino. `[ApiController]` + `[Authorize]` na classe e `[Authorize(Policy = "<recurso>.<acao>")]` em cada action. Recebe o contrato, chama **um** método de app service e devolve o contrato.
 - **Notificação após persistir** (e-mail, mensagem): falha é logada, nunca relançada. Envio crítico usa outbox.
@@ -151,7 +155,7 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 ## 7. Filtros, ordenação e injeção de dependência
 
 **Filtros e ordenação de grade (tipados):**
-- `<X>Filter` (Contracts na enxuta; Shared no padrão de 9): propriedades tipadas (`string? Nome`, `DateOnly? De`, `E<X>Status? Status`) + `Page`, `PageSize`, `SortBy`, `SortDirection`.
+- `<X>Filter` (Contracts na enxuta; Shared no padrão numerado): propriedades tipadas (`string? Nome`, `DateOnly? De`, `E<X>Status? Status`) + `Page`, `PageSize`, `SortBy`, `SortDirection`.
 - `<X>Specification` (Application):
   - converte o filtro em `Expression<Func<X, bool>>`, combinando só os campos preenchidos;
   - ordenação por **lista branca**: `Dictionary<string, Expression<Func<X, object>>>`, com coluna padrão quando o nome é desconhecido.
@@ -171,16 +175,17 @@ Cada projeto expõe **um** método de registro (`AddApplication()`, `AddInfra(co
 - Melhorias deste padrão entram **só em código novo** e só com OK do usuário (ex.: filtro tipado num módulo novo, teste de DI). Nunca mover projetos, pastas, namespaces ou renomear sufixos em massa sem pedido. Adotar as pastas numeradas num projeto existente quebra caminhos de deploy, CI, Dockerfile e scripts: só com plano que liste e atualize cada um.
 - Migração estrutural: sugerir ao usuário `/plano-migracao`, módulo a módulo.
 - **Adoção total pedida pelo usuário:** o pedido explícito prevalece sobre as regras acima, mas só com checklist: (1) commit/backup do estado atual; (2) baseline do contrato (JSON das respostas, rotas) antes de mexer; (3) etapas pequenas, com build e testes verdes a cada uma; (4) se há cliente em outro repositório, alterar os dois e comparar o contrato antes/depois; (5) registrar a decisão no `CLAUDE.md` do projeto; (6) o que não foi verificado (banco real, ponta a ponta) é **PARCIAL**.
-- **Reconhecer o padrão de 9 em projeto desconhecido:** existe um projeto `*.Shared` **sem nenhuma `ProjectReference`**, com `Entities`/`Dto`/`Enums`, e o `Domain` **não tem entidades**. Nesse caso, respeitar essa estrutura e aplicar a regra-alvo (entidade sem atributo de ORM, Shared leve, segurança fora do Shared) **só em código novo**. Legado que diverge (atributos de ORM nas entidades, pacote pesado ou pasta de segurança no Shared) é registrado como *Divergência* no `CLAUDE.md` do projeto, sem migração em massa; se o Shared é referenciado por cliente instalado, avisar o usuário do risco de distribuir segredo e dependência pesada.
+- **Reconhecer o padrão numerado em projeto desconhecido:** existe um projeto `*.Shared` **sem nenhuma `ProjectReference`**, com `Entities`/`Dto`/`Enums`, e o `Domain` **não tem entidades**. Nesse caso, respeitar essa estrutura e aplicar a regra-alvo (entidade sem atributo de ORM, Shared leve, segurança fora do Shared) **só em código novo**.
+- **Equivalentes válidos no legado (não "corrigir"):** `FiltroBy` e `OrdemBy` (no lugar de `Filter`/ordenação), `Map` (no lugar de `<X>Configuration`), `Profile` do AutoMapper (no lugar de `<X>Mapper`) e `AppService` também dentro do Domain. Host que já usa o Domain direto: registrar na allowlist do `CLAUDE.md` como *Divergência* em vez de refatorar. Legado que diverge (atributos de ORM nas entidades, pacote pesado ou pasta de segurança no Shared) é registrado como *Divergência* no `CLAUDE.md` do projeto, sem migração em massa; se o Shared é referenciado por cliente instalado, avisar o usuário do risco de distribuir segredo e dependência pesada.
 - **Condicional por stack** (registrar no `CLAUDE.md` como *Não se aplica* ou *Divergência*, sem inventar): persistência (`Infra/Data/Context` e migrations só com EF/SQL; MongoDB não tem DbContext); `.slnx` exige SDK com suporte (checar `global.json`); `[Authorize]` com políticas só se o projeto tem autenticação.
 
 ## 9. Fatia vertical de uma funcionalidade nova (checklist)
 
-1. Entidade com métodos de domínio (e enum) em `Domain/<Modulo>/<X>/` na enxuta, ou em `Shared/Entities/<Modulo>/` no padrão de 9; `I<X>Repository` no `Domain` (enxuta) ou em `Infra/Repositories/Interfaces/` (padrão de 9).
-2. `<X>Configuration` (mapeamento de persistência) em `Infra/Data/<Modulo>/<X>/` (enxuta) ou `Infra/Persistence/Configurations/` (padrão de 9).
+1. Entidade com métodos de domínio (e enum) em `Domain/<Modulo>/<X>/` na enxuta, ou em `Shared/Entities/<Modulo>/` no padrão numerado; `I<X>Repository` no `Domain` (enxuta) ou em `Infra/Repositories/Interfaces/` (padrão numerado).
+2. `<X>Configuration` (mapeamento de persistência) em `Infra/Data/<Modulo>/<X>/` (enxuta) ou `Infra/Persistence/Configurations/` (padrão numerado).
 3. Migration com `-Context` (gerar; aplicar só com autorização).
 4. `<X>Repository` (`internal`) implementando a interface.
-5. `<X>Request` (`[Required]`/`[MaxLength]`), `<X>View`, `<X>Filter` em `Contracts/<Modulo>/<X>/` (enxuta) ou `Shared/Dto/<Modulo>/` e `Shared/Filters/` (padrão de 9).
+5. `<X>Request` (`[Required]`/`[MaxLength]`), `<X>View`, `<X>Filter` em `Contracts/<Modulo>/<X>/` (enxuta) ou `Shared/Dto/<Modulo>/` e `Shared/Filters/` (padrão numerado).
 6. `<X>Mapper` + `<X>Specification` em `Application/<Modulo>/<X>/`.
 7. `I<X>AppService` + `<X>AppService` (ou Query/Command, se já nascer grande).
 8. `<X>Controller` com rota e políticas; política nova cadastrada onde o projeto registra permissões.
@@ -204,4 +209,4 @@ Apontar `arquivo:linha` e a camada correta quando aparecer:
 - projeto na pasta numerada errada, pasta com espaço ou teste dentro de `src/`;
 - worker com regra de negócio própria;
 - caminho rápido que duplica uma decisão que já existe no caminho canônico (defeito num deles exige corrigir os dois; um auxiliar chamado por só um dos caminhos não resolve);
-- no padrão de 9: atributo de ORM na entidade do Shared; pacote pesado ou segurança/segredo no Shared; Application usando implementação de repositório, `DbContext` ou driver; entidade devolvida em controller (usar `View`/`Response`); regra de negócio em `Utils`/`Helpers`.
+- no padrão numerado: host usando o Domain fora da allowlist; segredo ou Key Vault no Shared; atributo de ORM na entidade do Shared; pacote pesado ou segurança/segredo no Shared; Application usando implementação de repositório, `DbContext` ou driver; entidade devolvida em controller (usar `View`/`Response`); regra de negócio em `Utils`/`Helpers`.
