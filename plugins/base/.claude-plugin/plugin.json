@@ -1,7 +1,7 @@
 {
   "name": "base",
   "displayName": "Base (segurança, revisão, planejamento)",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "description": "Hook de segredos, revisão por lentes, segurança (autenticação, segredos, infraestrutura, incidente, LGPD), dados e integrações, testes e QA, desenvolvimento de interfaces (orquestração, referências, inspeção visual com Playwright), requisitos e produto, deploy e agentes especializados para qualquer stack.",
   "author": { "name": "Leonardo Pokrewecky" },
   "repository": "https://github.com/LeonardoPokrewecky/claude-code-setup",
