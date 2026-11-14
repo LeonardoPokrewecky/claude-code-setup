@@ -186,8 +186,8 @@ Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI 
 
 | Componente | Windows PS 5.1 | Windows PS 7 | Linux / WSL2 | macOS |
 |---|---|---|---|---|
-| Hook (plugin, Git Bash/sh) | testado aqui | testado aqui (88 casos do `casos-hook.psd1` via `pwsh`) | alterado para o CI, não executado | não testado |
-| `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI, não executado | CI, não executado | CI (`macos-latest`), não executado |
+| Hook (plugin, Git Bash/sh) | testado aqui | testado aqui (88 casos do `casos-hook.psd1` via `pwsh`) | CI passou (Pester no `ubuntu-latest`, PR #9); dentro do Claude Code, não testado | CI passou (Pester no `macos-latest`, PR #9); dentro do Claude Code, não testado |
+| `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI passou (`windows-latest`, PR #9) | CI passou (`ubuntu-latest`, PR #9); uso real não testado | CI passou (`macos-latest`, PR #9); uso real não testado |
 | Plugins e marketplace (`claude plugin validate`, instalação isolada) | testado aqui | — | não testado | não testado |
 | Sandbox (`-Perfil unix`) | não suportado (doc oficial) | não suportado | não testado | não testado |
 | Devcontainer | testado com a CLI `devcontainer` (build, Claude Code instalado, volume, isolamento); autenticação e projeto real não testados | — | não testado | não testado |
