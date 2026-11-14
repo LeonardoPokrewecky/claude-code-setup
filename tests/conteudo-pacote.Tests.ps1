@@ -25,6 +25,18 @@ Describe 'Conteúdo do pacote' {
         @($achados) | Should -BeNullOrEmpty
     }
 
+    It 'modelo de fontes da LGPD existe, com validade de 30 dias, sem data real e sem conteúdo jurídico copiado' {
+        $m = Join-Path $script:raiz 'plugins/base/skills/lgpd-audit/fontes-modelo.md'
+        Test-Path -LiteralPath $m | Should -BeTrue
+        $t = [IO.File]::ReadAllText($m, [Text.Encoding]::UTF8)
+        $t | Should -Match 'verificado-em: AAAA-MM-DD'
+        $t | Should -Match 'validade-dias: 30'
+        $t | Should -Not -Match 'verificado-em: \d{4}-\d{2}-\d{2}' -Because 'o modelo não carrega data real'
+        $skill = [IO.File]::ReadAllText((Join-Path $script:raiz 'plugins/base/skills/lgpd-audit/SKILL.md'), [Text.Encoding]::UTF8)
+        $skill | Should -Match 'fontes-modelo\.md' -Because 'a Etapa 0 aponta para o modelo'
+        $skill | Should -Match 'atualizar-fontes'
+    }
+
     It 'sem termos proibidos (lista externa ao repositório)' {
         $lista = @()
         if ($env:CCS_TERMOS_PROIBIDOS) { $lista = $env:CCS_TERMOS_PROIBIDOS -split ';' }

@@ -10,6 +10,8 @@
 - **Critério de aceite:** o teste verifica o resultado que importa para o usuário, não só que "não lançou exceção".
 - **Regressão:** o que já funcionava e pode quebrar com este diff; testes existentes alterados para passar (suspeito: o teste mudou para aceitar o bug?).
 - **Fidedignidade:** teste que depende de fixture inexistente deve falhar/pular explicitamente, nunca passar vazio; suíte verde rodando zero testes (projeto de teste não reconhecido).
+- **Mock de API inventada:** teste que simula método, campo ou resposta de SDK/serviço que **não existe** passa e quebra em execução (padrão mais perigoso: o teste confirma a alucinação). Conferir cada chamada simulada contra a documentação ou o código-fonte da biblioteca; duvidou, conferir no código-fonte ou na documentação da biblioteca, ou rodar contra o sandbox do provedor; nunca contra produção nem com dado real (ver "Massa de teste").
+- **Validação em execução:** quantidade de testes e de arquivos não prova nada. Para integração e entrega, exigir que build e subida (ou o fluxo principal) tenham rodado de verdade, com a saída como evidência; o mesmo código pode se comportar diferente em outra ferramenta ou versão.
 - **Isolamento:** dependência de rede, banco real, relógio ou ordem de execução.
 
 Saída extra: lista "falta teste para …" em ordem de risco.

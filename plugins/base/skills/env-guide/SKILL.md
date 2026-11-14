@@ -74,8 +74,22 @@ Descartados: Claude-Mem (conflita com Auto Memory e envia dados a terceiros), He
 - Hook `bloquear-segredos` (plugin `base`): bloqueia comando de shell que cita arquivo de segredo e pede confirmação para o que mexe na configuração do Claude Code, esconde o comando (base64) ou usa `git -C`/`-c`. É camada contra acidente, não fronteira. Leitura legítima: o usuário roda com `! <comando>`.
 - Autoproteção: `deny` de edição em `~/.claude/settings*.json`, `~/.claude/hooks/` e `~/.claude/plugins/`; `ask` em CLAUDE.md, skills e agentes do usuário.
 
+## Isolamento por ambiente
+Do mais fraco ao mais forte; cada camada soma à anterior, nenhuma a substitui.
+
+| Camada | Onde vale | Como | Estado |
+|---|---|---|---|
+| Hook + `deny/ask` (texto do comando) | todos | plugin `base` + `merge-settings.ps1` | testado no Windows; contra acidente, não fronteira |
+| Sandbox nativo do Claude Code | Linux, WSL2, macOS | `merge-settings.ps1 -Perfil unix` (Linux: `bubblewrap` e `socat`) | não testado |
+| Contêiner (camada `devcontainer`) | Windows nativo e Linux, mesma configuração | copiar `.devcontainer/`; Docker em execução | não validado em projeto real |
+| VM descartável | repositório de terceiros ou código hostil, qualquer sistema | fora do pacote | contêiner e sandbox reduzem o dano, não garantem |
+
+- **Windows nativo** não tem sandbox do Claude Code (doc oficial): use o contêiner para projeto de terceiros ou código não confiável.
+- **`ai-jail`** (projeto externo, `akitaonrails/ai-jail`) é opção no Linux, macOS e WSL2, **não** faz parte do pacote e não é instalado por ele: sandbox por `bubblewrap`/Landlock, rede fechada por padrão, `--mask` para `.env`. Avisos: não roda no Windows nativo; por padrão monta `~/.claude` com escrita e repassa `ANTHROPIC_API_KEY` (use `--no-agent-state` e `--env-from-file` fora do projeto); previne acidente, **não** barra código hostil; a máscara de arquivo no Linux cai se o arquivo for substituído (salvar por outro editor). Confira as flags no repositório antes de adotar.
+- Repositório clonado de terceiros: tratar o `CLAUDE.md` e o `.claude/` dele como não confiáveis (ver `project-bootstrap`).
+
 ## Documentos gerados pelas skills
-Pasta de documentação = `Documentação:` do CLAUDE.md do projeto; sem indicação, o padrão é `<pasta-pai-do-repo>/docs/<nome-do-repo>/` (**fora do repositório**; a skill pergunta se prefere `(versionada)` em `docs/planejamento/`): `backlog/*.md` (`/blueprint`), `RELATORIO-LGPD.md` (`/lgpd-audit`), `HANDOFF.md` (`/session-handoff`). Exceção: `DIVIDA.md` (`/divida`) fica versionado na raiz do projeto.
+Pasta de documentação = `Documentação:` do CLAUDE.md do projeto; sem indicação, o padrão é `<pasta-pai-do-repo>/docs/<nome-do-repo>/` (**fora do repositório**; a skill pergunta se prefere `(versionada)` em `docs/planejamento/`): `backlog/*.md` (`/blueprint`), `RELATORIO-LGPD.md` (`/lgpd-audit`), `referencias/lgpd-fontes-oficiais.md` (`/lgpd-audit`, válido por 30 dias; `/lgpd-audit atualizar-fontes` atualiza), `HANDOFF.md` (`/session-handoff`). Exceção: `DIVIDA.md` (`/divida`) fica versionado na raiz do projeto.
 
 ## Configuração por máquina
 Pastas, clone do pacote e tabela de projetos atuais ficam em `~/.claude/maquina.md` (modelo `core/maquina.example.md`). Nada pessoal ou de cliente entra no pacote.

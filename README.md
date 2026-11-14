@@ -129,7 +129,7 @@ if (-not (Test-Path "$proj/CLAUDE.md")) { Copy-Item "$repo/project-templates/CLA
 - Repositório de cliente em que o Claude não deve aparecer: em vez do `.gitignore`, somar `CLAUDE.md`, `CLAUDE.local.md` e `.claude/` ao `.git/info/exclude`.
 - **Documentação do projeto** (blueprints, relatório LGPD, handoff): as skills perguntam uma vez se fica **só local** (fora do repositório, padrão e obrigatório em projeto de cliente) ou **versionada no Git** do projeto (`docs/planejamento/`, só projeto próprio, para abrir em outro ambiente) e gravam a resposta na linha `Documentação:` do `CLAUDE.md`. Em ambos os casos, commit e push só a pedido.
 - **Blueprint com aprovação:** toda alteração não trivial começa por um blueprint (status `RASCUNHO vN`) aberto no navegador pelo `ver-blueprint.ps1`; o Claude só implementa depois de um "aprovado" explícito, marca o checklist durante a implementação (dá para retomar depois de `/clear`) e fecha com a avaliação de brechas. Trivial (1 arquivo, até ~20 linhas, sem banco, autenticação, contrato, segredos ou dados de usuário) dispensa. A regra fica no `core/CLAUDE.md`: depois de atualizar o pacote, rodar `/plugin update` e o `instalar-arquivos.ps1`. Um hook que bloqueie edição sem blueprint aprovado fica para depois, só se a regra falhar no uso real.
-- Camada `devcontainer` (copiar `.devcontainer/`): isolamento para Windows nativo ou código não confiável — **não validada em projeto real**.
+- Camada `devcontainer` (copiar `.devcontainer/`): isolamento para Windows nativo ou código não confiável — validada com a CLI do devcontainer em 2026-11-14; **sem uso em projeto real**. A decisão por ambiente (hook, sandbox, contêiner, VM descartável, `ai-jail` como opção externa) está na seção "Isolamento por ambiente" da skill `env-guide`.
 
 ---
 
@@ -190,7 +190,7 @@ Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI 
 | `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI, não executado | CI, não executado | CI (`macos-latest`), não executado |
 | Plugins e marketplace (`claude plugin validate`, instalação isolada) | testado aqui | — | não testado | não testado |
 | Sandbox (`-Perfil unix`) | não suportado (doc oficial) | não suportado | não testado | não testado |
-| Devcontainer | não testado | — | não testado | não testado |
+| Devcontainer | testado com a CLI `devcontainer` (build, Claude Code instalado, volume, isolamento); autenticação e projeto real não testados | — | não testado | não testado |
 | Desktop × CLI | mesma configuração (`~/.claude`) | | | |
 
 Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe `sh` ([doc](https://code.claude.com/docs/en/hooks)). Instale o Git for Windows ou defina `CLAUDE_CODE_GIT_BASH_PATH`.
@@ -200,6 +200,7 @@ Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe 
 ## 8. Limitações das proteções
 
 - **O hook lê só o texto do comando.** Não pega nome montado em variável, `cd` + caminho relativo, curinga sozinho (`cat *`), busca que lê segredos sem citar o nome (`grep -r PASSWORD .`) nem script que lê o arquivo por dentro. Medição: 7/7 desses casos passam — é camada contra acidente.
+- **Isolamento é em camadas e cada uma tem limite:** o sandbox e o contêiner reduzem o dano de um comando errado, mas não são barreira contra código hostil (para isso, VM descartável). Ferramenta externa de sandbox (ex.: `ai-jail`) com máscara de arquivo no Linux pode perder a regra se o arquivo for substituído (salvar por outro editor): mantenha segredos em pasta inteira mascarada e fora do repositório.
 - **Falso positivo conhecido:** `git commit -m "... .env ..."` é bloqueado (use `! <comando>`).
 - **Hook que não roda não bloqueia:** JSON inválido ou timeout liberam; falha interna depois do parse pede confirmação; sem PowerShell, a ponte pede confirmação.
 - **Regras `ask/deny` por texto** não pegam o programa por caminho completo ou dentro de `sh -c` (doc oficial); o sandbox (macOS/Linux/WSL2) é a proteção que não depende do texto.
@@ -229,16 +230,22 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 - [ ] Rodar `claude plugin eval ./plugins/base` e criar evals para skills sob demanda (`/revisar`, `/blueprint`, `/alterar-dados`) — invocação por `/comando` em eval não confirmada na doc.
 - [ ] Perfil de CI e template de CI com `anthropics/claude-code-action` (sem caso real).
 - [ ] Validar a seção IIS do `/deploy-checklist` e a camada `devcontainer` em projeto real.
+- [ ] Validar `-Perfil unix` numa máquina Linux (roteiro em `project-templates/devcontainer/README.md`, seção "Validar o sandbox no Linux").
+- [ ] Ideia futura: trilha de auditoria com cadeia de hash (cada registro guarda o hash do anterior) para `/alterar-dados` e `/deploy-checklist`; detecta edição no meio do arquivo, não prova autoria.
+- [ ] Rodar `claude plugin eval ./plugins/base` incluindo `lente-testes-mock` (chama o modelo; custo).
 - [ ] Revisar o conteúdo das skills novas de segurança e dados (`autenticacao-e-sessao`, `endurecimento-de-infraestrutura`, `resposta-a-incidente`, `modelagem-dados`, `integracoes`, `escolha-de-banco-e-capacidade`) com a lente `seguranca` e conferir recomendações contra fontes oficiais (OWASP, docs da Microsoft e do PostgreSQL) antes de publicar.
 - [ ] Criar evals para as skills novas (sem eval hoje).
 - [ ] Avaliar dividir o plugin `base` (39 skills) em plugins temáticos (segurança, QA e design, produto) e complementar `dotnet`/`angular` com autenticação, EF/índices e o lado de interface.
 - [ ] Skills de marketing e SEO (Luna, Lira, Rank do levantamento externo): decidir entre plugin opcional próprio ou o `marketingskills` externo.
 - [ ] Fixar `marketingskills` por SHA, se o schema aceitar.
-- [ ] Confirmar direitos de distribuição do `Auditoria LGPD.pdf`.
+- [x] `Auditoria LGPD.pdf` (material de terceiro) removido da árvore em 2026-11-14; a skill `/lgpd-audit` agora se baseia em fontes oficiais.
+- [ ] O PDF **continua no histórico público do Git** (desde o primeiro commit): decidir entre manter, reescrever o histórico (`git filter-repo` + push forçado, invalida clones) ou deixar o repositório privado.
+- [x] Arquivo próprio de fontes oficiais da LGPD por projeto (`referencias/lgpd-fontes-oficiais.md` na pasta de documentação, fora do repositório), válido por 30 dias; `/lgpd-audit` usa sem pesquisar dentro do prazo, pergunta antes de atualizar quando vence e `/lgpd-audit atualizar-fontes` atualiza a pedido. Modelo em `plugins/base/skills/lgpd-audit/fontes-modelo.md`.
+- [ ] Rodar uma vez `/lgpd-audit atualizar-fontes` num projeto de teste (usa rede; só com a sua autorização) e registrar o resultado.
 - [ ] Validar `desenvolvimento-de-interfaces` e `/inspecao-visual` num frontend real com a camada `playwright` (nomes das ferramentas `browser_*` do MCP, captura, console e rede) e criar evals para elas.
 
 ### Pendências de validação
 - `echo .env` bloqueado pelo hook do plugin: confirmar numa sessão recarregada (`/reload-plugins`); o script em si bloqueia o caso.
 - Passo 5 do README (`git push` pede confirmação, `/plugin`, `/agents`, `/context`): conferir na interface após recarregar.
 - Frontend (projeto Angular de exemplo): `npm test` com ChromeHeadless passou, 31/31 testes, em 06/11/2026.
-- macOS, Linux/WSL2, sandbox (`-Perfil unix`) e devcontainer continuam não testados (tabela da seção 7).
+- macOS, Linux/WSL2 e sandbox (`-Perfil unix`) continuam não testados; o devcontainer foi testado com a CLI (build, isolamento, volume), falta a autenticação e o uso em projeto real (tabela da seção 7).

@@ -36,6 +36,13 @@ Estado atual limpo **não** significa histórico limpo.
 - Nunca armazenar a senha tentada numa falha de login.
 - Dado sensível em repouso: chave derivada, cifra autenticada, prefixo de versão no valor, leitura dupla durante a troca de chave, índice cego para busca por igualdade, migração idempotente com reversão.
 
+## 4b. Segredo que o agente não precisa ver (placeholder)
+Quando o agente ou um processo dele precisa chamar uma API, o valor real não deve entrar no ambiente dele.
+- Padrão: o processo recebe um **valor falso**; um proxy de saída troca pelo real só nas chamadas ao host indicado (exemplo de ferramenta: `ai-jail --secret KEY=host`, Linux/macOS/WSL2). Assim o segredo não vai para log, transcrição, comando nem `printenv`.
+- Valor real em arquivo de permissão restrita **fora do repositório** (`secrets/<projeto>/` ou User Secrets), nunca na linha de comando (aparece em lista de processos e logs).
+- Limites: só funciona com cliente que fala HTTP simples com o proxy; HTTPS direto segue sem troca. Não é fronteira contra código hostil.
+- Sem essa ferramenta (Windows nativo): variável de ambiente só no processo que precisa, nunca `export` global; User Secrets no .NET.
+
 ## 5. Se `exposicao` (suspeita de vazamento)
 Classificar como incidente (ver `/postmortem`): conter primeiro (revogar/rotacionar), **preservar evidência antes de limpar**, descobrir como vazou, procurar o mesmo padrão em outros pontos e, se houver dado pessoal, avisar o usuário para avaliar a obrigação de notificação (`/lgpd-audit`).
 
