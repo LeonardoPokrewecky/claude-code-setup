@@ -129,7 +129,7 @@ if (-not (Test-Path "$proj/CLAUDE.md")) { Copy-Item "$repo/project-templates/CLA
 - Repositório de cliente em que o Claude não deve aparecer: em vez do `.gitignore`, somar `CLAUDE.md`, `CLAUDE.local.md` e `.claude/` ao `.git/info/exclude`.
 - **Documentação do projeto** (blueprints, relatório LGPD, handoff): as skills perguntam uma vez se fica **só local** (fora do repositório, padrão e obrigatório em projeto de cliente) ou **versionada no Git** do projeto (`docs/planejamento/`, só projeto próprio, para abrir em outro ambiente) e gravam a resposta na linha `Documentação:` do `CLAUDE.md`. Em ambos os casos, commit e push só a pedido.
 - **Blueprint com aprovação:** toda alteração não trivial começa por um blueprint (status `RASCUNHO vN`) aberto no navegador pelo `ver-blueprint.ps1`; o Claude só implementa depois de um "aprovado" explícito, marca o checklist durante a implementação (dá para retomar depois de `/clear`) e fecha com a avaliação de brechas. Trivial (1 arquivo, até ~20 linhas, sem banco, autenticação, contrato, segredos ou dados de usuário) dispensa. A regra fica no `core/CLAUDE.md`: depois de atualizar o pacote, rodar `/plugin update` e o `instalar-arquivos.ps1`. Um hook que bloqueie edição sem blueprint aprovado fica para depois, só se a regra falhar no uso real.
-- Camada `devcontainer` (copiar `.devcontainer/`): isolamento para Windows nativo ou código não confiável — **não validada em projeto real**. A decisão por ambiente (hook, sandbox, contêiner, VM descartável, `ai-jail` como opção externa) está na seção "Isolamento por ambiente" da skill `env-guide`.
+- Camada `devcontainer` (copiar `.devcontainer/`): isolamento para Windows nativo ou código não confiável — validada com a CLI do devcontainer em 2026-11-14; **sem uso em projeto real**. A decisão por ambiente (hook, sandbox, contêiner, VM descartável, `ai-jail` como opção externa) está na seção "Isolamento por ambiente" da skill `env-guide`.
 
 ---
 
@@ -190,7 +190,7 @@ Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI 
 | `merge-settings.ps1`, `instalar-arquivos.ps1`, `gerar-docs.ps1` | testado aqui | CI, não executado | CI, não executado | CI (`macos-latest`), não executado |
 | Plugins e marketplace (`claude plugin validate`, instalação isolada) | testado aqui | — | não testado | não testado |
 | Sandbox (`-Perfil unix`) | não suportado (doc oficial) | não suportado | não testado | não testado |
-| Devcontainer | parcial: contêiner base testado com `docker run` (isolamento ok; falha de permissão do volume corrigida); feature oficial e autenticação não testadas | — | não testado | não testado |
+| Devcontainer | testado com a CLI `devcontainer` (build, Claude Code instalado, volume, isolamento); autenticação e projeto real não testados | — | não testado | não testado |
 | Desktop × CLI | mesma configuração (`~/.claude`) | | | |
 
 Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe `sh` ([doc](https://code.claude.com/docs/en/hooks)). Instale o Git for Windows ou defina `CLAUDE_CODE_GIT_BASH_PATH`.
@@ -248,4 +248,4 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 - `echo .env` bloqueado pelo hook do plugin: confirmar numa sessão recarregada (`/reload-plugins`); o script em si bloqueia o caso.
 - Passo 5 do README (`git push` pede confirmação, `/plugin`, `/agents`, `/context`): conferir na interface após recarregar.
 - Frontend (projeto Angular de exemplo): `npm test` com ChromeHeadless passou, 31/31 testes, em 06/11/2026.
-- macOS, Linux/WSL2, sandbox (`-Perfil unix`) e devcontainer continuam não testados (tabela da seção 7).
+- macOS, Linux/WSL2 e sandbox (`-Perfil unix`) continuam não testados; o devcontainer foi testado com a CLI (build, isolamento, volume), falta a autenticação e o uso em projeto real (tabela da seção 7).

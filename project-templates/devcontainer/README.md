@@ -1,4 +1,4 @@
-# Camada `devcontainer` — não validada em projeto real
+# Camada `devcontainer` — validada com a CLI do devcontainer; sem uso em projeto real
 
 Isolamento para Windows nativo (onde o sandbox do Claude Code não roda) ou para código não confiável: o Claude e os comandos que ele executa rodam dentro do container.
 
@@ -8,12 +8,13 @@ Isolamento para Windows nativo (onde o sandbox do Claude Code não roda) ou para
 - Firewall de saída (`init-firewall.sh`) e hardening: ver o container de referência em `anthropics/claude-code/.devcontainer`.
 - Dentro do container (Linux), aplicar o perfil `unix` (`merge-settings.ps1 -Perfil unix`, com `pwsh`) para ligar o sandbox também.
 
-## Resultado da validação parcial (2026-11-14, Docker Desktop 29.9.2 no Windows)
-Testado com `docker run` na imagem `mcr.microsoft.com/devcontainers/base:ubuntu`, usuário `vscode`, volume nomeado em `/home/vscode/.claude`, sem montar nada do host:
-- Usuário `vscode` (uid 1000); `SSH_AUTH_SOCK` vazio; sem `credential.helper`; sem `docker.sock`; sem variáveis `ANTHROPIC_*`, `GITHUB_*`, `GH_*` ou `AWS_*`; nenhuma montagem ligada ao host.
-- **Falha achada e corrigida:** o volume nomeado é criado com dono `root` quando `/home/vscode/.claude` não existe na imagem, e o `vscode` não consegue gravar ali (`Permission denied`). Correção no template: `postCreateCommand` com `sudo chown -R vscode:vscode /home/vscode/.claude`; o comando foi testado no contêiner e o volume ficou gravável.
-- **Não testado:** a feature oficial `claude-code`, o `postCreateCommand` executado pelo próprio Dev Containers (não há CLI `devcontainer` instalada; a extensão do VS Code exige o botão "Reopen in Container"), a autenticação do Claude Code dentro do contêiner e a checagem de `~/.ssh` e `~/.aws` (o hook `bloquear-segredos` barra comandos que citam esses nomes; rodar com `! <comando>`).
-- Camada continua **não validada em projeto real**.
+## Resultado da validação (2026-11-14, Docker Desktop 29.9.2 no Windows, `@devcontainers/cli` 0.90.0)
+Testado com `devcontainer up` e `devcontainer exec` numa pasta de teste vazia, sem credencial real e sem montar nada do host além da pasta de trabalho:
+- **Build:** o template original **falhava**: a feature do Claude Code exige Node.js e a imagem base não o traz (`Node.js and npm are required`). Corrigido com a feature `ghcr.io/devcontainers/features/node:1`; depois disso o contêiner sobe e o Claude Code 2.1.325 está instalado.
+- **Volume do `.claude`:** era criado com dono `root` e o `vscode` não gravava (`Permission denied`). Corrigido com `postCreateCommand` (`sudo chown -R vscode:vscode /home/vscode/.claude`); executado pelo Dev Containers, o volume ficou do `vscode` e gravável.
+- **Isolamento:** usuário `vscode`; `SSH_AUTH_SOCK` vazio; sem `credential.helper`; sem `docker.sock`; sem variáveis `ANTHROPIC_*`, `GITHUB_*`, `GH_*` ou `AWS_*`; o home só tem os arquivos padrão da imagem (sem pastas de chave SSH ou de nuvem); a pasta de trabalho mostra só o conteúdo do projeto.
+- **Não testado:** a **autenticação** do Claude Code dentro do contêiner; o repasse de agente SSH e de credenciais do Git feito pelo **editor** (a CLI não repassa; o VS Code pode, ver o passo 3 do roteiro); uso em **projeto real** com a imagem da stack.
+- Camada **validada com a CLI; ainda sem uso em projeto real**.
 
 ## Roteiro de validação (sem credencial real, sem dado real)
 
