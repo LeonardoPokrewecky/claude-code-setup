@@ -2,4 +2,4 @@
 type: regex
 ---
 
-/revisar
+/(?:base:)?revisar|/security-review
