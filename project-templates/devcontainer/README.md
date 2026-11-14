@@ -16,6 +16,7 @@ Não testado aqui: o build do container e a autenticação dentro dele.
 1. `docker info` responde (no Windows, iniciar o Docker Desktop antes).
 2. Numa pasta de teste vazia: copiar `.devcontainer/`, abrir no editor com "Reopen in Container" (ou `devcontainer up --workspace-folder .`).
 3. Dentro do contêiner: `claude --version` responde; `ls ~/.ssh ~/.aws` não existe; `echo $CLAUDE_CONFIG_DIR` aponta para o volume.
+   - Conferir também o que o editor repassa sem montar pasta: `echo $SSH_AUTH_SOCK` deve estar vazio e `git config --get credential.helper` não deve apontar para o host. Se aparecer, desligar o repasse do agente SSH e das credenciais do Git nas configurações do editor/Dev Containers e repetir o teste (comportamento do Dev Containers não verificado aqui).
 4. Registrar o resultado (passou / falhou e o motivo) na seção 7 do `README.md` do pacote. Sem executar, a camada segue "não validada".
 
 ## Validar o sandbox no Linux (`-Perfil unix`)
