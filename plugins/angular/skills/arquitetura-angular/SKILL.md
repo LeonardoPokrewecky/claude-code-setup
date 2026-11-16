@@ -5,7 +5,7 @@ description: Padrão de arquitetura para frontend Angular — core (guards, inte
 
 # Arquitetura Angular
 
-- **Projeto novo:** nasce neste padrão (o da Fábrica do iAVendedor).
+- **Projeto novo:** nasce neste padrão.
 - **Projeto existente:** o `CLAUDE.md` do projeto prevalece; o padrão vale para **código novo** e as divergências são só registradas, sem mover pastas em massa. Adoção total só a pedido do usuário, com commit antes, build e testes verdes a cada etapa (sugerir `/plano-migracao`).
 - **Front e back separados:** projetos independentes, nunca o front dentro de pasta do back; regra e organização no `project-bootstrap`. Contrato: OpenAPI do backend ou a seção 4 abaixo. O front **nunca** consome o Shared .NET.
 - **Regras de sessão e rede** (interceptor, guard, 401/403, cache do `index.html`, busca com debounce): `referencia-regras-spa.md`, sob demanda. Estados de tela e componentes: `/componentes-e-estados`. Modelo de autenticação: `/autenticacao-e-sessao`. Não duplicar aqui.

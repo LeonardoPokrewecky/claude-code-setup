@@ -1,6 +1,6 @@
 # Referência: estrutura por pastas numeradas, com Shared como shared kernel (.NET)
 
-Padrão **default** para projeto .NET novo (o padrão do Monitor). O `CLAUDE.md` do projeto pode escolher a variante enxuta do `SKILL.md`; não misturar as duas no mesmo projeto. Projeto existente sem esta estrutura não migra sem pedido (seção 8 do `SKILL.md`).
+Padrão **default** para projeto .NET novo. O `CLAUDE.md` do projeto pode escolher a variante enxuta do `SKILL.md`; não misturar as duas no mesmo projeto. Projeto existente sem esta estrutura não migra sem pedido (seção 8 do `SKILL.md`).
 
 **Atenção ao significado dos nomes.** Aqui o `07-shared` **não** é um projeto periférico de helpers: é o **shared kernel**, o vocabulário comum de uma solução com vários executáveis (API, workers, agentes, clientes instalados). E o `03-domain` **não guarda entidades**: é a camada de serviço (regras e orquestração entre entidades). Quem conhece a Onion/Clean clássica (Domain no centro, com as entidades) deve ler esta página com esse cuidado.
 
@@ -26,6 +26,23 @@ Diferenças da variante enxuta do `SKILL.md`: entidades, enums e DTOs ficam no S
 - `tests/` e `tools/` ficam na raiz, **sem número**: não são camada, e a ordem alfabética já os põe depois de `07-shared`. O `src/` da variante enxuta tem a mesma regra.
 - A numeração é organização visual e **não** representa a hierarquia de dependências. Os números nunca mudam; a pasta só existe quando tem projeto (buraco na numeração é normal, ex.: sem `05-desktop`). Projeto reservado e vazio fica de fora, sem esqueleto "para completar a estrutura".
 - Pasta física = pasta da solution (mesma árvore no Explorer e no `.slnx`; checar `global.json` para o SDK).
+- **O `.slnx` declara as pastas explicitamente com `<Folder>`**. Só listar os `<Project>` faz o Visual Studio mostrar os projetos soltos, sem as pastas numeradas (o disco não vira pasta de solução sozinho). Exemplo:
+
+```xml
+<Solution>
+  <Folder Name="/01 - api/">
+    <Project Path="01-api/<Produto>.Api/<Produto>.Api.csproj" />
+  </Folder>
+  <Folder Name="/02 - application/">
+    <Project Path="02-application/<Produto>.Application/<Produto>.Application.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/<Produto>.Domain.Tests/<Produto>.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
+```
+
+  O `Name` da `<Folder>` é só rótulo no Visual Studio e segue o padrão `NN - camada` (com espaço), enquanto o disco segue `NN-camada` sem espaço. Na variante com `src/`, aninhar: `<Folder Name="/src/">` com `<Folder Name="/src/01 - api/">` dentro. Ao criar ou adicionar projeto, atualizar o `.slnx` dentro da pasta da camada; conferir abrindo no Visual Studio.
 
 ## 2. Camadas
 
@@ -151,7 +168,7 @@ Princípios: SOLID, baixo acoplamento, alta coesão, testabilidade. Sem abstraç
 - **Hoje:** `.env` (fora do Git) e `appsettings`, lidos por **options tipadas** (`IOptions<T>` com `ValidateOnStart`). Segredo de .NET em User Secrets; o `appsettings.json` versionado fica legível e sem valor sensível.
 - **Key Vault não está implementado.** Quando o usuário **pedir**, a migração é: `AddKeyVault(config)` na `Infra.Security` e `appsettings` apontando para o cofre, sem mexer no resto do código (as options continuam iguais). Não instalar pacote nem criar recurso antes do pedido.
 
-## 9. Regras de robustez (inspiradas no agente Master, reescritas)
+## 9. Regras de robustez
 
 - **Contrato sempre aditivo:** campo novo é opcional e o antigo continua sendo enviado; remover ou renomear exige versão nova.
 - **Reivindicação atômica:** operação em dois passos muda o status com uma atualização condicional (`UPDATE … WHERE status = <esperado>`) e confere que **uma** linha foi afetada. Sem isso, dois cliques geram dois registros.
@@ -159,7 +176,7 @@ Princípios: SOLID, baixo acoplamento, alta coesão, testabilidade. Sem abstraç
 - **Autorização pela tabela de vínculo canônica:** comparar o dono atual no vínculo, não numa coluna copiada no registro filho (transferência que atualiza só o vínculo deixaria o antigo negando acesso ao novo responsável). Rota administrativa nova tem verificação explícita de permissão; copiar o atributo do vizinho não prova nada.
 - **LGPD:** a autorização e o teto por cliente não exigem dado pessoal além do necessário (minimização); logs de fila e de autorização levam identificador, nunca documento, e-mail ou token.
 
-## 10. Princípios (inspirados no agente Forge)
+## 10. Princípios
 
 - **ADR antes de decisão estrutural** (projeto novo, pacote fora da lista, exceção na allowlist): `/adr`.
 - **Medir antes de otimizar:** linha de base e percentil, depois a mudança: `/medir-antes-depois`.
