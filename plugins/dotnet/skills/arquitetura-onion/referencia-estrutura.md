@@ -17,14 +17,17 @@ Diferenças da variante enxuta do `SKILL.md`: entidades, enums e DTOs ficam no S
 ├── 05-desktop/        executáveis de borda (navegação, agente instalado no cliente)
 ├── 06-async/          <Produto>.Async (workers, consumers, jobs)
 ├── 07-shared/         <Produto>.Shared
-├── tests/             <Produto>.<Projeto>.Tests (Unit, Integration, Functional, Architecture)
-└── tools/             <Produto>.Tools (importadores, diagnóstico, manutenção)
+├── 08-tests/          <Produto>.<Projeto>.Tests (Unit, Integration, Functional, Architecture)
+└── 09-tools/          <Produto>.Tools (importadores, diagnóstico, manutenção)
 ```
+
+**As 9 pastas existem sempre em projeto novo.** Pasta sem projeto fica só com o `README.md` da camada (modelo único em `readme-camada.md`: finalidade, o que entra, o que não entra, quem referencia). Sem `.csproj` vazio: o projeto só nasce quando houver código. O README permanece depois que a pasta ganha projeto.
 
 - **Pasta numerada por camada, mais de um projeto por pasta** quando houver motivo (subdomínio, banco, integração): `<Produto>.Domain.<Sub>`, `<Produto>.Infra.Data.<Banco>`. Projeto novo só com motivo registrado via `/adr`; pasta que ficou pequena não vira projeto.
 - **Sem espaço** em nome de pasta, projeto ou namespace (espaço exige aspas em CLI, Docker, CI e deploy). Pasta em minúsculo: `NN-camada`.
-- `tests/` e `tools/` ficam na raiz, **sem número**: não são camada, e a ordem alfabética já os põe depois de `07-shared`. O `src/` da variante enxuta tem a mesma regra.
-- A numeração é organização visual e **não** representa a hierarquia de dependências. Os números nunca mudam; a pasta só existe quando tem projeto (buraco na numeração é normal, ex.: sem `05-desktop`). Projeto reservado e vazio fica de fora, sem esqueleto "para completar a estrutura".
+- `08-tests` e `09-tools` seguem a mesma numeração das camadas (não são camada de dependência, mas ocupam a sequência). A variante enxuta do `SKILL.md` **não** muda: continua com `src/`, `tests/` e `tools/` e pasta só com projeto.
+- A numeração é organização visual e **não** representa a hierarquia de dependências. Os números nunca mudam. As 9 pastas existem sempre; **projeto** vazio não se cria (sem `.csproj` "para completar a estrutura"). A regra de "sem pasta vazia" da seção 6 vale só para subpastas internas de projeto.
+- **Projeto existente** não ganha as pastas vazias nem é renumerado sem pedido do usuário (seção 8 do `SKILL.md`).
 - Pasta física = pasta da solution (mesma árvore no Explorer e no `.slnx`; checar `global.json` para o SDK).
 - **O `.slnx` declara as pastas explicitamente com `<Folder>`**. Só listar os `<Project>` faz o Visual Studio mostrar os projetos soltos, sem as pastas numeradas (o disco não vira pasta de solução sozinho). Exemplo:
 
@@ -36,13 +39,16 @@ Diferenças da variante enxuta do `SKILL.md`: entidades, enums e DTOs ficam no S
   <Folder Name="/02 - application/">
     <Project Path="02-application/<Produto>.Application/<Produto>.Application.csproj" />
   </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/<Produto>.Domain.Tests/<Produto>.Domain.Tests.csproj" />
+  <Folder Name="/05 - desktop/">
+    <File Path="05-desktop/README.md" />
+  </Folder>
+  <Folder Name="/08 - tests/">
+    <Project Path="08-tests/<Produto>.Domain.Tests/<Produto>.Domain.Tests.csproj" />
   </Folder>
 </Solution>
 ```
 
-  O `Name` da `<Folder>` é só rótulo no Visual Studio e segue o padrão `NN - camada` (com espaço), enquanto o disco segue `NN-camada` sem espaço. Na variante com `src/`, aninhar: `<Folder Name="/src/">` com `<Folder Name="/src/01 - api/">` dentro. Ao criar ou adicionar projeto, atualizar o `.slnx` dentro da pasta da camada; conferir abrindo no Visual Studio.
+  O exemplo é abreviado: o `.slnx` real traz as **9** `<Folder>`; a que ainda não tem projeto leva o `README.md` como `<File>` (como `05 - desktop` acima). O `Name` da `<Folder>` é só rótulo no Visual Studio e segue o padrão `NN - camada` (com espaço), enquanto o disco segue `NN-camada` sem espaço. Na variante com `src/`, aninhar: `<Folder Name="/src/">` com `<Folder Name="/src/01 - api/">` dentro. Ao criar ou adicionar projeto, atualizar o `.slnx` dentro da pasta da camada; conferir abrindo no Visual Studio.
 
 ## 2. Camadas
 
@@ -55,8 +61,8 @@ Diferenças da variante enxuta do `SKILL.md`: entidades, enums e DTOs ficam no S
 | 05 | desktop | Executáveis de borda | Executável de navegação ou agente instalado no cliente: chama casos de uso, configuração local | Regra no code-behind/ViewModel, acesso direto ao banco; o **agente instalado** não referencia `Infra.Security` nem pacote pesado |
 | 06 | async | Segundo plano | Workers, consumers/producers, jobs, retry, lote | Regra de negócio no worker (delegar à Application) |
 | 07 | shared | Shared kernel | Entidades, enums, value objects; `Request`/`View`/`Response`; `FiltroBy`/`OrdemBy` (descrevem a consulta, não a executam); classes de options; abstrações de log/cache, `Result<T>`, `PagedResult<T>`, `Guard`; constantes e tipos de claims | Regra entre entidades, orquestração, segurança (assinatura, segredos), atributo de ORM ou de driver, pacote pesado (seção 5) |
-| — | tests | Qualidade | Unit, Integration, Functional, Architecture | Código de produção, dados reais |
-| — | tools | Operação | Importadores, exportadores, diagnóstico, manutenção | Regra própria (reusar Application), credencial embutida |
+| 08 | tests | Qualidade | Unit, Integration, Functional, Architecture | Código de produção, dados reais |
+| 09 | tools | Operação | Importadores, exportadores, diagnóstico, manutenção | Regra própria (reusar Application), credencial embutida |
 
 Mudança no Shared afeta todos os consumidores: alterar com critério. Tipo usado por mais de uma camada ou processo nasce no Shared.
 
@@ -99,7 +105,7 @@ Sem declaração nos dois lugares, o teste falha. **Lógica usada por dois hosts
 
 ### Teste de arquitetura obrigatório
 
-Em `tests/<Produto>.Architecture.Tests`, falhando o build. Criar **junto com a solution**, não depois. Exemplo em `exemplo-teste-arquitetura.md`. Valida:
+Em `08-tests/<Produto>.Architecture.Tests`, falhando o build. Criar **junto com a solution**, não depois. Exemplo em `exemplo-teste-arquitetura.md`. Valida:
 1. a tabela de referências acima;
 2. Shared sem nenhuma `ProjectReference`;
 3. Shared só com pacotes da lista permitida (seção 5);

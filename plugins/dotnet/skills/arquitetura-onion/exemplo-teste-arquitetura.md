@@ -1,6 +1,6 @@
 # Exemplo: teste de arquitetura (xUnit + NetArchTest)
 
-Carregar sob demanda ao criar `tests/<Produto>.Architecture.Tests`. É **modelo em texto**: adaptar nomes ao produto. Pacote (`NetArchTest.Rules`) só é instalado com pedido do usuário.
+Carregar sob demanda ao criar `08-tests/<Produto>.Architecture.Tests`. É **modelo em texto**: adaptar nomes ao produto. Pacote (`NetArchTest.Rules`) só é instalado com pedido do usuário.
 
 O projeto de teste referencia os projetos que valida. Cada regra falha o build com mensagem que diz **o que** violou.
 

@@ -68,7 +68,7 @@ Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if command -v pwsh >/dev/nul
 
 | Skill | Invocação | Descrição |
 |---|---|---|
-| `arquitetura-onion` | automática + `/arquitetura-onion` | Padrão de arquitetura para backend .NET — pastas de solution numeradas por camada (01-api a 07-shared, mais tests/ e tools/) com Shared como shared kernel leve (entidades, enums e DTOs; direção api → application → domain → infra), allowlist de consumo por host, teste de arquitetura obrigatório, regras de fila e contrato, variante enxuta Domain/Contracts para projeto pequeno, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade. Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend ou revisar onde um código deve ficar. |
+| `arquitetura-onion` | automática + `/arquitetura-onion` | Padrão de arquitetura para backend .NET — pastas de solution numeradas por camada (01-api a 07-shared, 08-tests e 09-tools, as 9 pastas sempre, vazias com README) com Shared como shared kernel leve (entidades, enums e DTOs; direção api → application → domain → infra), allowlist de consumo por host, teste de arquitetura obrigatório, regras de fila e contrato, variante enxuta Domain/Contracts para projeto pequeno, convenções de nome, filtros tipados e a fatia vertical de uma funcionalidade. Use ao criar projeto .NET novo, adicionar módulo/funcionalidade de backend, revisar onde um código deve ficar, ou quando o usuário pedir para aplicar/adotar a estrutura numerada (pastas 01-api a 07-shared, .slnx com pastas de solução) em um projeto .NET existente. |
 
 ### Plugin `angular`
 
