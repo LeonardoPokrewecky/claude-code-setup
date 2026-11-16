@@ -1,5 +1,7 @@
 # PLANO — Plugin workers (v4)
 
+> **Proposta experimental.** Não faz parte do que é instalado nem do fluxo atual do pacote. Cada fase só começa se a anterior provar economia real de tokens (portão da Fase 0). Pendências gerais: [docs/pendencias.md](../docs/pendencias.md).
+
 claude-code-setup · 2026-11-10
 
 ## Plano por fases (leia primeiro)

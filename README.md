@@ -26,6 +26,9 @@ claude-code-setup/
 ├── profiles/unix/settings.json       ← sandbox para macOS/Linux/WSL2
 ├── project-templates/                ← camadas de projeto (settings, regras por caminho, devcontainer)
 ├── scripts/                          ← merge-settings, instalar-arquivos, gerar-docs
+├── install/                          ← instalação (guia canônico e instalar.ps1)
+├── docs/pendencias.md                ← backlog e pendências de validação
+├── workers/PLANO.md                  ← proposta experimental (não instalada)
 └── tests/                            ← Pester 5+: hook, scripts, estrutura, conteúdo
 ```
 
@@ -43,71 +46,13 @@ Os plugins `dotnet` e `angular` ficam desligados por padrão: a camada de projet
 
 ## 2. Instalação
 
-> Guia dedicado, com passo guiado por script (`install/instalar.ps1`), migração, backups e solução de problemas: [install/README.md](install/README.md).
+Procedimento completo (pré-requisitos, caminho guiado e manual, migração da versão 1, validação, atualizar, desinstalar, recuperar e problemas comuns): **[install/README.md](install/README.md)**, fonte única. Nada aqui repete esses passos.
 
-Pré-requisitos: Git (no Windows, **Git for Windows**: o hook roda no Git Bash), Claude Code recente (validado com 2.1.319), PowerShell 5.1 ou 7 (`pwsh` em macOS/Linux).
-
-**PowerShell 7 (`pwsh`) é obrigatório em macOS/Linux:** os scripts, o hook de segredos e os testes são `.ps1`. Instale antes de começar:
-```bash
-brew install --cask powershell          # macOS
-# Linux: https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux
-pwsh -v                                  # confira
-```
-Sem `pwsh`, o plugin `base` instala, mas o hook de segredos não roda: a ponte `run-hook.sh` passa a **pedir confirmação em todo comando Bash**, e a leitura de `.env` via `cat` deixa de ser bloqueada. No Windows só com PowerShell 5.1 (sem `pwsh`), troque `pwsh -NoProfile -File` por `powershell -ExecutionPolicy Bypass -File` nos comandos abaixo.
-
-Abra o PowerShell **na pasta deste repositório**:
+Início rápido, na pasta do clone (Git, Claude Code e PowerShell; `pwsh` é obrigatório em macOS/Linux):
 ```powershell
-$repo = (Resolve-Path .).Path
-$cl   = Join-Path $(if ($env:USERPROFILE) { $env:USERPROFILE } else { $HOME }) '.claude'
+pwsh -NoProfile -File install/instalar.ps1 -SoSimular   # só mostra o que mudaria; não grava
+pwsh -NoProfile -File install/instalar.ps1              # guiado: mostra o dry-run e pergunta antes de gravar
 ```
-
-**Passo 1 — Arquivo da máquina** (só se não existir): copie `core/maquina.example.md` para `~/.claude/maquina.md` e preencha pastas, clone e projetos.
-```powershell
-New-Item -ItemType Directory -Force $cl | Out-Null   # Mac/Linux novo: ~/.claude ainda não existe
-if (-not (Test-Path "$cl/maquina.md")) { Copy-Item "$repo/core/maquina.example.md" "$cl/maquina.md" }
-```
-
-**Passo 2 — Plugins** (no Claude Code, ou no shell com `claude plugin ...`):
-```text
-/plugin marketplace add LeonardoPokrewecky/claude-code-setup     (ou o caminho local do clone)
-/plugin install base@kit-dev-ia
-/plugin install dotnet@kit-dev-ia     (fica desligado; a camada dotnet liga por projeto)
-/plugin install angular@kit-dev-ia    (fica desligado; a camada angular liga por projeto)
-```
-
-**Passo 3 — CLAUDE.md global e Explore** (antes deste passo, mova regras de projeto/cliente do seu CLAUDE.md atual para o repositório daquele projeto: o arquivo é substituído inteiro, com backup):
-```powershell
-pwsh -NoProfile -File "$repo/scripts/instalar-arquivos.ps1" -DryRun
-pwsh -NoProfile -File "$repo/scripts/instalar-arquivos.ps1" -Confirmar <código>
-```
-
-**Passo 4 — Settings** (permissões, modelo, marketplace). Em macOS/Linux/WSL2, acrescente `-Perfil unix` para ligar o sandbox (exige `bubblewrap` e `socat` no Linux):
-```powershell
-pwsh -NoProfile -File "$repo/scripts/merge-settings.ps1" -DryRun -ManterEscalares
-pwsh -NoProfile -File "$repo/scripts/merge-settings.ps1" -Confirmar <código> -ManterEscalares
-```
-Leia cada **ALERTA**: `allow` e marketplace novos aparecem de propósito; um alerta inesperado indica alteração indevida no pacote. Sem `-ManterEscalares`, o pacote define `model` = `sonnet` e `advisorModel` = `opus` (advisor: experimental, só Anthropic API).
-
-Opções do `merge-settings.ps1`:
-- O merge **adiciona**: objetos se mesclam, listas viram união; valor escalar do pacote sobrescreve o seu (`SOBRESCREVE` no dry-run), a menos que use **`-ManterEscalares`** (`MANTIDO`).
-- **`-Remover`** tira o que o pacote não remove sozinho: `-Remover env.CLAUDE_CODE_SUBAGENT_MODEL` (apaga a chave) ou `-Remover 'permissions.allow[]=Bash(winget:*)'` (tira um item); vários itens separados por vírgula. Remover `deny`, `ask` ou hook gera **ALERTA**.
-- **`-Perfil unix`** soma `profiles/unix/settings.json`. **`-Layers a,b -Target <repo>/.claude/settings.json`** aplica camadas de projeto.
-- Sem mudança no resultado, nada é gravado; estrutura inválida (tipo errado em `permissions`, `env`, `enabledPlugins`, `hooks`, `sandbox`) é recusada antes de gravar; valores com nome de segredo aparecem como `***`.
-- A opção `-HookShell` da versão 1 saiu: o hook agora escolhe `pwsh`/`powershell` sozinho.
-
-**Passo 5 — Validar** (feche e abra o Claude Code):
-| Teste | Esperado |
-|---|---|
-| "rode `echo .env`" (Bash e PowerShell) | bloqueado pelo hook |
-| "rode `git -C . push`" | pede confirmação |
-| "rode `dotnet --version`" e depois `dotnet test` num projeto | `dotnet test` roda sem pedir |
-| "leia `~/.ssh/config`" | negado |
-| `/plugin` | `base` ligado; `context7` e `security-guidance` ativos; nenhum terceiro inesperado |
-| `/agents` | `Explore` (usuário) + agentes `base:*` |
-| `/context` | anotar o total (compare com a medição do pacote) |
-
-### Migração da versão 1 (arquivos copiados em `~/.claude`)
-Faça o Passo 2 **antes** dos Passos 3 e 4. O `instalar-arquivos.ps1` lista como **LEGADO** as skills, os agentes e o hook antigos com o mesmo nome e os move para `~/.claude/backups/instalar-*/legado/`. O `merge-settings.ps1` remove do settings o hook antigo (ALERTA "proteção sai"), porque ele agora vem do plugin.
 
 ---
 
@@ -176,9 +121,8 @@ Skills de plugin também respondem com prefixo (`/base:revisar`). Desktop e CLI 
 
 ## 6. Atualizar, desinstalar e recuperar
 
-- **Atualizar:** `git pull` no clone; `claude plugin marketplace update kit-dev-ia` e `claude plugin update base@kit-dev-ia` (o `version` do `plugin.json` fixa a versão: suba-o a cada mudança publicada); `/reload-plugins` na sessão aberta; depois rodar de novo os Passos 3 e 4 (o dry-run mostra só o que mudou).
-- **Desinstalar:** `/plugin uninstall base@kit-dev-ia`, `dotnet@kit-dev-ia` e `angular@kit-dev-ia`; `claude plugin marketplace remove kit-dev-ia`; restaurar `~/.claude/CLAUDE.md` e `settings.json` do backup.
-- **Recuperar:** `settings.json` → `~/.claude/settings.json.bak-AAAAMMDD-HHmmss`; CLAUDE.md, agentes e legado → `~/.claude/backups/instalar-*/`. Copie de volta o arquivo desejado.
+Em [install/README.md, seção 6](install/README.md#6-atualizar-desinstalar-e-recuperar). Em resumo: `git pull`, atualizar o marketplace e os plugins, `/reload-plugins` e repetir os Passos 3 e 4; os backups ficam em `~/.claude/settings.json.bak-*` e `~/.claude/backups/instalar-*/`.
+
 
 ---
 
@@ -225,27 +169,4 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 
 ## 10. Pendências
 
-- [ ] Validar numa sessão real (Passo 5) e medir `/context` antes × depois.
-- [x] Executar o CI (push) para PowerShell 7 e Linux: passou (PR #3, 09/11/2026; Windows PowerShell 5.1, PowerShell 7 e Ubuntu).
-- [x] Evals criados e rodados para `/blueprint`, `/revisar` e `/alterar-dados` (7 casos, todos aprovados na última rodada).
-- [ ] Perfil de CI e template de CI com `anthropics/claude-code-action` (sem caso real).
-- [ ] Validar a seção IIS do `/deploy-checklist` e a camada `devcontainer` em projeto real.
-- [ ] Validar `-Perfil unix` numa máquina Linux (roteiro em `project-templates/devcontainer/README.md`, seção "Validar o sandbox no Linux").
-- [ ] Ideia futura: trilha de auditoria com cadeia de hash (cada registro guarda o hash do anterior) para `/alterar-dados` e `/deploy-checklist`; detecta edição no meio do arquivo, não prova autoria.
-- [x] Evals antigos rodados em 2026-11-14 (ver seção 9).
-- [ ] Revisar o conteúdo das skills novas de segurança e dados (`autenticacao-e-sessao`, `endurecimento-de-infraestrutura`, `resposta-a-incidente`, `modelagem-dados`, `integracoes`, `escolha-de-banco-e-capacidade`) com a lente `seguranca` e conferir recomendações contra fontes oficiais (OWASP, docs da Microsoft e do PostgreSQL) antes de publicar.
-- [ ] Criar evals para as skills novas (sem eval hoje).
-- [ ] Avaliar dividir o plugin `base` (39 skills) em plugins temáticos (segurança, QA e design, produto) e complementar `dotnet`/`angular` com autenticação, EF/índices e o lado de interface.
-- [ ] Skills de marketing e SEO (Luna, Lira, Rank do levantamento externo): decidir entre plugin opcional próprio ou o `marketingskills` externo.
-- [ ] Fixar `marketingskills` por SHA, se o schema aceitar.
-- [x] `Auditoria LGPD.pdf` (material de terceiro) removido da árvore em 2026-11-14; a skill `/lgpd-audit` agora se baseia em fontes oficiais.
-- [ ] O PDF **continua no histórico público do Git** (desde o primeiro commit): decidir entre manter, reescrever o histórico (`git filter-repo` + push forçado, invalida clones) ou deixar o repositório privado.
-- [x] Arquivo próprio de fontes oficiais da LGPD por projeto (`referencias/lgpd-fontes-oficiais.md` na pasta de documentação, fora do repositório), válido por 30 dias; `/lgpd-audit` usa sem pesquisar dentro do prazo, pergunta antes de atualizar quando vence e `/lgpd-audit atualizar-fontes` atualiza a pedido. Modelo em `plugins/base/skills/lgpd-audit/fontes-modelo.md`.
-- [ ] Rodar uma vez `/lgpd-audit atualizar-fontes` num projeto de teste (usa rede; só com a sua autorização) e registrar o resultado.
-- [ ] Validar `desenvolvimento-de-interfaces` e `/inspecao-visual` num frontend real com a camada `playwright` (nomes das ferramentas `browser_*` do MCP, captura, console e rede) e criar evals para elas.
-
-### Pendências de validação
-- `echo .env` bloqueado pelo hook do plugin: confirmar numa sessão recarregada (`/reload-plugins`); o script em si bloqueia o caso.
-- Passo 5 do README (`git push` pede confirmação, `/plugin`, `/agents`, `/context`): conferir na interface após recarregar.
-- Frontend (projeto Angular de exemplo): `npm test` com ChromeHeadless passou, 31/31 testes, em 06/11/2026.
-- macOS, Linux/WSL2 e sandbox (`-Perfil unix`) continuam não testados; o devcontainer foi testado com a CLI (build, isolamento, volume), falta a autenticação e o uso em projeto real (tabela da seção 7).
+Backlog, ideias futuras e pendências de validação: [docs/pendencias.md](docs/pendencias.md). O plano experimental de workers fica em [workers/PLANO.md](workers/PLANO.md) (não faz parte do que é instalado).

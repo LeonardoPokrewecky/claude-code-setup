@@ -1,6 +1,6 @@
 # Instalador guiado do claude-code-setup. Veja install/README.md.
 #
-# Este script NAO inventa um caminho novo: ele chama, na ordem, os mesmos comandos do README (Passos 1 a 4) e
+# Este script NAO inventa um caminho novo: ele chama, na ordem, os mesmos comandos do install/README.md (Passos 1 a 4) e
 # mantem a regra do pacote: cada gravacao em ~/.claude passa por DRY-RUN -> revisao sua -> -Confirmar <codigo>.
 # O codigo e lido da saida do dry-run, mas so e usado depois que voce responde "s".
 #
