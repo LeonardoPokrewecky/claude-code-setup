@@ -1,6 +1,6 @@
 # Referência: regras de sessão e rede em SPA Angular
 
-Carregar sob demanda ao mexer em autenticação no cliente, interceptors, guards, busca ou publicação. Regras inspiradas no agente Master (`spa-frontend`), reescritas aqui. Modelo de autenticação (cookie, JWT, OIDC): `/autenticacao-e-sessao`. Estados de tela e componentes: `/componentes-e-estados`.
+Carregar sob demanda ao mexer em autenticação no cliente, interceptors, guards, busca ou publicação. Modelo de autenticação (cookie, JWT, OIDC): `/autenticacao-e-sessao`. Estados de tela e componentes: `/componentes-e-estados`.
 
 ## 1. Interceptor que desembrulha a resposta
 
