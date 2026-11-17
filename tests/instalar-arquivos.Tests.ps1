@@ -9,8 +9,11 @@ BeforeAll {
         # Linha: saída numa linha só (o pwsh quebra mensagens de erro na largura do console).
         [pscustomobject]@{ Texto = $saida; Linha = ($saida -replace '\s*\r?\n\s*(\|\s*)?', ' '); Codigo = $(if ($saida -match '-Confirmar ([0-9a-f]{12})') { $Matches[1] }) }
     }
+    # Pastas temporárias criadas pelos testes; o AfterAll apaga todas.
+    $script:criadas = New-Object Collections.Generic.List[string]
     function New-Destino {
         $d = Join-Path ([IO.Path]::GetTempPath()) "inst-teste-$([guid]::NewGuid().ToString('n'))"
+        $script:criadas.Add($d)
         foreach ($p in 'skills/revisar', 'skills/minha-skill', 'agents', 'hooks') { New-Item -ItemType Directory -Force -Path (Join-Path $d $p) | Out-Null }
         Set-Content -LiteralPath (Join-Path $d 'skills/revisar/SKILL.md') -Value 'versao 1'
         Set-Content -LiteralPath (Join-Path $d 'skills/minha-skill/SKILL.md') -Value 'minha'
@@ -19,6 +22,10 @@ BeforeAll {
         Set-Content -LiteralPath (Join-Path $d 'CLAUDE.md') -Value 'regras antigas'
         $d
     }
+}
+
+AfterAll {
+    foreach ($d in $script:criadas) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }
 }
 
 Describe 'instalar-arquivos.ps1' {

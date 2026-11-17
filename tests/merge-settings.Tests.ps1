@@ -12,8 +12,11 @@ BeforeAll {
         [pscustomobject]@{ Texto = $saida; Linha = ($saida -replace '\s*\r?\n\s*(\|\s*)?', ' '); Codigo = $(if ($saida -match '-Confirmar ([0-9a-f]{12})') { $Matches[1] }) }
     }
 
+    # Pastas temporárias criadas pelos testes; o AfterAll apaga todas.
+    $script:criadas = New-Object Collections.Generic.List[string]
     function New-Alvo {
         $dir = Join-Path ([IO.Path]::GetTempPath()) "merge-teste-$([guid]::NewGuid().ToString('n'))"
+        $script:criadas.Add($dir)
         New-Item -ItemType Directory -Path $dir | Out-Null
         $alvo = Join-Path $dir 'settings.json'
         $inicial = @'
@@ -28,6 +31,10 @@ BeforeAll {
         [IO.File]::WriteAllText($alvo, $inicial, $script:utf8)
         $alvo
     }
+}
+
+AfterAll {
+    foreach ($d in $script:criadas) { Remove-Item -LiteralPath $d -Recurse -Force -ErrorAction SilentlyContinue }
 }
 
 Describe 'merge-settings.ps1' {
