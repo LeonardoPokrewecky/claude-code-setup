@@ -42,6 +42,7 @@
 | `/project-bootstrap` | Prepara um projeto para o ambiente Claude Code (também automática) |
 | `/referencias-visuais` | Pesquisa referências de interface sob demanda |
 | `/regressao-e-smoke` | Define e mantém uma verificação rápida pós-publicação |
+| `/responder-revisao` | Trata os comentários de revisão de um PR |
 | `/resposta-a-incidente` | Roteiro de resposta a incidente em andamento |
 | `/revisar` | Revisão somente leitura por lentes |
 | `/session-handoff` | Gera um resumo de passagem de bastão quando uma tarefa vai continuar em outra… |

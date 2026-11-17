@@ -45,7 +45,7 @@ Diff que toca segurança, LGPD ou arquitetura: recomendar sessão Opus se a atua
 1. `git fetch origin <nome>` (pede confirmação); diff `git diff <base>...origin/<nome>` (sempre `origin/` explícito).
 2. Escopo: só o que a branch mudou. Trecho igual ao da base (`git show <base>:<arquivo>`) é pré-existente e não é achado — exceto correção incompleta (o mesmo padrão corrigido em outro ponto do diff e este ficou para trás).
 3. Linha do achado: `git show origin/<nome>:<arquivo> | grep -n "<trecho>"`, nunca pelos marcadores `@@`.
-4. Build isolado: `git worktree add <fora-do-repo>/_wt_<nome> origin/<nome>`, buildar só o tocado, `git worktree remove ... --force` ao fim.
+4. Build isolado: `git worktree add <fora-do-repo>/_wt_<nome> origin/<nome>`, buildar só o tocado, `git worktree remove ... --force` ao fim. Se algum projeto referencia outro por caminho relativo (`..\<NomeDoRepo>\...`), a última pasta do worktree tem o nome do repositório (`_wt_<nome>/<NomeDoRepo>`): com outro nome, o build compila contra o checkout principal e passa sem ter compilado a branch.
 
 ## 4. Antes de reportar
 Tentar **refutar** cada achado (alcançável? pré-existente? algo a jusante neutraliza?) e marcar **confirmado** ou **plausível**.

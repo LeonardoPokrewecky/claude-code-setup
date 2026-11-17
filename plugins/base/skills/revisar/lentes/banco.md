@@ -1,6 +1,6 @@
 # Lente: banco de dados (só leitura + plano)
 
-- Migration: reversível? Trava tabela grande (lock)? Ordem com o deploy do código (coluna nova antes do código que a lê)?
+- Migration: reversível? Trava tabela grande (lock)? Ordem com o deploy do código (coluna nova antes do código que a lê)? Migration gerada com alterações não pedidas (dezenas de `AlterColumn` em tabelas não tocadas) indica configuração de design-time diferente da de runtime (startup project, switches do provedor): descartar e gerar de novo.
 - Nome real de coluna/campo (mapeamento EF, `[BsonElement]`, `INFORMATION_SCHEMA.COLUMNS`) igual ao usado em SQL/consulta manual.
 - Índice para o novo filtro/ordenação; índice único condicional válido para o banco (ex.: Mongo `partialFilterExpression` não aceita `$ne`).
 - Índice único em campo **opcional** precisa de filtro parcial (`WHERE campo IS NOT NULL`; Mongo: condição de tipo, pois existência também casa com nulo); senão dois registros sem o campo colidem.

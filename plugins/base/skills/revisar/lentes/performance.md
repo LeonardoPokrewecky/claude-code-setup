@@ -2,6 +2,7 @@
 
 - N+1: consulta dentro de laço; carregamento preguiçoso em listagem.
 - Consulta sem índice, sem paginação ou carregando a tabela inteira na memória em vez de filtrar no banco.
+- EF Core: nunca `Task.WhenAll` sobre o mesmo `DbContext` (não é thread-safe); consulta paralela exige escopo e contexto por tarefa — e, se o contexto é resolvido por `AsyncLocal`, também `ExecutionContext.SuppressFlow()`.
 - Alocação/memória: coleção grande copiada, string concatenada em laço, stream lido inteiro sem necessidade.
 - Chamadas repetidas ao mesmo serviço/endpoint; ausência de cache onde o dado é estável (ou cache sem invalidação).
 - Frontend: re-renderização desnecessária, detecção de mudança disparada em excesso, bundle maior por import inteiro de biblioteca.

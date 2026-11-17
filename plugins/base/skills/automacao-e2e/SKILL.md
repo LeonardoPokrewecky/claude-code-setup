@@ -32,6 +32,9 @@ Não criar teste artificial só para aumentar a contagem.
 ## 3. Estabilidade
 - Seletor por papel/rótulo acessível ou `data-testid`; nunca por classe de estilo ou posição.
 - Esperar por condição observável (elemento, resposta de rede), nunca por `sleep` fixo.
+- Ambiente local com certificado autoassinado: `ignoreHTTPSErrors` no contexto; sem isso toda chamada à API é bloqueada e o sintoma é só timeout de seletor.
+- Registrar sempre `console.error` e respostas HTTP ≥ 400 da página: separam "seletor errado" de "API recusou". Antes de culpar o front, confirmar que a API no ar é o build novo.
+- Depois de selecionar opção em lista, ler a opção que ficou de fato selecionada: valor serializado igual entre opções (`[object Object]`) ou rótulo com espaços faz a seleção errar sem erro.
 - Cada teste independente: cria seus dados e os limpa; sem ordem entre testes.
 - Dado sintético e determinístico; relógio e serviços externos simulados.
 - Verificar o **resultado visível ao usuário**, não detalhes de implementação; incluir caminho de erro e estados vazio/carregando.
