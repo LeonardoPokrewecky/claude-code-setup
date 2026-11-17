@@ -150,14 +150,31 @@ Describe 'Core e settings' {
 }
 
 Describe 'Documentação' {
-    It 'componentes.md gerado está atualizado (rode scripts/gerar-docs.ps1)' {
-        $tmp = Join-Path ([IO.Path]::GetTempPath()) "componentes-$([guid]::NewGuid().ToString('n')).md"
+    It 'componentes.md e comandos.md gerados estão atualizados (rode scripts/gerar-docs.ps1)' {
+        $id = [guid]::NewGuid().ToString('n')
+        $tmp = Join-Path ([IO.Path]::GetTempPath()) "componentes-$id.md"
+        $tmpComandos = Join-Path ([IO.Path]::GetTempPath()) "comandos-$id.md"
         $ps = if ($PSVersionTable.PSEdition -eq 'Core') { 'pwsh' } else { 'powershell' }
-        & $ps -NoProfile -ExecutionPolicy Bypass -File (Join-Path $raiz 'scripts/gerar-docs.ps1') -Saida $tmp | Out-Null
-        $gerado = [IO.File]::ReadAllText($tmp) -replace '\r\n', "`n"
-        $commitado = [IO.File]::ReadAllText((Join-Path $raiz 'plugins/base/skills/env-guide/componentes.md')) -replace '\r\n', "`n"
-        Remove-Item -LiteralPath $tmp -Force
-        $commitado | Should -Be $gerado
+        # As duas saídas vão para a pasta temporária: o teste nunca grava nos arquivos commitados.
+        & $ps -NoProfile -ExecutionPolicy Bypass -File (Join-Path $raiz 'scripts/gerar-docs.ps1') -Saida $tmp -SaidaComandos $tmpComandos | Out-Null
+        try {
+            foreach ($par in @(@($tmp, 'plugins/base/skills/env-guide/componentes.md'), @($tmpComandos, 'plugins/base/skills/comandos/comandos.md'))) {
+                $gerado = [IO.File]::ReadAllText($par[0]) -replace '\r\n', "`n"
+                $commitado = [IO.File]::ReadAllText((Join-Path $raiz $par[1])) -replace '\r\n', "`n"
+                $commitado | Should -Be $gerado -Because "$($par[1]) desatualizado"
+            }
+        } finally { Remove-Item -LiteralPath $tmp, $tmpComandos -Force -ErrorAction SilentlyContinue }
+    }
+
+    It 'comandos.md lista toda skill uma vez, com resumo de 1 a 80 caracteres' {
+        $linhas = @([IO.File]::ReadAllLines((Join-Path $raiz 'plugins/base/skills/comandos/comandos.md'), $script:utf8) | Where-Object { $_ -match '^\| `/' })
+        $nomes = @($linhas | ForEach-Object { ([regex]::Match($_, '^\| `/([^`]+)`')).Groups[1].Value })
+        $skills = @(Get-ChildItem -LiteralPath (Join-Path $raiz 'plugins') -Recurse -Filter SKILL.md | ForEach-Object { (Get-Front $_.FullName)['name'] })
+        ($nomes | Sort-Object) -join ',' | Should -Be (($skills | Sort-Object) -join ',')
+        foreach ($l in $linhas) {
+            $resumo = (($l -split '\|')[2]).Trim() -replace ' \(também automática\)$', ''
+            $resumo.Length | Should -BeIn (1..80) -Because "resumo em: $l"
+        }
     }
 
     It 'links relativos de <Rel> apontam para arquivos que existem' -ForEach $markdowns {

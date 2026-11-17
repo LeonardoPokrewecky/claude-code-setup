@@ -5,7 +5,7 @@ Ligado em todo projeto. Contém:
 - **Skills** genéricas (revisão por lentes, planejamento, alteração de dados, deploy, LGPD, handoff e outras) e **agentes** (`revisor`, `implementer-sonnet`, `test-validator-haiku`, `researcher-haiku`, `documentation-haiku`).
 - **Evals** (`evals/`): `claude plugin eval ./plugins/base` (chama o modelo).
 
-Lista completa e descrições: [skills/env-guide/componentes.md](skills/env-guide/componentes.md) (gerada). Instalação e limitações: README do repositório.
+Lista completa e descrições: [skills/env-guide/componentes.md](skills/env-guide/componentes.md) (gerada). Lista curta, um resumo por comando: `/comandos` ([skills/comandos/comandos.md](skills/comandos/comandos.md), gerada). Instalação e limitações: README do repositório.
 
 Instalação (Claude Code 2.1.275 ou mais recente; o repositório é privado, então exige credencial Git com acesso):
 ```

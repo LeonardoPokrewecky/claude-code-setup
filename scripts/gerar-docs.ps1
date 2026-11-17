@@ -1,11 +1,13 @@
 ﻿# Gera o inventario do pacote a partir dos proprios arquivos (fonte unica): plugins, skills, agentes, camadas,
 # perfis e contagem de permissoes. Saida padrao: plugins/base/skills/env-guide/componentes.md (lido pela skill
 # env-guide sob demanda e linkado pelo README). Nao editar a saida a mao: rodar este script e commitar.
-# O teste tests/estrutura.Tests.ps1 falha se a saida commitada estiver desatualizada.
-param([string]$Saida)
+# Gera tambem a lista curta de comandos (plugins/base/skills/comandos/comandos.md), lida pela skill /comandos.
+# O teste tests/estrutura.Tests.ps1 falha se alguma saida commitada estiver desatualizada.
+param([string]$Saida, [string]$SaidaComandos)
 $ErrorActionPreference = 'Stop'
 $raiz = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).ProviderPath
 if (-not $Saida) { $Saida = Join-Path $raiz 'plugins/base/skills/env-guide/componentes.md' }
+if (-not $SaidaComandos) { $SaidaComandos = Join-Path $raiz 'plugins/base/skills/comandos/comandos.md' }
 $utf8 = New-Object Text.UTF8Encoding $false
 
 function Read-Json([string]$f) { [IO.File]::ReadAllText($f, $utf8) | ConvertFrom-Json }
@@ -23,6 +25,16 @@ function Sort-Ordinal {
     [object[]]$itens = @($input)
     [Array]::Sort($itens, [Comparison[object]] { param($a, $b) [string]::CompareOrdinal($a.Name, $b.Name) })
     $itens
+}
+# Resumo de uma linha para o /comandos: começo da description (até " (", " — ", ": ", ", com " ou fim de frase),
+# com no máximo $Limite caracteres, cortado na última palavra inteira e terminado em reticências.
+function Get-ResumoSkill([string]$Descricao, [int]$Limite = 80) {
+    $r = ($Descricao -split ' \(| — |(?<=\.)\s|, com |: ', 2)[0].Trim().TrimEnd('.', ',', ';', ' ')
+    if ($r.Length -le $Limite) { return $r }
+    $corte = $r.Substring(0, $Limite - 1)
+    $espaco = $corte.LastIndexOf(' ')
+    if ($espaco -gt 0) { $corte = $corte.Substring(0, $espaco) }
+    $corte.TrimEnd(',', ';', ' ') + [char]0x2026
 }
 
 $o = New-Object Collections.Generic.List[string]
@@ -124,3 +136,30 @@ $texto = ($o -join "`n") + "`n"
 New-Item -ItemType Directory -Force -Path (Split-Path $Saida) | Out-Null
 [IO.File]::WriteAllText($Saida, $texto, $utf8)
 Write-Host "OK: $Saida"
+
+# Lista curta para a skill /comandos: uma tabela por plugin, comando e resumo de uma linha.
+$c = New-Object Collections.Generic.List[string]
+$c.Add('# Comandos do pacote (gerado)')
+$c.Add('')
+$c.Add('> Gerado por `scripts/gerar-docs.ps1` a partir das skills. Não editar à mão. Lido pela skill `/comandos`.')
+$c.Add('> `(também automática)`: o Claude também usa a skill sozinho quando a tarefa pede.')
+foreach ($p in $mkt.plugins) {
+    $dir = Join-Path $raiz ($p.source -replace '^\./', '')
+    $skills = @(Get-ChildItem -LiteralPath (Join-Path $dir 'skills') -Directory -ErrorAction SilentlyContinue | Sort-Ordinal)
+    if (-not $skills) { continue }
+    $porProjeto = $p.PSObject.Properties['defaultEnabled'] -and -not $p.defaultEnabled
+    $c.Add('')
+    $c.Add("## Plugin ``$($p.name)``$(if ($porProjeto) { ' (ligado por projeto)' })")
+    $c.Add('')
+    $c.Add('| Comando | O que faz |')
+    $c.Add('|---|---|')
+    foreach ($s in $skills) {
+        $h = Get-Front (Join-Path $s.FullName 'SKILL.md')
+        $auto = if ($h['disable-model-invocation'] -ne 'true') { ' (também automática)' } else { '' }
+        $c.Add("| ``/$($h['name'])`` | $(Format-Celula (Get-ResumoSkill $h['description']))$auto |")
+    }
+}
+$textoComandos = ($c -join "`n") + "`n"
+New-Item -ItemType Directory -Force -Path (Split-Path $SaidaComandos) | Out-Null
+[IO.File]::WriteAllText($SaidaComandos, $textoComandos, $utf8)
+Write-Host "OK: $SaidaComandos"
