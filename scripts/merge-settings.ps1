@@ -69,18 +69,26 @@ function Join-Unique($x, $y) {
 $sobrescritos = New-Object Collections.Generic.List[string]
 $nomeSegredo = '(?i)(token|secret|passw|pwd|apikey|api_key|auth|credential|cookie|bearer|private|connectionstring|key$)'
 
+# Objeto com discriminador "source" (ex.: origem de marketplace: directory usa path, github usa repo). Variantes
+# diferentes nao se fundem campo a campo: o resultado seria um hibrido (directory + repo). O objeto vira valor unico.
+function Test-VarianteDiferente($x, $y) {
+    $sx = $x.PSObject.Properties['source']; $sy = $y.PSObject.Properties['source']
+    $sx -and $sy -and $sx.Value -is [string] -and $sy.Value -is [string] -and $sx.Value -cne $sy.Value
+}
+
 function Merge-Json($a, $b, [string]$caminho) {
     foreach ($p in $b.PSObject.Properties) {
         $cur = $a.PSObject.Properties[$p.Name]
         $aqui = if ($caminho) { "$caminho.$($p.Name)" } else { $p.Name }
         if (-not $cur) { $a | Add-Member -NotePropertyName $p.Name -NotePropertyValue $p.Value; continue }
-        if ($p.Value -is [pscustomobject] -and $cur.Value -is [pscustomobject]) { Merge-Json $cur.Value $p.Value $aqui }
+        $variante = $p.Value -is [pscustomobject] -and $cur.Value -is [pscustomobject] -and (Test-VarianteDiferente $cur.Value $p.Value)
+        if ($p.Value -is [pscustomobject] -and $cur.Value -is [pscustomobject] -and -not $variante) { Merge-Json $cur.Value $p.Value $aqui }
         elseif ($p.Value -is [array] -and $cur.Value -is [array]) { $cur.Value = Join-Unique $cur.Value $p.Value }
         elseif (($cur.Value | ConvertTo-Json -Compress -Depth 30) -ceq ($p.Value | ConvertTo-Json -Compress -Depth 30)) { }
         else {
             $mostrar = { param($v) if ($p.Name -match $nomeSegredo) { '***' } else { $v | ConvertTo-Json -Compress -Depth 30 } }
             $de = & $mostrar $cur.Value; $para = & $mostrar $p.Value
-            if ($ManterEscalares -and $cur.Value -isnot [pscustomobject] -and $cur.Value -isnot [array]) {
+            if ($ManterEscalares -and ($variante -or ($cur.Value -isnot [pscustomobject] -and $cur.Value -isnot [array]))) {
                 $sobrescritos.Add("MANTIDO  $aqui = $de (pacote: $para)")
             } else {
                 $sobrescritos.Add("SOBRESCREVE  $aqui : $de -> $para")

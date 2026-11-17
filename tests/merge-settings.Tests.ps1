@@ -64,6 +64,33 @@ Describe 'merge-settings.ps1' {
         Test-Path "$alvo.bak-*" | Should -BeTrue
     }
 
+    It 'Origem de marketplace de outra variante não vira híbrida (com e sem -ManterEscalares)' {
+        foreach ($manter in $true, $false) {
+            $alvo = New-Alvo
+            $s0 = [IO.File]::ReadAllText($alvo, $script:utf8) | ConvertFrom-Json
+            $s0 | Add-Member -NotePropertyName extraKnownMarketplaces -NotePropertyValue ([pscustomobject]@{
+                'kit-dev-ia' = [pscustomobject]@{ source = [pscustomobject]@{ source = 'directory'; path = 'C:\clone' } } })
+            [IO.File]::WriteAllText($alvo, ($s0 | ConvertTo-Json -Depth 30), $script:utf8)
+            $extra = if ($manter) { @('-ManterEscalares') } else { @() }
+
+            $r = Invoke-Merge $alvo (@('-DryRun') + $extra)
+            $r.Codigo | Should -Not -BeNullOrEmpty
+            Invoke-Merge $alvo (@('-Confirmar', $r.Codigo) + $extra) | Out-Null
+
+            $origem = ([IO.File]::ReadAllText($alvo, $script:utf8) | ConvertFrom-Json).extraKnownMarketplaces.'kit-dev-ia'.source
+            $campos = @($origem.PSObject.Properties.Name | Sort-Object)
+            if ($manter) {
+                $r.Texto | Should -Match 'MANTIDO  extraKnownMarketplaces\.kit-dev-ia\.source ='
+                $origem.source | Should -Be 'directory'
+                $campos | Should -Be @('path', 'source')
+            } else {
+                $r.Texto | Should -Match 'SOBRESCREVE  extraKnownMarketplaces\.kit-dev-ia\.source :'
+                $origem.source | Should -Be 'github'
+                $campos | Should -Be @('repo', 'source')
+            }
+        }
+    }
+
     It 'Hook de outro script no mesmo evento é preservado; só o legado sai' {
         $alvo = New-Alvo
         $s = [IO.File]::ReadAllText($alvo, $script:utf8) | ConvertFrom-Json
