@@ -5,7 +5,8 @@ Contexto: [README.md](../README.md) · instalação e validação: [install/READ
 
 ## Backlog
 
-- [ ] Validar numa sessão real (`install/README.md`, seção 5) e medir `/context` antes × depois.
+- [x] Uso real: o projeto financeiro foi criado com este pacote e o usa desde o início até a versão atual (informado em 17/11/2026; o repositório não está na máquina DEV).
+- [ ] Registrar as evidências da seção 5 do `install/README.md` vindas do projeto financeiro (hook bloqueia, `git push` pede confirmação, `/plugin`, `/agents`) e medir `/context` antes × depois.
 - [x] Executar o CI (push) para PowerShell 7 e Linux: passou (PR #3, 09/11/2026; Windows PowerShell 5.1, PowerShell 7 e Ubuntu).
 - [x] Evals criados e rodados para `/blueprint`, `/revisar` e `/alterar-dados` (7 casos, todos aprovados na última rodada).
 - [ ] Perfil de CI e template de CI com `anthropics/claude-code-action` (sem caso real).

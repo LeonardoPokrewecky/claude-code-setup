@@ -6,3 +6,8 @@ Ligado em todo projeto. Contém:
 - **Evals** (`evals/`): `claude plugin eval ./plugins/base` (chama o modelo).
 
 Lista completa e descrições: [skills/env-guide/componentes.md](skills/env-guide/componentes.md) (gerada). Instalação e limitações: README do repositório.
+
+Instalação (Claude Code 2.1.275 ou mais recente; o repositório é privado, então exige credencial Git com acesso):
+```
+/plugin install base --marketplace LeonardoPokrewecky/claude-code-setup
+```
