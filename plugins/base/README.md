@@ -1,7 +1,7 @@
 # Plugin `base`
 
 Ligado em todo projeto. Contém:
-- **Hook `bloquear-segredos`** (`hooks/`): PreToolUse Bash/PowerShell. O `hooks.json` escolhe `pwsh` ou `powershell` e roda `bloquear-segredos.ps1`; sem PowerShell, `run-hook.sh` pede confirmação. Casos de teste: `tests/casos-hook.psd1` do repositório.
+- **Hook `bloquear-segredos`** (`hooks/`): PreToolUse Bash/PowerShell. O `hooks.json` escolhe o shell (no Windows o `powershell` 5.1 primeiro, que abre mais rápido; fora dele o `pwsh`) e roda `bloquear-segredos.ps1`; sem PowerShell, `run-hook.sh` pede confirmação. Casos de teste: `tests/casos-hook.psd1` do repositório.
 - **Skills** genéricas (revisão por lentes, planejamento, alteração de dados, deploy, LGPD, handoff e outras) e **agentes** (`revisor`, `implementer-sonnet`, `test-validator-haiku`, `researcher-haiku`, `documentation-haiku`).
 - **Evals** (`evals/`): `claude plugin eval ./plugins/base` (chama o modelo).
 

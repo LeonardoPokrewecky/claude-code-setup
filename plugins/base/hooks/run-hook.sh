@@ -4,9 +4,13 @@
 # quando não acha pwsh nem powershell; ele também serve para rodar o hook à mão: sh run-hook.sh < entrada.json.
 # O Claude Code roda hooks em shell form no sh (macOS/Linux) ou no Git Bash (Windows):
 # https://code.claude.com/docs/en/hooks. O stdin (JSON do Claude Code) passa direto para o PowerShell via exec.
-# Prefere pwsh (PowerShell 7, abre mais rápido); no Windows sem pwsh usa o powershell 5.1.
+# No Windows (OS=Windows_NT, herdado pelo Git Bash) prefere o powershell 5.1: abre mais rápido que o pwsh
+# (medido em 17/11/2026: ~400 ms × ~610 ms por comando pelo Git Bash). Fora do Windows prefere o pwsh.
 # Sem nenhum PowerShell: pede confirmação em vez de liberar em silêncio (o hook nunca trava a sessão).
 script="$(dirname "$0")/bloquear-segredos.ps1"
+if [ "$OS" = "Windows_NT" ] && command -v powershell >/dev/null 2>&1; then
+  exec powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$script"
+fi
 if command -v pwsh >/dev/null 2>&1; then
   exec pwsh -NoProfile -NonInteractive -File "$script"
 fi

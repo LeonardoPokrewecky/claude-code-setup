@@ -18,7 +18,11 @@ function Invoke-Hook {
     param(
         [Parameter(Mandatory)][string]$Comando,
         [string]$Hook = (Join-Path $PSScriptRoot '../plugins/base/hooks/bloquear-segredos.ps1'),
-        [switch]$ViaSh
+        [switch]$ViaSh,
+        # Roda direto a ponte run-hook.sh pelo sh (como o fallback do hooks.json ou a execução manual).
+        [switch]$ViaPonte,
+        # Pasta posta no início do PATH do processo (ex.: um pwsh falso para provar qual shell foi escolhido).
+        [string]$PathPrefixo
     )
     $padrao = if ($IsLinux -or $IsMacOS) { 'pwsh' } else { 'powershell' }
     $shell = if ($env:HOOK_SHELL) { $env:HOOK_SHELL } else { $padrao }
@@ -33,11 +37,16 @@ function Invoke-Hook {
         $cmd = $cfg.hooks.PreToolUse[0].hooks[0].command.Replace('${CLAUDE_PLUGIN_ROOT}', $plugin)
         $psi.FileName = Get-ShParaHook
         $psi.Arguments = '-c "' + $cmd.Replace('\', '\\').Replace('"', '\"') + '"'
+    } elseif ($ViaPonte) {
+        $ponte = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '../plugins/base/hooks/run-hook.sh')).ProviderPath -replace '\\', '/'
+        $psi.FileName = Get-ShParaHook
+        $psi.Arguments = "`"$ponte`""
     } else {
         $psi.FileName = $shell
         $psi.Arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$Hook`""
     }
     $psi.UseShellExecute = $false
+    if ($PathPrefixo) { $psi.EnvironmentVariables['PATH'] = $PathPrefixo + [IO.Path]::PathSeparator + $env:PATH }
     $psi.RedirectStandardInput = $true
     $psi.RedirectStandardOutput = $true
     $psi.RedirectStandardError = $true

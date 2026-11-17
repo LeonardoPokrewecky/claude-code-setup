@@ -147,6 +147,7 @@ Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe 
 - **Isolamento é em camadas e cada uma tem limite:** o sandbox e o contêiner reduzem o dano de um comando errado, mas não são barreira contra código hostil (para isso, VM descartável). Ferramenta externa de sandbox (ex.: `ai-jail`) com máscara de arquivo no Linux pode perder a regra se o arquivo for substituído (salvar por outro editor): mantenha segredos em pasta inteira mascarada e fora do repositório.
 - **Falso positivo conhecido:** `git commit -m "... .env ..."` é bloqueado (use `! <comando>`).
 - **Hook que não roda não bloqueia:** JSON inválido ou timeout liberam; falha interna depois do parse pede confirmação; sem PowerShell, a ponte pede confirmação.
+- **O hook custa tempo em todo comando Bash/PowerShell:** no Windows ele usa o PowerShell 5.1 mesmo com o `pwsh` instalado, porque abre mais rápido (medido em 17/11/2026 pelo Git Bash: ~400 ms com o 5.1 × ~610 ms com o `pwsh` 7.7 do winget). Fora do Windows usa o `pwsh`. Depois de atualizar o pacote: `/plugin update` e `/reload-plugins`.
 - **Regras `ask/deny` por texto** não pegam o programa por caminho completo ou dentro de `sh -c` (doc oficial); o sandbox (macOS/Linux/WSL2) é a proteção que não depende do texto.
 - **`appsettings.json` e `appsettings.Development.json` não são protegidos por nome:** mantenha-os sem segredo.
 - **Agentes com Bash (`revisor`, `test-validator-haiku`):** a restrição de comandos é só instrução. Agente de plugin não aceita `hooks` nem `permissionMode` no frontmatter, e `disallowedTools: Bash(...)` remove o Bash inteiro ([doc](https://code.claude.com/docs/en/sub-agents)); valem as regras ask/deny e o hook da sessão.
@@ -158,7 +159,7 @@ Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe 
 
 ## 9. Testes e manutenção
 
-- `Invoke-Pester ./tests -Output Detailed` (Pester 5 ou 6; o Windows PowerShell 5.1 traz o 3.4, então rode com `pwsh`; última execução (17/11/2026, Windows PowerShell 5.1): Pester 6.2.0, 319 aprovados, 0 falhas, 1 ignorado: `Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -SkipPublisherCheck`).
+- `Invoke-Pester ./tests -Output Detailed` (Pester 5 ou 6; o Windows PowerShell 5.1 traz o 3.4, então rode com `pwsh`; última execução (17/11/2026, Windows PowerShell 5.1): Pester 6.2.0, 322 aprovados, 0 falhas, 1 ignorado; com `pwsh` 7.7: 321 aprovados, 0 falhas, 2 ignorados: `Install-Module Pester -MinimumVersion 5.5.0 -Scope CurrentUser -SkipPublisherCheck`).
 - Casos do hook em `tests/casos-hook.psd1`: padrão novo no hook entra com caso novo.
 - Mudou skill, agente, plugin, camada ou perfil? Rode `scripts/gerar-docs.ps1` e commite o `componentes.md` (o teste falha se ficar desatualizado).
 - `claude plugin validate .` e `claude plugin validate ./plugins/<nome>` antes de publicar.

@@ -45,6 +45,16 @@ Describe 'Marketplace e plugins' {
         }
     }
 
+    It 'hook de segredos: no Windows o powershell 5.1 vem antes do pwsh (abre mais rápido)' {
+        $cmd = (Read-Json (Join-Path $raiz 'plugins/base/hooks/hooks.json')).hooks.PreToolUse[0].hooks[0].command
+        $windows = $cmd.IndexOf('[ "$OS" = "Windows_NT" ] && command -v powershell')
+        $windows | Should -BeGreaterOrEqual 0 -Because 'o primeiro ramo testa OS=Windows_NT e o powershell'
+        $windows | Should -BeLessThan $cmd.IndexOf('command -v pwsh')
+        $ponte = [IO.File]::ReadAllText((Join-Path $raiz 'plugins/base/hooks/run-hook.sh'), $script:utf8)
+        $ponte.IndexOf('[ "$OS" = "Windows_NT" ] && command -v powershell') | Should -BeLessThan $ponte.IndexOf('command -v pwsh')
+        $ponte.IndexOf('[ "$OS" = "Windows_NT" ] && command -v powershell') | Should -BeGreaterOrEqual 0
+    }
+
     It 'claude plugin validate passa no marketplace e em cada plugin (quando o CLI existe)' {
         if (-not (Get-Command claude -ErrorAction SilentlyContinue)) { Set-ItResult -Skipped -Because 'CLI claude ausente'; return }
         foreach ($alvo in @('.') + @(Get-ChildItem -LiteralPath (Join-Path $raiz 'plugins') -Directory | ForEach-Object { "plugins/$($_.Name)" })) {
