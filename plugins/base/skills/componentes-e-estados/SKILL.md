@@ -21,7 +21,7 @@ Alvo: `$ARGUMENTS` (sem argumento: perguntar o componente ou a tela). Leitura li
 4. **Sucesso/Dados:** o estado normal, inclusive com muito conteúdo e texto longo.
 5. **Parcial/Offline:** dados antigos, falha de uma parte, ação pendente.
 Formulário: validação junto do campo, envio desabilita o botão (evita duplo envio), confirmação de ação destrutiva.
-Padrões recorrentes, cada um com seus estados: tabela (ordenação, vazio, carregando com esqueleto), paginação, filtro e pesquisa (sem resultado, limpar filtros), modal e menu (abre, fecha com Esc, devolve o foco), notificação (some sozinha só se não for erro), confirmação de ação.
+Padrões recorrentes, cada um com seus estados: tabela (ordenação, vazio, carregando com esqueleto), paginação, filtro e pesquisa (sem resultado, limpar filtros), modal e menu (abre, fecha com Esc, não fecha pelo clique no fundo, devolve o foco), notificação (some sozinha só se não for erro), confirmação de ação.
 
 ## 3. Teste
 Um teste por estado e por variante relevante (ver `/criar-testes`), incluindo foco por teclado e leitor de tela nos fluxos principais. Estados vistos no navegador com a `/inspecao-visual`.

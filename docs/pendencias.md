@@ -25,6 +25,8 @@ Contexto: [README.md](../README.md) · instalação e validação: [install/READ
 - [ ] Rodar uma vez `/lgpd-audit atualizar-fontes` num projeto de teste (usa rede; só com a sua autorização) e registrar o resultado.
 - [ ] Validar `desenvolvimento-de-interfaces` e `/inspecao-visual` num frontend real com a camada `playwright` (nomes das ferramentas `browser_*` do MCP, captura, console e rede) e criar evals para elas.
 - [ ] **Brecha (hipótese, sem WSL na DEV para reproduzir):** no WSL2 sem `pwsh`, o `run-hook.sh` cai no `powershell.exe` do Windows (interop) com caminho Linux no `-File`; o PowerShell não acha o arquivo e sai com código ≠ 0 e ≠ 2, que o Claude Code trata como erro não bloqueante — o comando rodaria sem verificação. Correção provável: só usar `powershell`/`powershell.exe` quando `OS=Windows_NT`; senão, pedir confirmação. Tratar em blueprint próprio (registrado em 17/11/2026).
+- [x] Passo 1 para aposentar um `~/.claude/CLAUDE.md` legado: as regras genéricas que faltavam (deploy, firewall, proxy/CDN, Angular) foram para `deploy-checklist`, `endurecimento-de-infraestrutura`, `componentes-e-estados` e a referência do `angular` (17/11/2026).
+- [ ] Passo 2: levar as proibições sempre ativas e as regras exclusivas de um projeto para o `CLAUDE.md` do repositório dele, e só então trocar o global pelo `core/CLAUDE.md`.
 - [ ] Eval `qual-skill-revisar`: o grader `consultou-guia` (`arm: with-only`) só sai da nota com `--ablation with-without`; com `--ablation none` derruba o caso (0/3 em 17/11/2026, com a resposta correta 3/3). Remover o grader ou rodar a suíte com ablação.
 
 ## Pendências de validação

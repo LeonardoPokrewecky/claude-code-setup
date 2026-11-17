@@ -23,10 +23,13 @@ Com atraso de digitação, usar um **contador de sequência** (ou `switchMap`): 
 - **`index.html` sem cache** (`Cache-Control: no-cache`); só arquivos com hash no nome são imutáveis. Sem isso o usuário continua na versão antiga depois de publicar.
 - **`environment`:** o arquivo versionado costuma estar certo; o **pacote** é que sai errado. Conferir o `apiUrl` do que será publicado (o de desenvolvimento nunca vai para produção). Em cada ambiente, `apiUrl` é o único valor que muda.
 - **Build fora da pasta do código** (`outputPath` próprio, ignorado pelo Git), para não misturar saída com fonte.
+- Configuração `production` com `fileReplacements` e `sourceMap` desligado. Angular 17+: publicar o conteúdo de `dist/<projeto>/browser/` e ajustar o `<base href>` quando o site não estiver na raiz.
+- Projeto existente: `provideZonelessChangeDetection()` só se ele já for zoneless (sem `zone.js` no `package.json` nem nos `polyfills`). Misturar produz tela que não atualiza ou fica presa no carregando só no build de produção.
 
 ## 5. Formulários e diálogos
 
 - Sem `alert`/`confirm` nativos: componente próprio, acessível e testável.
+- Modal não fecha pelo clique no fundo (perde o que foi digitado): só pelo X, pelo Cancelar ou pelo Esc.
 - Rótulo associado a cada campo (`label` com `for`/`id`), mensagem de erro ao lado do campo e botão desabilitado sempre com o motivo visível.
 - Máscara na exibição **e** valor normalizado no envio; campo opcional vazio vai ausente, não como texto vazio.
 
@@ -42,3 +45,4 @@ Token e dado pessoal não vão para URL, `console.log` nem `localStorage` sem de
 - [ ] Busca com contador de sequência
 - [ ] `index.html` sem cache; `apiUrl` do pacote conferido; build fora do código
 - [ ] Sem `alert`/`confirm`; rótulos e mensagens de erro nos campos
+- [ ] `fileReplacements` e `sourceMap` desligado em produção; zoneless só se o projeto já for; modal não fecha pelo fundo

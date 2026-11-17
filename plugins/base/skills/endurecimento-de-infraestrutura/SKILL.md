@@ -11,7 +11,9 @@ Alvo: `$ARGUMENTS` (sem argumento: repositório atual, olhando Dockerfile, compo
 Onde roda (VM/IIS/Linux, container, PaaS, Kubernetes, serverless), o que é público na internet, quem acessa a administração, dados sensíveis/LGPD, proxy/WAF/CDN, CI/CD e quem publica.
 
 ## 2. Checklist (ajustar ao tipo de hospedagem)
-- **Exposição mínima:** só 80/443 públicos; banco, cache, fila e painéis administrativos sem acesso direto da internet (rede privada ou lista de IP); nenhuma porta nova sem justificativa registrada.
+- **Exposição mínima:** só 80/443 públicos; banco, cache, fila e painéis administrativos sem acesso direto da internet (rede privada ou lista de IP); nenhuma porta nova sem justificativa registrada. Serviço interno escuta em `127.0.0.1`, inclusive no Docker (`-p 127.0.0.1:porta:porta`) e em túnel reverso (`-R 127.0.0.1:porta`), nunca em `0.0.0.0`.
+- **Firewall:** regras individuais, nunca `iptables-restore` em produção; testar a conectividade numa segunda sessão antes de fechar a sessão SSH atual. O acesso não depende de lista de IP dinâmico (o IP de origem do cliente muda).
+- **Proxy/CDN:** a origem responde apenas ao proxy. Com o certificado universal do proxy (ex.: Cloudflare), que só cobre um nível, usar subdomínio de um nível (`api-servico.dominio`), não `api.servico.dominio`; com certificado próprio ou avançado, conferir a cobertura.
 - **Acesso administrativo:** SSH/RDP por chave ou MFA, sem senha, sem login direto como root/administrador, contas nominais, acesso removido quando alguém sai.
 - **TLS:** só versões atuais, certificado válido com renovação automática, HTTP redireciona para HTTPS, HSTS.
 - **Cabeçalhos HTTP:** `Strict-Transport-Security`, `Content-Security-Policy`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`; sem cabeçalho que revele versão (`Server`, `X-Powered-By`); CORS com origens explícitas.
