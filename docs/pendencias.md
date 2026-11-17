@@ -19,7 +19,7 @@ Contexto: [README.md](../README.md) · instalação e validação: [install/READ
 - [ ] Skills de marketing e SEO (Luna, Lira, Rank do levantamento externo): decidir entre plugin opcional próprio ou o `marketingskills` externo.
 - [ ] Fixar `marketingskills` por SHA, se o schema aceitar.
 - [x] `Auditoria LGPD.pdf` (material de terceiro) removido da árvore em 2026-11-14; a skill `/lgpd-audit` agora se baseia em fontes oficiais.
-- [ ] O PDF **continua no histórico público do Git** (desde o primeiro commit): decidir entre manter, reescrever o histórico (`git filter-repo` + push forçado, invalida clones) ou deixar o repositório privado.
+- [x] O PDF continua no histórico do Git (commit `8a6ac0a`) e nas refs `refs/pull/N/head` do GitHub, que são só leitura (push forçado não as remove). Decisão em 17/11/2026: **repositório privado**, sem reescrever o histórico (confirmado: a API do GitHub sem login responde 404). Instalar o marketplace exige credencial Git com acesso ao repositório.
 - [x] Arquivo próprio de fontes oficiais da LGPD por projeto (`referencias/lgpd-fontes-oficiais.md` na pasta de documentação, fora do repositório), válido por 30 dias; `/lgpd-audit` usa sem pesquisar dentro do prazo, pergunta antes de atualizar quando vence e `/lgpd-audit atualizar-fontes` atualiza a pedido. Modelo em `plugins/base/skills/lgpd-audit/fontes-modelo.md`.
 - [ ] Rodar uma vez `/lgpd-audit atualizar-fontes` num projeto de teste (usa rede; só com a sua autorização) e registrar o resultado.
 - [ ] Validar `desenvolvimento-de-interfaces` e `/inspecao-visual` num frontend real com a camada `playwright` (nomes das ferramentas `browser_*` do MCP, captura, console e rede) e criar evals para elas.
