@@ -53,3 +53,6 @@ Desktop.ini
 
 # Resultados de claude plugin eval.
 **/evals/results/
+
+# Saida local do Pester.
+testResults.xml
