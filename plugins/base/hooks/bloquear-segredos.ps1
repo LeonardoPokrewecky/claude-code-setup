@@ -4,8 +4,9 @@
 # essa brecha.
 # Entrada: JSON do Claude Code no stdin. Saída: exit 2 + motivo no stderr bloqueia; JSON "ask" no stdout pede
 # confirmação ao usuário; exit 0 sem saída libera.
-# JSON inválido ou sem comando libera (o hook nunca pode travar a sessão). Qualquer outra falha interna pede
-# confirmação (trap abaixo): sem ele, a exceção sairia com código 1, que o Claude Code trata como não bloqueante.
+# JSON válido sem comando libera (nada a verificar). Entrada ilegível (JSON inválido ou vazio) e qualquer outra
+# falha interna pedem confirmação (falha fechada; o trap abaixo cobre o resto): sem ele, a exceção sairia com
+# código 1, que o Claude Code trata como não bloqueante. Não usa exit 2 para não travar a sessão.
 # Defesa por texto do comando: não pega nome montado em variável/concatenação, "cd" seguido de caminho relativo nem
 # curinga "*" sozinho; é camada extra sobre o deny/ask do settings.json (limitações no README).
 $ErrorActionPreference = 'Stop'
@@ -25,11 +26,18 @@ trap { Write-Confirmar "falha interna do hook: $($_.Exception.Message)" }
 [Console]::OutputEncoding = [Text.UTF8Encoding]::new($false)
 try { [Console]::InputEncoding = [Text.UTF8Encoding]::new($false) } catch { }
 
+$falhaEntrada = $false
 try {
-    # PowerShell 5.1 pode entregar o stdin com BOM (U+FEFF); sem o Trim o parse falha e o hook libera tudo.
-    $entrada = [Console]::In.ReadToEnd().TrimStart([char]0xFEFF) | ConvertFrom-Json
-    $comando = [string]$entrada.tool_input.command
-} catch { exit 0 }
+    # PowerShell 5.1 pode entregar o stdin com BOM (U+FEFF); sem o Trim o parse falha.
+    $texto = [Console]::In.ReadToEnd().TrimStart([char]0xFEFF)
+    if ([string]::IsNullOrWhiteSpace($texto)) { $falhaEntrada = $true }
+    else {
+        $entrada = $texto | ConvertFrom-Json
+        $comando = [string]$entrada.tool_input.command
+    }
+} catch { $falhaEntrada = $true }
+# Falha fechada: sem entrada legível o comando não foi verificado; pede confirmação (sem ecoar a entrada).
+if ($falhaEntrada) { Write-Confirmar 'entrada do hook ilegível (JSON inválido ou vazio); o comando não foi verificado' }
 if ([string]::IsNullOrWhiteSpace($comando)) { exit 0 }
 
 # Aspas e escapes no meio do nome (.e""nv, .e`nv, .e^nv) somem antes do teste; testa o original e o normalizado.
