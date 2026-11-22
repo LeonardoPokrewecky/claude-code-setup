@@ -77,6 +77,14 @@ Describe 'Skills' {
         ($h['description'] + ' ' + $h['when_to_use']).Length | Should -BeLessOrEqual 1536 -Because 'limite da listagem de skills'
     }
 
+    It 'links relativos para .md em <Pasta> apontam para arquivos existentes' -ForEach $skills {
+        $texto = [IO.File]::ReadAllText($Arquivo, [Text.Encoding]::UTF8)
+        $dir = Split-Path $Arquivo
+        foreach ($m in [regex]::Matches($texto, '\]\((?!https?:|#|mailto:)([^)#\s]+\.md)(#[^)]*)?\)')) {
+            Test-Path -LiteralPath (Join-Path $dir $m.Groups[1].Value) | Should -BeTrue -Because "link quebrado em $Pasta/SKILL.md: $($m.Groups[1].Value)"
+        }
+    }
+
     It 'skill automática <Pasta> (sem disable-model-invocation) tem descrição de até 200 caracteres' -ForEach $skills {
         $h = Get-Front $Arquivo
         if ($h['disable-model-invocation'] -eq 'true') { Set-ItResult -Skipped -Because 'skill manual'; return }

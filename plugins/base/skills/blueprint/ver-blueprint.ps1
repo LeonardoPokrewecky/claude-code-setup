@@ -19,6 +19,10 @@ $titulo = if ($texto -match '(?m)^#\s+(.+)$') { $Matches[1].Trim() } else { [IO.
 
 if (Get-Command ConvertFrom-Markdown -ErrorAction SilentlyContinue) {
     $corpo = ($texto | ConvertFrom-Markdown).Html
+    # O Markdown deixa passar HTML cru: remove script/iframe/object/embed, atributos on*= e javascript: (além do CSP abaixo).
+    $corpo = [regex]::Replace($corpo, '(?is)<(script|iframe|object|embed)\b.*?(</\1\s*>|$)', '')
+    $corpo = [regex]::Replace($corpo, '(?i)\son\w+\s*=\s*("[^"]*"|''[^'']*''|[^\s>]+)', '')
+    $corpo = [regex]::Replace($corpo, '(?i)javascript\s*:', '')
 } else {
     $corpo = '<pre>' + (ConvertTo-HtmlSeguro $texto) + '</pre>'
 }
@@ -28,6 +32,7 @@ $html = @"
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
 <title>$(ConvertTo-HtmlSeguro ($titulo))</title>
 <style>
 body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1f2328; }

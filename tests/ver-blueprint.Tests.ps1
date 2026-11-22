@@ -43,6 +43,20 @@ Describe 'ver-blueprint.ps1' {
         Remove-Item -LiteralPath $d -Recurse -Force
     }
 
+    It 'HTML cru do Markdown não vira script ativo: CSP presente e script/on*=/javascript: removidos' {
+        $d = New-Pasta
+        $md = Join-Path $d 'x.md'
+        [IO.File]::WriteAllText($md, "# T`n`n<script>alert(1)</script>`n`n<img src=x onerror=alert(2)>`n`n<a href=`"javascript:alert(3)`">x</a>`n", $script:utf8)
+        (Invoke-Ver @('-Caminho', $md)).Codigo | Should -Be 0
+        $t = [IO.File]::ReadAllText((Join-Path $d 'x.html'), $script:utf8)
+        $t | Should -Match 'Content-Security-Policy'
+        $t | Should -Match "default-src 'none'"
+        $t | Should -Not -Match '<script'
+        $t | Should -Not -Match '(?i)onerror\s*='
+        $t | Should -Not -Match '(?i)javascript\s*:'
+        Remove-Item -LiteralPath $d -Recurse -Force
+    }
+
     It 'falha com mensagem clara se o arquivo não existe, sem gravar nada' {
         $d = New-Pasta
         $r = Invoke-Ver @('-Caminho', (Join-Path $d 'nao-existe.md'))
