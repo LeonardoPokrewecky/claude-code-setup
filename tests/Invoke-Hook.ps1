@@ -1,4 +1,4 @@
-﻿# Executa o hook como o Claude Code faz (JSON no stdin, processo separado) e classifica o resultado.
+# Executa o hook como o Claude Code faz (JSON no stdin, processo separado) e classifica o resultado.
 # Shell do hook: variável de ambiente HOOK_SHELL (powershell | pwsh); padrão powershell no Windows, pwsh fora dele.
 # -ViaSh: roda pela ponte plugins/base/hooks/run-hook.sh (como o hooks.json do plugin), com o sh encontrado.
 function Get-ShParaHook {
@@ -68,8 +68,8 @@ function Invoke-Hook {
     $p = [Diagnostics.Process]::Start($psi)
     $bytes = $utf8.GetBytes($entrada)
     if ($ComBom) { $bytes = [byte[]](0xEF, 0xBB, 0xBF) + $bytes }
-    $p.StandardInput.BaseStream.Write($bytes, 0, $bytes.Length)
-    $p.StandardInput.Close()
+    # Interpretador falso pode sair antes de ler o stdin (Broken pipe): isso é esperado, não falha do teste.
+    try { $p.StandardInput.BaseStream.Write($bytes, 0, $bytes.Length); $p.StandardInput.Close() } catch [System.IO.IOException] { }
     $saida = $p.StandardOutput.ReadToEnd()
     $erro = $p.StandardError.ReadToEnd()
     $p.WaitForExit()

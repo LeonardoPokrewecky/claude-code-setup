@@ -1,4 +1,4 @@
-﻿# Pester 5. Testa o ver-blueprint.ps1 numa pasta temporária, sempre com -NaoAbrir (nunca abre navegador).
+# Pester 5. Testa o ver-blueprint.ps1 numa pasta temporária, sempre com -NaoAbrir (nunca abre navegador).
 BeforeAll {
     $script:alvo = Join-Path $PSScriptRoot '../plugins/base/skills/blueprint/ver-blueprint.ps1'
     $script:utf8 = New-Object Text.UTF8Encoding $false
@@ -52,8 +52,14 @@ Describe 'ver-blueprint.ps1' {
         $t | Should -Match 'Content-Security-Policy'
         $t | Should -Match "default-src 'none'"
         $t | Should -Not -Match '<script'
-        $t | Should -Not -Match '(?i)onerror\s*='
-        $t | Should -Not -Match '(?i)javascript\s*:'
+        if (Get-Command ConvertFrom-Markdown -ErrorAction SilentlyContinue) {
+            $t | Should -Not -Match '(?i)onerror\s*='
+            $t | Should -Not -Match '(?i)javascript\s*:'
+        } else {
+            # Windows PowerShell 5.1: o texto inteiro vai escapado dentro de <pre>; nenhuma tag crua sobra.
+            $t | Should -Not -Match '<img'
+            $t | Should -Not -Match '<a href'
+        }
         Remove-Item -LiteralPath $d -Recurse -Force
     }
 
