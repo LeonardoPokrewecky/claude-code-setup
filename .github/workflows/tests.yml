@@ -26,16 +26,36 @@ jobs:
     defaults:
       run:
         shell: ${{ matrix.shell_testes }}
+    env:
+      CLAUDE_CODE_VERSION: '2.1.330'
+      DISABLE_UPDATES: '1'
     steps:
-      - uses: actions/checkout@v4
-      - name: Pester 5+
+      # actions/checkout v7.0.1, por SHA (atualizar de propósito, conferindo a tag).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Pester (versão exata)
         shell: pwsh
-        run: Install-Module Pester -MinimumVersion 5.5.0 -MaximumVersion 6.99 -Force -Scope CurrentUser -SkipPublisherCheck
+        run: Install-Module Pester -RequiredVersion 6.2.0 -Force -Scope CurrentUser -SkipPublisherCheck
+      - name: CLI claude (versão fixa, para claude plugin validate)
+        shell: pwsh
+        run: |
+          if ($IsWindows) {
+            & ([scriptblock]::Create((Invoke-RestMethod https://claude.ai/install.ps1))) $env:CLAUDE_CODE_VERSION
+            $bin = Join-Path $env:USERPROFILE '.local\bin'
+          } else {
+            bash -c "curl -fsSL https://claude.ai/install.sh | bash -s $env:CLAUDE_CODE_VERSION"
+            $bin = Join-Path $HOME '.local/bin'
+          }
+          Add-Content -Path $env:GITHUB_PATH -Value $bin
+          & (Join-Path $bin 'claude') --version
       - name: Testes (${{ matrix.os }}, ${{ matrix.shell_testes }})
         env:
           HOOK_SHELL: ${{ matrix.shell_testes }}
+          # Faz os testes falharem (em vez de pular) se a CLI faltar.
+          CCS_EXIGE_CLI: '1'
+          # Lista mínima genérica de termos proibidos (a lista real fica fora do repositório).
+          CCS_TERMOS_PROIBIDOS: 'C:\Users\'
         run: |
-          Import-Module Pester -MinimumVersion 5.5.0
+          Import-Module Pester -RequiredVersion 6.2.0
           $c = New-PesterConfiguration
           $c.Run.Path = './tests'
           $c.Run.Exit = $true

@@ -59,6 +59,7 @@ Describe 'Marketplace e plugins' {
     }
 
     It 'claude plugin validate passa no marketplace e em cada plugin (quando o CLI existe)' {
+        if (-not (Get-Command claude -ErrorAction SilentlyContinue) -and ($env:CI -eq 'true' -or $env:CCS_EXIGE_CLI)) { throw 'CLI claude ausente no CI: o workflow deve instalá-la (não pular em silêncio).' }
         if (-not (Get-Command claude -ErrorAction SilentlyContinue)) { Set-ItResult -Skipped -Because 'CLI claude ausente'; return }
         foreach ($alvo in @('.') + @(Get-ChildItem -LiteralPath (Join-Path $raiz 'plugins') -Directory | ForEach-Object { "plugins/$($_.Name)" })) {
             $saida = & claude plugin validate (Join-Path $raiz $alvo) 2>&1 | Out-String

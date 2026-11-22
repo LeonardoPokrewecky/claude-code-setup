@@ -93,7 +93,8 @@ Describe 'merge-settings.ps1' {
             } else {
                 $r.Texto | Should -Match 'SOBRESCREVE  extraKnownMarketplaces\.kit-dev-ia\.source :'
                 $origem.source | Should -Be 'github'
-                $campos | Should -Be @('repo', 'source')
+                $campos | Should -Be @('ref', 'repo', 'source')
+                $origem.ref | Should -Match '^v\d+\.\d+\.\d+$|^[0-9a-f]{40}$'
             }
         }
     }

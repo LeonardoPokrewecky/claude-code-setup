@@ -25,6 +25,29 @@ Describe 'Conteúdo do pacote' {
         @($achados) | Should -BeNullOrEmpty
     }
 
+    It 'sem PDF, docs/pendencias.md nem workers/ rastreados (material do repositório privado)' {
+        $rastreados = @(git -C $script:raiz ls-files)
+        @($rastreados | Where-Object { $_ -match '(?i)\.pdf$' -or $_ -eq 'docs/pendencias.md' -or $_ -match '^workers/' }) | Should -BeNullOrEmpty
+    }
+
+    It 'workflow: actions por SHA completo, Pester em versão exata e CLI claude fixada' {
+        $wf = [IO.File]::ReadAllText((Join-Path $script:raiz '.github/workflows/tests.yml'), [Text.Encoding]::UTF8)
+        $usos = [regex]::Matches($wf, '(?m)^\s*-?\s*uses:\s*(\S+)') | ForEach-Object { $_.Groups[1].Value }
+        @($usos).Count | Should -BeGreaterThan 0
+        foreach ($u in $usos) { $u | Should -Match '@[0-9a-f]{40}$' -Because "action sem SHA completo: $u" }
+        $wf | Should -Match 'Install-Module Pester -RequiredVersion \d+\.\d+\.\d+'
+        $wf | Should -Not -Match 'MinimumVersion|MaximumVersion'
+        $wf | Should -Match "CLAUDE_CODE_VERSION: '\d+\.\d+\.\d+'"
+        $wf | Should -Match 'CCS_EXIGE_CLI'
+    }
+
+    It 'marketplace kit-dev-ia fixado por ref nos dois settings' {
+        foreach ($rel in 'core/settings.merge.json', 'project-templates/_base/.claude/settings.json') {
+            $j = [IO.File]::ReadAllText((Join-Path $script:raiz $rel), [Text.Encoding]::UTF8) | ConvertFrom-Json
+            $j.extraKnownMarketplaces.'kit-dev-ia'.source.ref | Should -Match '^v\d+\.\d+\.\d+$|^[0-9a-f]{40}$' -Because $rel
+        }
+    }
+
     It 'modelo de fontes da LGPD existe, com validade de 30 dias, sem data real e sem conteúdo jurídico copiado' {
         $m = Join-Path $script:raiz 'plugins/base/skills/lgpd-audit/fontes-modelo.md'
         Test-Path -LiteralPath $m | Should -BeTrue
@@ -45,9 +68,11 @@ Describe 'Conteúdo do pacote' {
             if (Test-Path -LiteralPath $arq) { $lista = [IO.File]::ReadAllLines($arq) }
         }
         $lista = @($lista | ForEach-Object { $_.Trim() } | Where-Object { $_ -and -not $_.StartsWith('#') })
+        if (-not $lista -and $env:CI -eq 'true') { throw 'No CI a lista de termos proibidos não pode ficar vazia (CCS_TERMOS_PROIBIDOS no workflow).' }
         if (-not $lista) { Set-ItResult -Skipped -Because 'lista de termos proibidos ausente (criada pelo usuário, fora do repositório)'; return }
         # Nunca imprimir o termo: só arquivo:linha e o índice do termo na lista.
-        $achados = foreach ($f in $script:arquivos) {
+        # O workflow carrega a lista genérica mínima do CI; ele não entra na varredura.
+        $achados = foreach ($f in ($script:arquivos | Where-Object { $_ -notmatch '[\\/]\.github[\\/]workflows[\\/]' })) {
             $n = 0
             foreach ($l in [IO.File]::ReadAllLines($f)) {
                 $n++

@@ -153,7 +153,8 @@ Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe 
 - **Agentes com Bash (`revisor`, `test-validator-haiku`):** a restrição de comandos é só instrução. Agente de plugin não aceita `hooks` nem `permissionMode` no frontmatter, e `disallowedTools: Bash(...)` remove o Bash inteiro ([doc](https://code.claude.com/docs/en/sub-agents)); valem as regras ask/deny e o hook da sessão.
 - **Modelos `.env.example`, `.env.sample`, `.env.template` e `.env.dist`:** a ferramenta Read os nega (`deny Read(**/.env.*)`) e o hook libera no shell (`cat .env.example`). É intencional: `deny` prevalece sobre `allow`, e estreitar o `deny` para uma lista de sufixos abriria nomes desconhecidos (`.env.backup`, `.env.old`).
 - **O código de `-Confirmar` não distingue você do agente:** a aprovação real é a confirmação que o hook pede ao ver `-Confirmar`.
-- **Plugins oficiais seguem a versão mais recente.** `marketingskills` (camada `marketing`) é fixado por tag; conferência por SHA no `env-guide`.
+- **Plugins oficiais seguem a versão mais recente.** `marketingskills` (camada `marketing`) é fixado por SHA completo em `ref`; conferência no `env-guide`.
+- **Marketplace `kit-dev-ia` fixado por tag** (`ref: v1.0.0` em `core/settings.merge.json` e `project-templates/_base/.claude/settings.json`; exige Claude Code ≥ 2.1.324 só se o `ref` for SHA). Atualizar de propósito: (1) commitar as mudanças; (2) criar e enviar a tag nova (`git tag vX.Y.Z && git push origin vX.Y.Z`); (3) trocar o `ref` nos dois arquivos num commit seguinte (um commit não contém o próprio SHA); (4) `/plugin marketplace update kit-dev-ia`.
 
 ---
 
