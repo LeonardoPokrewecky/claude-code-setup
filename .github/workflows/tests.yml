@@ -28,7 +28,6 @@ jobs:
         shell: ${{ matrix.shell_testes }}
     env:
       CLAUDE_CODE_VERSION: '2.1.330'
-      DISABLE_UPDATES: '1'
     steps:
       # actions/checkout v7.0.1, por SHA (atualizar de propósito, conferindo a tag).
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -52,6 +51,7 @@ jobs:
           HOOK_SHELL: ${{ matrix.shell_testes }}
           # Faz os testes falharem (em vez de pular) se a CLI faltar.
           CCS_EXIGE_CLI: '1'
+          DISABLE_UPDATES: '1'
           # Lista mínima genérica de termos proibidos (a lista real fica fora do repositório).
           CCS_TERMOS_PROIBIDOS: 'C:\Users\'
         run: |
