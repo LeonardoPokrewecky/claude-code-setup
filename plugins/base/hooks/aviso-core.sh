@@ -6,7 +6,7 @@ instalada_arq="${HOME}/.claude/core-versao.txt"
 
 le_inteiro() { # imprime o inteiro do arquivo (sem BOM, espacos e CR) ou nada
   [ -r "$1" ] || return 0
-  v=$(head -n 1 "$1" 2>/dev/null | tr -d '\r\357\273\277 \t')
+  v=$(head -n 1 "$1" 2>/dev/null | LC_ALL=C tr -d '\r\357\273\277 \t')
   case "$v" in ''|*[!0-9]*) return 0 ;; esac
   printf '%s' "$v"
 }

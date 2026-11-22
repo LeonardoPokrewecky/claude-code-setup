@@ -1,4 +1,4 @@
-# Executa o hook como o Claude Code faz (JSON no stdin, processo separado) e classifica o resultado.
+﻿# Executa o hook como o Claude Code faz (JSON no stdin, processo separado) e classifica o resultado.
 # Shell do hook: variável de ambiente HOOK_SHELL (powershell | pwsh); padrão powershell no Windows, pwsh fora dele.
 # -ViaSh: roda pela ponte plugins/base/hooks/run-hook.sh (como o hooks.json do plugin), com o sh encontrado.
 function Get-ShParaHook {

@@ -1,4 +1,4 @@
-# Pester 5. Testa o ver-blueprint.ps1 numa pasta temporária, sempre com -NaoAbrir (nunca abre navegador).
+﻿# Pester 5. Testa o ver-blueprint.ps1 numa pasta temporária, sempre com -NaoAbrir (nunca abre navegador).
 BeforeAll {
     $script:alvo = Join-Path $PSScriptRoot '../plugins/base/skills/blueprint/ver-blueprint.ps1'
     $script:utf8 = New-Object Text.UTF8Encoding $false

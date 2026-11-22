@@ -1,4 +1,4 @@
-# Hook SessionStart aviso-core.sh: compara core-versao.txt instalado (~/.claude) com o do plugin. Nunca bloqueia.
+﻿# Hook SessionStart aviso-core.sh: compara core-versao.txt instalado (~/.claude) com o do plugin. Nunca bloqueia.
 BeforeDiscovery {
     . (Join-Path $PSScriptRoot 'Invoke-Hook.ps1')
     $temSh = [bool](Get-ShParaHook)
