@@ -1,6 +1,7 @@
 # Instala o que plugin nao cobre (core/) em ~/.claude sem substituir nada em silencio:
 #   - core/CLAUDE.md          -> ~/.claude/CLAUDE.md (substituido inteiro; o dry-run mostra o diff)
 #   - core/indice-skills.md   -> ~/.claude/indice-skills.md (importado pelo CLAUDE.md global; gerado por gerar-docs.ps1)
+#   - core/core-versao.txt    -> ~/.claude/core-versao.txt (versao do core/ instalado; o hook SessionStart do plugin base compara e avisa se estiver atras)
 #   - core/agents/*.md        -> ~/.claude/agents/ (o Explore com modelo proprio: agente de plugin nao sobrescreve
 #                                o Explore embutido, https://code.claude.com/docs/en/sub-agents)
 # Skills, agentes e hook ficam nos plugins (plugins/base, plugins/dotnet, plugins/angular), instalados por /plugin.
@@ -27,7 +28,7 @@ $Destino = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPa
 
 function Get-Sha([string]$caminho) { (Get-FileHash -LiteralPath $caminho -Algorithm SHA256).Hash.ToLower() }
 
-$arquivos = @(Get-Item -LiteralPath (Join-Path $origem 'CLAUDE.md'), (Join-Path $origem 'indice-skills.md')) +
+$arquivos = @(Get-Item -LiteralPath (Join-Path $origem 'CLAUDE.md'), (Join-Path $origem 'indice-skills.md'), (Join-Path $origem 'core-versao.txt')) +
     @(Get-ChildItem -LiteralPath (Join-Path $origem 'agents') -File | Sort-Object Name)
 $itens = foreach ($arq in $arquivos) {
     $rel = $arq.FullName.Substring($origem.Length + 1)

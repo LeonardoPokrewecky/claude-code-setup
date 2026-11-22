@@ -65,6 +65,7 @@
 | `revisor` | `inherit` | Read, Grep, Glob, Bash | Revisão somente leitura de diff ou caminho com UMA lente (segurança, LGPD, testes etc.). Use quando /revisar delegar ou após algo não trivial. |
 | `test-validator-haiku` | `haiku` | Read, Grep, Glob, Bash | Executa build e testes já existentes e autorizados e resume o resultado. Use para validar uma mudança. |
 
+Hook: `SessionStart` (matcher `startup|resume`) → `sh "${CLAUDE_PLUGIN_ROOT}/hooks/aviso-core.sh"`
 Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if [ "$OS" = "Windows_NT" ] && command -v powershell >/dev/null 2>&1; then o=$(powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "${CLAUDE_PLUGIN_ROOT}/hooks/bloquear-segredos.ps1"); r=$?; elif command -v pwsh >/dev/null 2>&1; then o=$(pwsh -NoProfile -NonInteractive -File "${CLAUDE_PLUGIN_ROOT}/hooks/bloquear-segredos.ps1"); r=$?; else printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Hook bloquear-segredos: PowerShell (pwsh ou powershell) não encontrado; o comando não foi verificado. Confira o que o comando faz antes de aprovar."}}'; exit 0; fi; case "$r" in 0|2) [ -n "$o" ] && printf '%s' "$o"; exit "$r";; esac; printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Hook bloquear-segredos: o PowerShell não executou o hook (código de saída %s); o comando não foi verificado. Confira o que o comando faz antes de aprovar."}}' "$r"; exit 0`
 
 ### Plugin `dotnet`

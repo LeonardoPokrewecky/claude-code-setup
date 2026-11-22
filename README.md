@@ -163,6 +163,7 @@ Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe 
 ## 9. Testes e manutenção
 
 - `Invoke-Pester ./tests -Output Detailed` (Pester 5 ou 6; o Windows PowerShell 5.1 traz o 3.4, então instale o 6.2.0: `Install-Module Pester -RequiredVersion 6.2.0 -Scope CurrentUser -SkipPublisherCheck`). O resultado oficial é o do CI (4 combinações: Windows PowerShell 5.1, Windows `pwsh`, Ubuntu e macOS); contagens não ficam fixas aqui.
+- Mexeu em `core/`? Suba o número de `core/core-versao.txt` **e** de `plugins/base/core-versao.txt` (o teste exige os dois iguais); é o que faz o hook `SessionStart` avisar quem ficou com `core/` antigo.
 - Casos do hook em `tests/casos-hook.psd1`: padrão novo no hook entra com caso novo.
 - Mudou skill, agente, plugin, camada ou perfil? Rode `scripts/gerar-docs.ps1` e commite o `componentes.md`, o `comandos.md` da skill `/comandos` e o `core/indice-skills.md` (área e \ (o teste falha se ficarem desatualizados).
 - `claude plugin validate .` e `claude plugin validate ./plugins/<nome>` antes de publicar.

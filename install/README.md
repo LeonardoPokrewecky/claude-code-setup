@@ -229,6 +229,8 @@ claude plugin marketplace update kit-dev-ia
 claude plugin update base@kit-dev-ia
 ```
 
+Se o `core/` instalado em `~/.claude` ficar atrás do plugin, o início da sessão mostra um aviso (hook `SessionStart`, que compara `~/.claude/core-versao.txt` com a versão do plugin). Resolva com `scripts/instalar-arquivos.ps1 -DryRun` e depois `-Confirmar <código>`. O aviso some quando as versões se igualam.
+
 Depois rode `/reload-plugins` na sessão aberta e **repita os Passos 3 e 4** (o dry-run mostra só o que mudou).
 
 **Desinstalar**
