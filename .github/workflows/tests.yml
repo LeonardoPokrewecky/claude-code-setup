@@ -31,8 +31,8 @@ jobs:
     steps:
       # actions/checkout v7.0.1, por SHA (atualizar de propósito, conferindo a tag).
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      # Sem "shell:" próprio: instala no mesmo shell dos testes (5.1 e pwsh têm pastas de módulos diferentes).
       - name: Pester (versão exata)
-        shell: pwsh
         run: Install-Module Pester -RequiredVersion 6.2.0 -Force -Scope CurrentUser -SkipPublisherCheck
       - name: CLI claude (versão fixa, para claude plugin validate)
         shell: pwsh
