@@ -166,11 +166,8 @@ Describe 'Hook bloquear-segredos' {
     }
 
     It 'JSON com BOM é lido normalmente' {
-        $hook = Join-Path $PSScriptRoot '../plugins/base/hooks/bloquear-segredos.ps1'
-        $shell = if ($env:HOOK_SHELL) { $env:HOOK_SHELL } elseif ($IsLinux -or $IsMacOS) { 'pwsh' } else { 'powershell' }
-        $saida = ([string][char]0xFEFF + '{"tool_input":{"command":"git status"}}' | & $shell -NoProfile -ExecutionPolicy Bypass -File $hook) -join ''
-        $LASTEXITCODE | Should -Be 0
-        $saida.Trim() | Should -BeNullOrEmpty
+        # Bytes EF BB BF + JSON direto no stdin (o pipe do PowerShell 5.1 recodifica o BOM conforme a página de código).
+        (Invoke-Hook -Comando 'git status' -ComBom).Resultado | Should -Be 'Libera'
     }
 
     It 'Falha interna depois do parse pede confirmação em vez de liberar' {

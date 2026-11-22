@@ -19,6 +19,8 @@ function Invoke-Hook {
         [Parameter(Mandatory)][string]$Comando,
         [string]$Hook = (Join-Path $PSScriptRoot '../plugins/base/hooks/bloquear-segredos.ps1'),
         [switch]$ViaSh,
+        # Prefixa o stdin com o BOM UTF-8 (EF BB BF), como o PowerShell 5.1 pode entregar.
+        [switch]$ComBom,
         # Roda direto a ponte run-hook.sh pelo sh (como o fallback do hooks.json ou a execução manual).
         [switch]$ViaPonte,
         # Pasta posta no início do PATH do processo (ex.: um pwsh falso para provar qual shell foi escolhido).
@@ -65,6 +67,7 @@ function Invoke-Hook {
 
     $p = [Diagnostics.Process]::Start($psi)
     $bytes = $utf8.GetBytes($entrada)
+    if ($ComBom) { $bytes = [byte[]](0xEF, 0xBB, 0xBF) + $bytes }
     $p.StandardInput.BaseStream.Write($bytes, 0, $bytes.Length)
     $p.StandardInput.Close()
     $saida = $p.StandardOutput.ReadToEnd()
