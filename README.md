@@ -176,4 +176,4 @@ Fontes: [Plugins](https://code.claude.com/docs/en/plugins-reference) · [Marketp
 
 ## 10. Pendências
 
-Backlog e ideias futuras: abra uma issue no repositório.
+Pendências abertas e o que já foi resolvido: [`docs/pendencias.md`](docs/pendencias.md). Ideias futuras: abra uma issue no repositório.
