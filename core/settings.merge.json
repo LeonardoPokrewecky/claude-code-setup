@@ -3,7 +3,7 @@
   "model": "sonnet",
   "advisorModel": "opus",
   "extraKnownMarketplaces": {
-    "kit-dev-ia": { "source": { "source": "github", "repo": "LeonardoPokrewecky/claude-code-setup", "ref": "v1.0.3" } }
+    "kit-dev-ia": { "source": { "source": "github", "repo": "LeonardoPokrewecky/claude-code-setup", "ref": "v1.0.4" } }
   },
   "enabledPlugins": {
     "base@kit-dev-ia": true,

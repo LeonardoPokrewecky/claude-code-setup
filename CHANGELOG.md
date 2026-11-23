@@ -3,6 +3,7 @@
 Histórico editorial do pacote. Contagens de testes ficam no CI, não aqui.
 
 ## 2026-11-23
+- Marketplace `kit-dev-ia` fixado em `v1.0.4` (plugin `base` 3.2.0 publicado).
 - Plugin `base` 3.2.0: skill automática `depurar` (causa raiz, correção mínima, validação rodando, falhas comparadas pelo nome, sem git destrutivo), com evals `ativa-depurar` e `nao-ativa-depurar-1/2` (não rodados).
 - Lente `performance`: legibilidade fora de caminho crítico; ganho sem número é plausível. Otimizar um módulo = `/revisar performance <caminho>` + `/medir-antes-depois` (sem skill nova).
 - Template `CLAUDE.project.md` e `project-bootstrap`: documentação por domínio (`.claude/docs/<dominio>.md`) e onde guardar cada armadilha (CLAUDE.md × `rules/` × `docs/`).

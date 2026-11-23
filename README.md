@@ -159,7 +159,7 @@ Windows sem Git Bash: o hook em shell form roda no PowerShell e falha a sintaxe 
 - **Variável de ambiente com nome de segredo pede confirmação, não bloqueia:** `$env:*TOKEN*`, `$GH_TOKEN`, `Get-Item env:*PASSWORD*`, `GetEnvironmentVariable` e `/proc/*/environ` (termos: TOKEN, SECRET, PASSWORD, PASSWD, API_KEY, PRIVATE_KEY, CREDENTIAL). Não pega nome montado (`$env:$x`, `${!x}`) nem variável com outro nome; o `sandbox` do perfil `unix` é a proteção que não depende do texto.
 - **Nome de segredo com ponto final (`.env.`) é bloqueado, porque o Windows ignora o ponto.** Nomes curtos 8.3 (`ENV~1`) não são cobertos. Efeito colateral: `echo "veja .env."` também bloqueia.
 - **Plugins oficiais seguem a versão mais recente.** `marketingskills` (camada `marketing`) é fixado por SHA completo em `ref`; conferência no `env-guide`.
-- **Marketplace `kit-dev-ia` fixado por tag** (`ref: v1.0.3` em `core/settings.merge.json` e `project-templates/_base/.claude/settings.json`; exige Claude Code ≥ 2.1.324 só se o `ref` for SHA). Atualizar de propósito: (1) commitar as mudanças; (2) criar e enviar a tag nova (`git tag vX.Y.Z && git push origin vX.Y.Z`); (3) trocar o `ref` nos dois arquivos num commit seguinte (um commit não contém o próprio SHA); (4) `/plugin marketplace update kit-dev-ia`.
+- **Marketplace `kit-dev-ia` fixado por tag** (`ref: v1.0.4` em `core/settings.merge.json` e `project-templates/_base/.claude/settings.json`; exige Claude Code ≥ 2.1.324 só se o `ref` for SHA). Atualizar de propósito: (1) commitar as mudanças; (2) criar e enviar a tag nova (`git tag vX.Y.Z && git push origin vX.Y.Z`); (3) trocar o `ref` nos dois arquivos num commit seguinte (um commit não contém o próprio SHA); (4) `/plugin marketplace update kit-dev-ia`.
 
 ---
 
