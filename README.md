@@ -90,7 +90,7 @@ if (-not (Test-Path "$proj/CLAUDE.md")) { Copy-Item "$repo/project-templates/CLA
 | Banco de dados | sem regra genérica; `/alterar-dados` (backup + canário) e aprovação explícita |
 | Git | leitura nativa; **ask** para commit, push, fetch/pull/clone, reset --hard, clean, restore, checkout --, stash drop/clear, branch -D, remote add/set-url; o hook cobre `git -C`/`-c` |
 | Publicação e rede | **ask** (gh api/gist/secret/release/repo create, ações em PR (gh pr merge/review/comment/close/edit/ready), curl, wget, ssh, scp, rsync, Invoke-WebRequest…) |
-| Destrutivas e código inline | **ask** (rm, del, mv, Remove-Item, Move-Item, `node -e`, `python -c`, `bash -c`, `powershell`, `cmd`, `iex`, `Start-Process`) |
+| Destrutivas e código inline | **ask** (rm, del, Remove-Item, `node -e`, `python -c`, `bash -c`, `cmd`, `iex`, `Start-Process`); mv/Move-Item, `powershell`/`pwsh`, `npm start`, `dotnet run` ficam com o auto mode (`defaultMode: auto`) |
 
 As regras nativas dividem comandos compostos (`x && git push` pede confirmação). Nenhum modo de aprovação automática substitui esta política.
 

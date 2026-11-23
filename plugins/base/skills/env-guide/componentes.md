@@ -90,7 +90,7 @@ Hook: `PreToolUse` (matcher `Bash|PowerShell`) → `if [ "$OS" = "Windows_NT" ] 
 
 ## Permissões (`core/settings.merge.json`)
 
-Modelo `sonnet`, advisor `opus`. Regras: 32 allow, 170 ask, 58 deny. Política por classe de operação: README, seção Permissões.
+Modelo `sonnet`, advisor `opus`. Regras: 32 allow, 153 ask, 58 deny. Política por classe de operação: README, seção Permissões.
 
 ## Perfis (`profiles/`, `merge-settings.ps1 -Perfil <nome>`)
 
