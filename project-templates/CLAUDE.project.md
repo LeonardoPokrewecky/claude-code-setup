@@ -26,7 +26,12 @@ Projeto irmão: <caminho do outro lado (backend ↔ frontend), se houver; os doi
 - Pontos que o Claude precisa saber para não quebrar o domínio.
 
 ## Armadilhas conhecidas
+Só o que muda a decisão em **qualquer** tarefa. Armadilha ligada a um caminho de arquivo → `.claude/rules/<tema>.md` com `paths:` (carrega sozinha); de um domínio de negócio → `.claude/docs/<dominio>.md` (seção abaixo).
 - <problema> → <como evitar>
+
+## Documentação por domínio
+Lida sob demanda (não carrega sozinha). Cada arquivo: visão em 3 linhas · onde fica no código · armadilhas (`sintoma → causa → como evitar`) · como testar · decisões.
+- <domínio> → `.claude/docs/<dominio>.md` — <quando ler>
 
 ## Decisões
 - <AAAA-MM-DD> <decisão> — <motivo>

@@ -17,6 +17,7 @@
 | `/comunicacao-de-status` | Redige relatório de andamento objetivo e fiel ao que aconteceu |
 | `/criar-testes` | Gera testes para código sem cobertura, seguindo o framework e o padrão do… |
 | `/deploy-checklist` | Checklist de deploy |
+| `/depurar` | Depura até a causa raiz (também automática) |
 | `/desenvolvimento-de-interfaces` | Coordena frontend (também automática) |
 | `/divida` | Registra e lista dívida técnica |
 | `/endurecimento-de-infraestrutura` | Auditoria somente leitura para reduzir a superfície de ataque da infraestrutura |

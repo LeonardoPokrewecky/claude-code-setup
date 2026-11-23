@@ -11,3 +11,5 @@
 - Paginação por deslocamento alto em listagem grande: preferir cursor. Projetar só as colunas usadas.
 - Limite de taxa por origem em serviço consumido por muitos agentes atrás de uma saída de rede: limitar por identidade do chamador.
 - Medir antes de otimizar: linha de base com volume realista, **percentis (p95)** e não média, por camada (proxy, serviço, banco, navegador); repetir a medição depois. Indicar como confirmar (`/medir-antes-depois`).
+- Fora de caminho crítico (hot path), preferir legibilidade; não apontar micro-otimização sem medição.
+- Ganho afirmado sem número (contagem de chamadas, Big-O, plano de execução, tempo medido) é **plausível**, não confirmado.

@@ -37,6 +37,7 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 | Interface | `desenvolvimento-de-interfaces` (coordena; modos criar, auditar, corrigir), `/referencias-visuais`, `/sistema-de-design`, `/padroes-de-pagina`, `/componentes-e-estados`, `/layout-responsivo`, `/inspecao-visual`, `/automacao-e2e`, `/revisar a11y`, `/revisar interface` | A coordenadora escolhe as especialidades; tokens antes de componentes; nada pronto sem inspeção no navegador (Playwright) |
 | Entrega | `/entrega-sem-pendencia`, `/preparar-pr`, `/deploy-checklist`, `/session-handoff` | Fechar (sem pendência) → PR → publicar → passar o bastão |
 | Código | `/explicar`, `/limpar-codigo` | Entender antes de limpar |
+| Bug e desempenho | `depurar` (automática ao pedirem investigar bug ou teste falhando), `/revisar performance <caminho>` → `/medir-antes-depois` | Causa raiz antes de corrigir; otimizar um módulo = lente performance e depois medir |
 - Delegar: leitura ampla → `Explore`; pesquisa web → `researcher-haiku`; rodar testes → `test-validator-haiku`; só `.md` → `documentation-haiku`; implementação paralela → `implementer-sonnet`; uma lente de revisão → `revisor` (modelo da sessão; segurança/LGPD/arquitetura nunca em Haiku).
 - Agentes embutidos `Plan` e `general-purpose` herdam o modelo da sessão.
 

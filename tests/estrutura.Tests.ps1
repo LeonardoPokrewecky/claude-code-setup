@@ -91,8 +91,8 @@ Describe 'Skills' {
         $h['description'].Length | Should -BeLessOrEqual 200 -Because 'a descrição fica sempre no contexto'
     }
 
-    It 'as 6 skills de gatilho no meio da tarefa não têm a flag manual' {
-        foreach ($n in 'entrega-sem-pendencia', 'gestao-de-segredos', 'autenticacao-e-sessao', 'integracoes', 'modelagem-dados', 'resposta-a-incidente') {
+    It 'as 7 skills de gatilho no meio da tarefa não têm a flag manual' {
+        foreach ($n in 'entrega-sem-pendencia', 'gestao-de-segredos', 'autenticacao-e-sessao', 'integracoes', 'modelagem-dados', 'resposta-a-incidente', 'depurar') {
             $h = Get-Front (Join-Path $raiz "plugins/base/skills/$n/SKILL.md")
             $h['disable-model-invocation'] | Should -BeNullOrEmpty -Because "$n deve ativar sozinha"
         }

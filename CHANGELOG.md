@@ -2,6 +2,11 @@
 
 Histórico editorial do pacote. Contagens de testes ficam no CI, não aqui.
 
+## 2026-11-23
+- Plugin `base` 3.2.0: skill automática `depurar` (causa raiz, correção mínima, validação rodando, falhas comparadas pelo nome, sem git destrutivo), com evals `ativa-depurar` e `nao-ativa-depurar-1/2` (não rodados).
+- Lente `performance`: legibilidade fora de caminho crítico; ganho sem número é plausível. Otimizar um módulo = `/revisar performance <caminho>` + `/medir-antes-depois` (sem skill nova).
+- Template `CLAUDE.project.md` e `project-bootstrap`: documentação por domínio (`.claude/docs/<dominio>.md`) e onde guardar cada armadilha (CLAUDE.md × `rules/` × `docs/`).
+
 ## 2026-11-22
 - Repositório público limpo (sem PDF de terceiro no histórico); o histórico completo fica num repositório privado de arquivo.
 - Hook de segredos: o código de saída do interpretador é conferido (falha fechada); BOM no stdin tratado e testado com bytes reais.

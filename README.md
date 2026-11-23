@@ -111,6 +111,7 @@ As regras nativas dividem comandos compostos (`x && git push` pede confirmação
 | Dados | `/escolha-de-banco-e-capacidade`, `/modelagem-dados`, `/plano-migracao` |
 | Segurança | `/autenticacao-e-sessao`, `/gestao-de-segredos`, `/endurecimento-de-infraestrutura`, `/lgpd-audit` |
 | Incidente | `/resposta-a-incidente` (durante), `/postmortem` (depois) |
+| Bug e desempenho | `depurar` (automática ao pedir para investigar bug, exception ou teste falhando: causa raiz, correção mínima, validação rodando), `/revisar performance <caminho>` e `/medir-antes-depois` para otimizar |
 | Integrações e decisões | `/integracoes`, `/adr`, `/divida` |
 | Testes e qualidade | `/criar-testes`, `/teste-de-api`, `/automacao-e2e`, `/regressao-e-smoke`, `/laudo-de-evidencia`, `/medir-antes-depois` |
 | Interface | `desenvolvimento-de-interfaces` (automática: criar, auditar ou corrigir telas; escolhe as especialidades), `/referencias-visuais`, `/sistema-de-design`, `/padroes-de-pagina`, `/componentes-e-estados`, `/layout-responsivo`, `/inspecao-visual` (Playwright: capturas, larguras, console e rede), `/automacao-e2e`, `/revisar interface`, `/revisar a11y` |
