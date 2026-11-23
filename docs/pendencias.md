@@ -8,7 +8,7 @@ Atualizado em 2026-11-22. Origem: backlog do repositório de origem (`Skill e pl
 3. Rodar `/lgpd-audit atualizar-fontes` num projeto de teste (usa rede; só com autorização).
 
 ## Evals que não rodaram (custo ~US$ 0,09 por execução)
-4. `padroes-de-pagina-*` (4 casos) e o braço sem plugin do eval `criar`. US$ 1 cobre só ~1,5 caso nessa configuração.
+4. Braço sem plugin do eval `padroes-de-pagina-criar-sem-padrao` (rodar sem `--ablation none`; o padrão é com e sem plugin, então custa ~2x).
 
 ## Validação em ambiente real
 5. Sandbox `-Perfil unix` em Linux ou macOS (README: "não testado").
@@ -27,5 +27,6 @@ Atualizado em 2026-11-22. Origem: backlog do repositório de origem (`Skill e pl
 - Os 3 evals antigos (`adotar-projeto`, `qual-skill-revisar`, `lente-testes-mock`).
 - Evals das skills de maior risco.
 - Evals do onion (`onion-projeto-novo` e `onion-projeto-existente`): 3 de 3 execuções cada, score 1.00 (2026-11-22).
+- Evals de `padroes-de-pagina-*` (4 casos): 3 de 3 execuções cada, score 1.00 (2026-11-22; 1 voto FAIL isolado do juiz no `auditar-botoes`).
 - CI em Linux e macOS (Pester, PR #9).
 - Commit, PR e merge dos blueprints antigos.
