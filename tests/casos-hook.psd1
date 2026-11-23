@@ -99,5 +99,27 @@
         @{ Comando = 'cat .env.production'; Esperado = 'Bloqueia' }
         @{ Comando = 'type C:\certs\api.pfx'; Esperado = 'Bloqueia' }
         @{ Comando = 'cat "keys/server.key"'; Esperado = 'Bloqueia' }
+
+        # --- Revisão de segurança 2026-11-23: ponto final (o Windows ignora), abreviação de parâmetro, instalador, variável sensível ---
+        @{ Comando = 'type .env.'; Esperado = 'Bloqueia' }
+        @{ Comando = 'type .env..'; Esperado = 'Bloqueia' }
+        @{ Comando = 'cat chave.pem.'; Esperado = 'Bloqueia' }
+        @{ Comando = 'cat server.key.'; Esperado = 'Bloqueia' }
+        @{ Comando = 'cat .env.example.'; Esperado = 'Libera' }
+        @{ Comando = 'powershell -File scripts/merge-settings.ps1 -Conf abc123'; Esperado = 'Confirma' }
+        @{ Comando = 'pwsh scripts/instalar-arquivos.ps1 -Co abc123'; Esperado = 'Confirma' }
+        @{ Comando = 'pwsh -NoProfile -File install/instalar.ps1'; Esperado = 'Confirma' }
+        @{ Comando = 'echo s | pwsh install/instalar.ps1'; Esperado = 'Confirma' }
+        @{ Comando = 'powershell -File scripts/merge-settings.ps1 -DryRun'; Esperado = 'Libera' }
+        @{ Comando = 'echo $env:GITHUB_TOKEN'; Esperado = 'Confirma' }
+        @{ Comando = 'Write-Output $env:MY_API_KEY'; Esperado = 'Confirma' }
+        @{ Comando = 'Get-Item env:DB_PASSWORD'; Esperado = 'Confirma' }
+        @{ Comando = "[Environment]::GetEnvironmentVariable('X')"; Esperado = 'Confirma' }
+        @{ Comando = 'cat /proc/self/environ'; Esperado = 'Confirma' }
+        @{ Comando = 'echo $GH_TOKEN'; Esperado = 'Confirma' }
+        @{ Comando = 'echo ${DB_PASSWORD}'; Esperado = 'Confirma' }
+        @{ Comando = 'echo $env:APPDATA'; Esperado = 'Libera' }
+        @{ Comando = 'echo $env:PATH'; Esperado = 'Libera' }
+        @{ Comando = 'node -e "console.log(process.env.NODE_ENV)"'; Esperado = 'Libera' }
     )
 }

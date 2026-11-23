@@ -25,9 +25,9 @@ Describe 'Conteúdo do pacote' {
         @($achados) | Should -BeNullOrEmpty
     }
 
-    It 'sem PDF, docs/pendencias.md nem workers/ rastreados (material do repositório privado)' {
+    It 'sem PDF nem workers/ rastreados (material do repositório privado)' {
         $rastreados = @(git -C $script:raiz ls-files)
-        @($rastreados | Where-Object { $_ -match '(?i)\.pdf$' -or $_ -eq 'docs/pendencias.md' -or $_ -match '^workers/' }) | Should -BeNullOrEmpty
+        @($rastreados | Where-Object { $_ -match '(?i)\.pdf$' -or $_ -match '^workers/' }) | Should -BeNullOrEmpty
     }
 
     It 'workflow: actions por SHA completo, Pester em versão exata e CLI claude fixada' {

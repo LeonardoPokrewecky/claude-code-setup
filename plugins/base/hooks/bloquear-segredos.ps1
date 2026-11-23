@@ -1,5 +1,5 @@
 ﻿# Hook PreToolUse (Bash/PowerShell): bloqueia comando que referencia arquivo de segredo e pede confirmação
-# para comando que altera a configuração do Claude Code ou esconde o alvo (base64, curinga, rede).
+# para comando que altera a configuração do Claude Code ou esconde o alvo (base64, curinga, rede), chama o instalador ou lê variável de ambiente com nome de segredo.
 # O deny de Read/Edit/Write no settings.json não cobre cat/type/Get-Content/redirecionamento via shell; este hook fecha
 # essa brecha.
 # Entrada: JSON do Claude Code no stdin. Saída: exit 2 + motivo no stderr bloqueia; JSON "ask" no stdout pede
@@ -45,7 +45,8 @@ $textos = @($comando, ($comando -replace '["''`^]', '')) | Select-Object -Unique
 
 # Limites de nome: antes, nada que continue um nome; depois, fim ou qualquer caractere fora de nome
 # (cobre "HEAD:.env", ".env>x", ".env&&", ".env,").
-$fim = '(?=$|[^\w.-])'
+# O Windows ignora ponto final no nome (".env." abre ".env"), então pontos antes do fim também encerram o nome.
+$fim = '(?=\.*(?:$|[^\w.-]))'
 $padroes = @(
     # Modelos versionados (.env.example/.sample/.template/.dist) ficam liberados; .env.example.local continua bloqueado.
     "(?<![\w.-])\.env(?!\.(example|sample|template|dist)$fim)(rc)?(\.[\w-]+)*$fim",
@@ -74,7 +75,12 @@ $padroes = @(
 $padroesConfirmar = @(
     @{ Padrao = '\.claude[/\\](settings[\w.-]*|hooks|agents|skills|commands|CLAUDE\.md)(?=$|[^\w.-])'; Motivo = 'o comando cita configuração, hook, agente ou skill do Claude Code (pode alterar as proteções)' },
     @{ Padrao = '(^|[\s;&|(])(cd|sl|Set-Location|pushd|Push-Location)\s+\S*\.claude(?=$|[\s/\\;&|)])'; Motivo = 'entra na pasta .claude (caminho relativo depois escapa das demais regras)' },
-    @{ Padrao = '(merge-settings|instalar-arquivos)(\.ps1)?\b.*\s-Confirmar\b'; Motivo = 'grava configuração do Claude Code; confira o dry-run e os alertas antes de aprovar' },
+    # -Co* cobre abreviação de parâmetro (-Conf, -Co); o único parâmetro desses scripts que começa com "Co" é -Confirmar.
+    @{ Padrao = '(merge-settings|instalar-arquivos)(\.ps1)?\b.*\s[-/]Co\w*'; Motivo = 'grava configuração do Claude Code; confira o dry-run e os alertas antes de aprovar' },
+    # O instalador chama os dois scripts acima por dentro, com -Confirmar que o texto do comando não mostra.
+    @{ Padrao = '(^|[\s/\\"''])instalar(\.ps1)?(?=$|[\s"''])'; Motivo = 'o instalador grava configuração e CLAUDE.md globais do Claude Code; confira o dry-run antes de aprovar' },
+    # Leitura de variável de ambiente com nome de segredo: o valor iria para a transcrição.
+    @{ Padrao = '\$(env:|\{?)\w*(TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|PRIVATE_?KEY|CREDENTIAL)|(Get-Item|gi)\s+env:\w*(TOKEN|SECRET|PASSWORD|PASSWD|API_?KEY|PRIVATE_?KEY|CREDENTIAL)|GetEnvironmentVariable|/proc/[\w/]*environ'; Motivo = 'lê variável de ambiente que pode conter segredo (o valor apareceria na conversa)' },
     @{ Padrao = '(powershell|pwsh)(\.exe)?\b.*\s[-/](e|ec|en|enc\w*)(?=$|[\s:])|(^|[\s"''])[-/]encodedcommand\b'; Motivo = 'comando codificado em base64 (-EncodedCommand)' },
     @{ Padrao = 'FromBase64String|(^|[\s|;&])base64\s+(-\w*d|--decode)|certutil(\.exe)?\s.*[-/]decode'; Motivo = 'decodifica base64 (pode esconder o comando ou o alvo)' },
     @{ Padrao = 'Net\.WebClient|Net\.Http\.HttpClient|Net\.Sockets|Net\.Mail|Send-MailMessage|Download(String|File|Data)|Upload(String|File|Data|Values)'; Motivo = 'acesso à rede ou envio de dados pelo .NET' },
