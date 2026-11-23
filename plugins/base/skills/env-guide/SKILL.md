@@ -24,7 +24,7 @@ Clone local do pacote: linha "Clone do `claude-code-setup`" de `~/.claude/maquin
 - Qualquer alteração não trivial → skill `blueprint` (automática ou `/blueprint`): documento no navegador, implementação só após aprovação explícita, avaliação de brechas no fim. Algo grande: junto com o Plan mode.
 - Revisar → `/revisar` (escolhe as lentes pelo risco do diff), `/revisar <lente>` ou `/revisar pr <número|branch>` (pull request: CI, conflito, veredito); `/code-review` e `/security-review` embutidos para o diff completo.
 - Dados em massa → `/alterar-dados`; deploy → `/deploy-checklist`; LGPD do app → `/lgpd-audit`.
-- **Qual skill por tema** (todas manuais, só rodam por `/comando`, exceto `blueprint` e `desenvolvimento-de-interfaces`, que também são automáticas; lista curta para o usuário: `/comandos`; lista completa em componentes.md):
+- **Qual skill por tema** (manuais, só rodam por `/comando`, exceto as automáticas: `blueprint`, `desenvolvimento-de-interfaces`, `depurar`, `autenticacao-e-sessao`, `gestao-de-segredos`, `integracoes`, `modelagem-dados`, `resposta-a-incidente`, `entrega-sem-pendencia`, `project-bootstrap` e `env-guide`; lista curta para o usuário: `/comandos`; lista completa em componentes.md):
 
 | Tema | Skills | Como escolher |
 |---|---|---|
