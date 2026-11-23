@@ -35,11 +35,13 @@ $html = @"
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:">
 <title>$(ConvertTo-HtmlSeguro ($titulo))</title>
 <style>
-body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1f2328; }
-table { border-collapse: collapse; margin: 1rem 0; } th, td { border: 1px solid #d0d7de; padding: .4rem .6rem; vertical-align: top; text-align: left; }
-th { background: #f6f8fa; } code { background: #f6f8fa; padding: .1rem .3rem; border-radius: 4px; }
-pre { background: #f6f8fa; padding: 1rem; overflow-x: auto; white-space: pre-wrap; } pre code { padding: 0; }
-.rodape { color: #59636e; font-size: .85rem; margin-top: 2rem; }
+:root { color-scheme: dark; }
+body { font-family: system-ui, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #e6edf3; background: #0d1117; }
+a { color: #4493f8; } h1, h2, h3 { border-bottom: 1px solid #30363d; padding-bottom: .3rem; }
+table { border-collapse: collapse; margin: 1rem 0; } th, td { border: 1px solid #30363d; padding: .4rem .6rem; vertical-align: top; text-align: left; }
+th { background: #161b22; } code { background: #262c36; padding: .1rem .3rem; border-radius: 4px; }
+pre { background: #161b22; padding: 1rem; overflow-x: auto; white-space: pre-wrap; } pre code { padding: 0; background: none; }
+.rodape { color: #9198a1; font-size: .85rem; margin-top: 2rem; }
 </style>
 </head>
 <body>
